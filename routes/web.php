@@ -3,6 +3,8 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OtpRequestController;
 use App\Http\Controllers\Web\CampusCourseController;
+use App\Http\Controllers\Web\CampusCourseSubjectController;
+use App\Http\Controllers\Web\CampusGradeController;
 use App\Http\Controllers\Web\CourseController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\DashboardController;
@@ -15,6 +17,7 @@ use App\Http\Controllers\Web\RoleController;
 use App\Http\Controllers\Web\RouteController;
 use App\Http\Controllers\Web\SchoolController;
 use App\Http\Controllers\Web\UserController;
+use App\Models\SchoolCampusCourseSubjects;
 
 Route::get('/', function () {
     return view('welcome');
@@ -72,6 +75,14 @@ Route::middleware('auth', 'web')->group(function () {
     Route::post('academic/universities/course', [CampusCourseController::class, 'store'])->name('academic.universities.course.store');
     Route::put('academic/universities/course/{id}/{type}', [CampusCourseController::class, 'update'])->name('academic.universities.course.update');
     Route::delete('academic/universities/course/{id}/{type}', [CampusCourseController::class, 'destroy'])->name('academic.universities.course.destroy');
+
+    Route::post('academic/universities/grade', [CampusGradeController::class, 'store'])->name('academic.universities.grade.store');
+    Route::put('academic/universities/grade/{id}/{type}', [CampusGradeController::class, 'update'])->name('academic.universities.grade.update');
+    Route::delete('academic/universities/grade/{id}/{type}', [CampusGradeController::class, 'destroy'])->name('academic.universities.grade.destroy');
+
+    Route::post('subjects', [CampusCourseSubjectController::class, 'store'])->name('subject.store');
+    Route::put('subjects/{id}/{type}', [CampusCourseSubjectController::class, 'update'])->name('subject.update');
+    Route::delete('subjects/{id}/{type}', [CampusCourseSubjectController::class, 'destroy'])->name('subject.destroy');
 });
 Route::middleware('auth', 'web', 'role')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

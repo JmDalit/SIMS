@@ -41,6 +41,11 @@ class SchoolCampuses extends Model
         return $this->hasMany(SchoolCampusCourses::class, 'campus_id', 'id');
     }
 
+    public function grades()
+    {
+        return $this->hasMany(SchoolCampusGrades::class, 'campus_id', 'id');
+    }
+
     public function grading()
     {
         return $this->belongsTo(ListReferences::class, 'grading_id', 'id');
@@ -50,6 +55,8 @@ class SchoolCampuses extends Model
     {
         return $this->belongsTo(ListAgencies::class, 'agency_id', 'id');
     }
+
+
 
     public function getFullnameCampusAttribute()
     {

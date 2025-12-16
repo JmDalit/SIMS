@@ -1,10 +1,10 @@
 <template>
-    <Head title="Cities" />
+    <Head title="Scholar Status" />
     <AuthLayout>
         <div class="flex flex-col w-full h-full gap-10">
             <div class="flex">
                 <HeaderModule
-                    title="List of cities"
+                    title="List of status"
                     description="Cities information and management"
                 />
             </div>
@@ -14,13 +14,13 @@
                     @deleteSearch="clearSearch"
                     @saveForm="submitForm"
                     button-label="Create"
-                    :dialog-title="!citiesForm.id ? 'Create Role' : 'Edit Role'"
+                    :dialog-title="!statusForm.id ? 'Create Role' : 'Edit Role'"
                     dialog-description="Define a new role and configure its access permissions."
-                    :dialog-button-loading="citiesForm.processing"
+                    :dialog-button-loading="statusForm.processing"
                     :dialog-icon="IconUserCog"
                     dialog-button-label="Save"
-                    :message-has-errors="citiesForm.hasErrors"
-                    :message-errors="citiesForm.errors"
+                    :message-has-errors="statusForm.hasErrors"
+                    :message-errors="statusForm.errors"
                     @buttonOpenModal="toggleModal({ type: 'create' })"
                     message-type="error"
                     ref="toolbarRef"
@@ -28,28 +28,28 @@
                     <template #form>
                         <div class="flex flex-col gap-3 mt-5">
                             <TextInput
-                                v-model="citiesForm.name"
+                                v-model="statusForm.name"
                                 label="Name"
                             ></TextInput>
                             <TextInput
-                                v-model="citiesForm.district"
+                                v-model="statusForm.district"
                                 label="District"
                             ></TextInput>
                             <TextInput
-                                v-model="citiesForm.zipCode"
+                                v-model="statusForm.zipCode"
                                 label="Zipcode"
                             ></TextInput>
                             <TextInput
-                                v-model="citiesForm.oldName"
+                                v-model="statusForm.oldName"
                                 label="Old Name"
                             ></TextInput>
                             <TextInput
-                                v-model="citiesForm.code"
+                                v-model="statusForm.code"
                                 label="Code"
                             ></TextInput>
                             <SelectInput
                                 label="Province"
-                                v-model="citiesForm.province"
+                                v-model="statusForm.province"
                                 :options="page.props.cityOption"
                                 :clearable="true"
                                 capitalize
@@ -62,7 +62,7 @@
                                 <div class="text-sm">Is municipalities?</div>
 
                                 <DefaultToggle
-                                    v-model="citiesForm.isMunicipalities"
+                                    v-model="statusForm.isMunicipalities"
                                     :check-icon="IconCheck"
                                     :un-check-icon="IconX"
                                 />
@@ -74,7 +74,7 @@
                                 <div class="text-sm">Is chartered?</div>
 
                                 <DefaultToggle
-                                    v-model="citiesForm.isChartered"
+                                    v-model="statusForm.isChartered"
                                     :check-icon="IconCheck"
                                     :un-check-icon="IconX"
                                 />
@@ -238,7 +238,7 @@ const toolbarRef = ref(null);
 const toastRef = ref(null);
 const confirmRef = ref(null);
 const menu = ref(null);
-const citiesForm = useForm({
+const statusForm = useForm({
     id: null,
     name: null,
     district: null,
@@ -283,18 +283,18 @@ const menuItems = computed(() => {
 });
 
 const toggleModal = (res) => {
-    citiesForm.resetAndClearErrors();
+    statusForm.resetAndClearErrors();
 
     if (res.type == "edit") {
-        citiesForm.id = res.data.id;
-        citiesForm.name = res.data.name;
-        citiesForm.district = res.data.district;
-        citiesForm.zipCode = res.data.zipcode;
-        citiesForm.oldName = res.data.old_name;
-        citiesForm.code = res.data.code;
-        citiesForm.province = res.data.province_array;
-        citiesForm.isChartered = res.data.is_chartered;
-        citiesForm.isMunicipalities = res.data.is_municipality;
+        statusForm.id = res.data.id;
+        statusForm.name = res.data.name;
+        statusForm.district = res.data.district;
+        statusForm.zipCode = res.data.zipcode;
+        statusForm.oldName = res.data.old_name;
+        statusForm.code = res.data.code;
+        statusForm.province = res.data.province_array;
+        statusForm.isChartered = res.data.is_chartered;
+        statusForm.isMunicipalities = res.data.is_municipality;
     }
 
     toolbarRef.value.openModal();
@@ -302,11 +302,11 @@ const toggleModal = (res) => {
 
 const deleteRow = (id) => {
     confirmRef.value.popupDialog(() => {
-        citiesForm.delete(
+        statusForm.delete(
             route("location.cities.destroy", { id: id, type: "delete" }),
             {
                 onSuccess: () => {
-                    citiesForm.resetAndClearErrors();
+                    statusForm.resetAndClearErrors();
                     toastRef.value.show(page.props.flash);
                 },
             }
@@ -315,23 +315,23 @@ const deleteRow = (id) => {
 };
 
 const submitForm = () => {
-    if (!citiesForm.id) {
-        citiesForm.post(route("location.cities.store"), {
+    if (!statusForm.id) {
+        statusForm.post(route("location.cities.store"), {
             onSuccess: () => {
-                citiesForm.resetAndClearErrors();
+                statusForm.resetAndClearErrors();
                 toastRef.value.show(page.props.flash);
             },
         });
     } else {
-        citiesForm.put(
+        statusForm.put(
             route("location.cities.update", {
-                id: citiesForm.id,
+                id: statusForm.id,
                 type: "form",
             }),
             {
                 onSuccess: () => {
                     toolbarRef.value.closeModal();
-                    citiesForm.resetAndClearErrors();
+                    statusForm.resetAndClearErrors();
                     toastRef.value.show(page.props.flash);
                 },
             }
@@ -339,12 +339,12 @@ const submitForm = () => {
     }
 };
 const updateStatus = (result) => {
-    citiesForm.isActive = result.is_active;
-    citiesForm.put(
+    statusForm.isActive = result.is_active;
+    statusForm.put(
         route("location.cities.update", { id: result.id, type: "status" }),
         {
             onSuccess: () => {
-                citiesForm.clearErrors();
+                statusForm.clearErrors();
                 toastRef.value.show(page.props.flash);
             },
         }

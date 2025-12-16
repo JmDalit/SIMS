@@ -17,10 +17,15 @@ class SchoolCampusCourseSubjects extends Model
         'created_by',
         'updated_by',
         'verified_by',
-        'verified_at'
+        'verified_at',
+        'is_delete'
     ];
 
     protected $appends = ['formatted_date', 'class_array'];
+
+    protected $casts = [
+        'is_delete' => 'boolean',
+    ];
 
     public function campusCourse()
     {

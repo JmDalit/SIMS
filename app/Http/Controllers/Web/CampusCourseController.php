@@ -33,8 +33,8 @@ class CampusCourseController extends Controller
 
         return redirect()->back()->with('flash', [
             'status' => 'success',
-            'title'  => 'Subject Created',
-            'message' => 'Subject successfully created.',
+            'title'  => 'Campus Course Created',
+            'message' => 'Campus course successfully created.',
         ]);;
     }
 
@@ -82,6 +82,21 @@ class CampusCourseController extends Controller
             'status' => 'success',
             'title'  => 'Campus Course Updated',
             'message' => 'Campus course successfully updated.',
+        ]);
+    }
+
+    function destroy(int $id)
+    {
+
+        $find = SchoolCampusCourses::findOrFail($id);
+        $find->update([
+            'is_delete' => true,
+        ]);
+
+        return redirect()->back()->with('flash', [
+            'status' => 'success',
+            'title'  => 'Campus Course Deleted',
+            'message' => 'Campus course successfully deleted.',
         ]);
     }
 }

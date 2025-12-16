@@ -319,14 +319,17 @@
                 </DefaultTable>
             </div>
         </div>
+
         <DrawerSchoolModule
             ref="drawerRef"
+            :id="drawerId"
             :value="dataDrawer"
             :course-option="page.props.courseOption"
             :sub-class-option="page.props.subClassOption"
+            :confirm-ref="confirmRef"
         ></DrawerSchoolModule>
-        <DefaultToast ref="toastRef" />
         <DefaultConfirmDialog ref="confirmRef" />
+        <DefaultToast ref="toastRef" />
     </AuthLayout>
 </template>
 <script setup>
@@ -356,6 +359,7 @@ import DrawerSchoolModule from "../../Modules/Others/DrawerSchoolModule.vue";
 const page = usePage();
 const searchInput = ref(null);
 const dataDrawer = ref(null);
+const drawerId = ref(null);
 const timerBounce = ref(null);
 const hideRemoveButton = ref("create");
 const selectedRow = ref(null);
@@ -408,6 +412,7 @@ const toggleOption = (event, rowData) => {
 
 const openDrawer = (res) => {
     dataDrawer.value = res.data;
+    drawerId.value = res.data.id;
     drawerRef.value.openDrawer();
 };
 

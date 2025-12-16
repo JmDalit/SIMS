@@ -2,11 +2,9 @@
 
 namespace App\Http\Requests\Web;
 
-
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class CampusCourseRequest extends FormRequest
+class CampusGradeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,7 +21,6 @@ class CampusCourseRequest extends FormRequest
      */
     public function rules(): array
     {
-
         switch ($this->type) {
             case 'delete':
                 return [
@@ -38,30 +35,13 @@ class CampusCourseRequest extends FormRequest
             default:
                 return [
                     'campusId' => ['nullable'],
-                    'course' => ['required', 'array'],
-                    'course.id' => [
-                        'integer',
-                        Rule::unique('school_campus_courses', 'course_id')
-                            ->where('campus_id', $this->campusId)
-                            ->where('is_delete', 'false')
-                            ->ignore($this->id),
-                    ],
-                    'years'            => ['required'],
-                    'subjects.*.id'    => ['nullable'],
-                    'subjects.*.name'  => ['required'],
-                    'subjects.*.code'  => ['required'],
-                    'subjects.*.class' => ['required'],
-                    'subjects.*.unit'  => ['required']
+                    'grade' => ['required', 'string'],
+                    'upper' => ['nullable', 'string'],
+                    'lower' => ['nullable', 'string'],
+                    'fail' => ['boolean'],
+                    'incomplete' => ['boolean']
                 ];
                 break;
         }
-    }
-
-
-    public function attributes()
-    {
-        return [
-            'course.id' => 'course'
-        ];
     }
 }
