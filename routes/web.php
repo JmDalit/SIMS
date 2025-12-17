@@ -16,6 +16,7 @@ use App\Http\Controllers\Web\ReferenceController;
 use App\Http\Controllers\Web\RoleController;
 use App\Http\Controllers\Web\RouteController;
 use App\Http\Controllers\Web\SchoolController;
+use App\Http\Controllers\Web\StatusController;
 use App\Http\Controllers\Web\UserController;
 use App\Models\SchoolCampusCourseSubjects;
 
@@ -83,6 +84,10 @@ Route::middleware('auth', 'web')->group(function () {
     Route::post('subjects', [CampusCourseSubjectController::class, 'store'])->name('subject.store');
     Route::put('subjects/{id}/{type}', [CampusCourseSubjectController::class, 'update'])->name('subject.update');
     Route::delete('subjects/{id}/{type}', [CampusCourseSubjectController::class, 'destroy'])->name('subject.destroy');
+
+    Route::post('statuses', [StatusController::class, 'store'])->name('status.store');
+    Route::put('statuses/{id}/{type}', [StatusController::class, 'update'])->name('status.update');
+    Route::delete('statuses/{id}/{type}', [StatusController::class, 'destroy'])->name('status.destroy');
 });
 Route::middleware('auth', 'web', 'role')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -95,5 +100,6 @@ Route::middleware('auth', 'web', 'role')->group(function () {
     Route::get('location/barangay', [LocationBarangayController::class, 'index'])->name('location.barangays');
     Route::get('academic/courses', [CourseController::class, 'index'])->name('academic.courses');
     Route::get('academic/references', [ReferenceController::class, 'index'])->name('academic.references');
-    Route::get('academic/universities', [SchoolController::class, 'index'])->name('academic.universities');
+    Route::get('academic/schools', [SchoolController::class, 'index'])->name('academic.universities');
+    Route::get('scholar/statuses', [StatusController::class, 'index'])->name('statuses');
 });

@@ -21,6 +21,7 @@ class CampusGradeController extends Controller
             'lower' => $data['lower'],
             'upper' => $data['upper'],
             'is_failed' => $data['fail'],
+            'is_drop' => $data['drop'],
             'is_incomplete' => $data['incomplete'],
             'created_by' => Auth::user()->profile->fullname
         ]);
@@ -47,6 +48,7 @@ class CampusGradeController extends Controller
                 'lower' => $data['lower'],
                 'upper' => $data['upper'],
                 'is_failed' => $data['fail'],
+                'is_drop' => $data['drop'],
                 'is_incomplete' => $data['incomplete'],
                 'created_by' => Auth::user()->profile->fullname
             ]);

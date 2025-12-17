@@ -32,6 +32,7 @@
     <DefaultDialog
         v-model:visible="modal"
         :icon="dialogIcon"
+        width-set="lg:!w-[40%]"
         :title="dialogTitle"
         :description="dialogDescription"
         :button-label="dialogButtonLabel"

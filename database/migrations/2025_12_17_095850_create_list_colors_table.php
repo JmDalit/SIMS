@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('scholar_statuses', function (Blueprint $table) {
+        Schema::create('list_colors', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
-            $table->string('icon')->nullable();
-            $table->string('type')->nullable();
-            $table->string('color')->nullable();
+            $table->string('background_color')->nullable();
+            $table->string('text_color')->nullable();
             $table->boolean('is_active')->default(true);
             $table->boolean('is_delete')->default(false);
             $table->string('created_by')->nullable();
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('scholar_statuses');
+        Schema::dropIfExists('list_colors');
     }
 };

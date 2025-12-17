@@ -205,8 +205,9 @@
                                         </div>
                                     </Button>
                                 </div>
-                                <div class="flex flex-col gap-3">
+                                <div class="flex gap-3">
                                     <SelectInput
+                                        class="!w-[25rem]"
                                         v-model="
                                             courseForm.subjects[index].class
                                         "
@@ -222,21 +223,21 @@
                                         label="Description"
                                         capitalize
                                     ></TextInput>
-                                    <div class="flex items-center gap-3">
-                                        <TextInput
-                                            v-model="
-                                                courseForm.subjects[index].code
-                                            "
-                                            label="Code"
-                                        ></TextInput>
+                                    <TextInput
+                                        v-model="
+                                            courseForm.subjects[index].code
+                                        "
+                                        class="!w-[25rem]"
+                                        label="Code"
+                                    ></TextInput>
 
-                                        <TextInput
-                                            v-model="
-                                                courseForm.subjects[index].unit
-                                            "
-                                            label="Unit"
-                                        ></TextInput>
-                                    </div>
+                                    <TextInput
+                                        v-model="
+                                            courseForm.subjects[index].unit
+                                        "
+                                        class="!w-[20rem]"
+                                        label="Unit"
+                                    ></TextInput>
                                 </div>
                                 <Divider type="dashed" />
                             </div>
@@ -394,11 +395,6 @@
                                     v-model="gradeForm.fail"
                                     :check-icon="IconCheck"
                                     :un-check-icon="IconX"
-                                    @update-value="
-                                        gradeForm.fail
-                                            ? (gradeForm.incomplete = false)
-                                            : gradeForm.incomplete
-                                    "
                                 />
                             </div>
                         </div>
@@ -413,11 +409,18 @@
                                     v-model="gradeForm.incomplete"
                                     :check-icon="IconCheck"
                                     :un-check-icon="IconX"
-                                    @update-value="
-                                        gradeForm.incomplete
-                                            ? (gradeForm.fail = false)
-                                            : gradeForm.fail
-                                    "
+                                />
+                            </div>
+                        </div>
+                        <div class="flex flex-col">
+                            <Divider type="dashed" />
+                            <div class="flex justify-between items-center">
+                                <div class="text-sm">Is it a drop grade?</div>
+
+                                <DefaultToggle
+                                    v-model="gradeForm.drop"
+                                    :check-icon="IconCheck"
+                                    :un-check-icon="IconX"
                                 />
                             </div>
                         </div>
@@ -447,6 +450,17 @@
                                             stroke-width="2"
                                         />
                                         <div>INCOMPLETE</div>
+                                    </div>
+                                </div>
+                                <div v-else-if="props.data.is_drop">
+                                    <div
+                                        class="font-semibold flex items-center gap-1 text-red-600 px-4 rounded-xl"
+                                    >
+                                        <IconCircleX
+                                            size="20"
+                                            stroke-width="2"
+                                        />
+                                        <div>DROPPED</div>
                                     </div>
                                 </div>
                                 <div v-else>
@@ -629,6 +643,15 @@
                         </template>
                     </Column>
                 </DefaultScrollTable>
+
+                <div
+                    class="flex items-center font-light text-sm gap-1 text-gray-400 px-3 pt-3"
+                >
+                    <span class="font-semibold">
+                        {{ selectedRow?.subjects?.length ?? 0 }}
+                    </span>
+                    Registered Subjects
+                </div>
             </div>
         </template>
     </DefaultDialog>
@@ -721,6 +744,7 @@ const gradeForm = useForm({
     lower: null,
     fail: false,
     incomplete: false,
+    drop: false,
 });
 
 const toggleCourseOption = (event, rowData) => {
@@ -785,6 +809,7 @@ const toggleModal = (res) => {
         gradeForm.upper = selectedRow.value.upper;
         gradeForm.lower = selectedRow.value.lower;
         gradeForm.fail = selectedRow.value.is_failed;
+        gradeForm.drop = selectedRow.value.is_drop;
         gradeForm.incomplete = selectedRow.value.is_incomplete;
     }
 
@@ -957,4 +982,34 @@ const deleteRow = (res) => {
 defineExpose({
     openDrawer,
 });
+
+watch(
+    () => gradeForm.drop,
+    (val) => {
+        if (val) {
+            gradeForm.fail = false;
+            gradeForm.incomplete = false;
+        }
+    }
+);
+
+watch(
+    () => gradeForm.fail,
+    (val) => {
+        if (val) {
+            gradeForm.drop = false;
+            gradeForm.incomplete = false;
+        }
+    }
+);
+
+watch(
+    () => gradeForm.incomplete,
+    (val) => {
+        if (val) {
+            gradeForm.drop = false;
+            gradeForm.fail = false;
+        }
+    }
+);
 </script>

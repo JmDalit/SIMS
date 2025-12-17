@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
 
 
         //done seeders
-
+        //$this->call(ListColorSeeder::class);
         $this->call(ListAgencySeeder::class);
         $this->call(ListReferenceSeeder::class);
         $this->call(ListCourseSeeder::class);

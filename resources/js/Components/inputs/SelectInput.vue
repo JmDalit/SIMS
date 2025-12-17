@@ -34,7 +34,11 @@
                     class: '!text-sm',
                 },
             }"
-        />
+        >
+            <template #option="slotProps">
+                <slot name="option" v-bind="slotProps"></slot>
+            </template>
+        </Select>
     </div>
 </template>
 <script setup>

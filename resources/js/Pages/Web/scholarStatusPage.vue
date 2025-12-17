@@ -32,114 +32,75 @@
                                 label="Name"
                             ></TextInput>
                             <TextInput
-                                v-model="statusForm.district"
-                                label="District"
+                                v-model="statusForm.type"
+                                label="Type"
                             ></TextInput>
                             <TextInput
-                                v-model="statusForm.zipCode"
-                                label="Zipcode"
+                                v-model="statusForm.icon"
+                                label="Icon"
                             ></TextInput>
-                            <TextInput
-                                v-model="statusForm.oldName"
-                                label="Old Name"
-                            ></TextInput>
-                            <TextInput
-                                v-model="statusForm.code"
-                                label="Code"
-                            ></TextInput>
+
                             <SelectInput
-                                label="Province"
-                                v-model="statusForm.province"
-                                :options="page.props.cityOption"
-                                :clearable="true"
-                                capitalize
-                                filter
-                            ></SelectInput>
-                        </div>
-                        <div class="flex flex-col">
-                            <Divider type="dashed" />
-                            <div class="flex justify-between items-center">
-                                <div class="text-sm">Is municipalities?</div>
-
-                                <DefaultToggle
-                                    v-model="statusForm.isMunicipalities"
-                                    :check-icon="IconCheck"
-                                    :un-check-icon="IconX"
-                                />
-                            </div>
-                        </div>
-                        <div class="flex flex-col">
-                            <Divider type="dashed" />
-                            <div class="flex justify-between items-center">
-                                <div class="text-sm">Is chartered?</div>
-
-                                <DefaultToggle
-                                    v-model="statusForm.isChartered"
-                                    :check-icon="IconCheck"
-                                    :un-check-icon="IconX"
-                                />
-                            </div>
+                                v-model="statusForm.color"
+                                :options="page.props.colorOption"
+                                label="Color"
+                                clearable
+                            >
+                                <template #option="slot">
+                                    <div
+                                        :class="[
+                                            slot.option.name,
+                                            'px-5 py-1 rounded-lg',
+                                        ]"
+                                    >
+                                        Sample Color
+                                    </div>
+                                </template>
+                            </SelectInput>
                         </div>
                     </template>
                 </ToolbarModule>
                 <DefaultTable
-                    :items="page.props.cities.data"
+                    :items="page.props.status.data"
                     :pagination="{
-                        total: page.props.cities.total,
-                        perPage: page.props.cities.per_page,
-                        currentPage: page.props.cities.current_page,
+                        total: page.props.status.total,
+                        perPage: page.props.status.per_page,
+                        currentPage: page.props.status.current_page,
                     }"
                     @paginate="loadPage"
                 >
-                    <Column field="name" header="Name"> </Column>
-
-                    <Column field="old_name">
-                        <template #header>
-                            <div class="w-full flex justify-start">
-                                <p class="font-semibold">Old Name</p>
-                            </div>
-                        </template>
-                        <template #body="props">
-                            <div class="flex justify-start w-full">
-                                <div v-if="props.data.old_name">
-                                    {{ props.data.old_name }}
-                                </div>
-                                <div
-                                    class="text-gray-400 text-xs font-light"
-                                    v-else
-                                >
-                                    not set yet
-                                </div>
-                            </div>
-                        </template>
-                    </Column>
-                    <Column field="code">
-                        <template #header>
-                            <div class="w-full flex justify-center">
-                                <p class="font-semibold">Municipality Code</p>
-                            </div>
-                        </template>
+                    <Column header="Name">
                         <template #body="props">
                             <div
-                                class="flex items-center justify-center w-full"
+                                :class="[
+                                    'flex items-center gap-1 w-fit',
+                                    props.data.color_array.textColor,
+                                ]"
                             >
-                                <div class="text-xs font-semibold">
-                                    {{ props.data.code }}
+                                <component
+                                    :is="TablerIcons[props.data.icon]"
+                                    size="20"
+                                />
+                                <div class="capitalize">
+                                    {{ props.data.name }}
                                 </div>
                             </div>
                         </template>
                     </Column>
-                    <Column field="province_code">
-                        <template #header>
-                            <div class="w-full flex justify-start">
-                                <p class="font-semibold">Province</p>
-                            </div>
-                        </template>
-                        <template #body="props">
-                            <div class="flex justify-start w-full">
-                                <div>{{ props.data.province_code.name }}</div>
-                            </div>
-                        </template>
+                    <Column field="type" header="Type" class="capitalize">
+                    </Column>
+
+                    <Column
+                        field="created_by"
+                        header="Created By"
+                        class="!text-xs"
+                    >
+                    </Column>
+                    <Column
+                        field="updated_by"
+                        header="Updated By"
+                        class="!text-xs"
+                    >
                     </Column>
                     <Column field="status" class="w-[5%]">
                         <template #header>
@@ -155,7 +116,6 @@
                                     :check-icon="IconCheck"
                                     :un-check-icon="IconX"
                                     v-model="props.data.is_active"
-                                    :disabled="props.data.is_lock"
                                     @update-value="updateStatus(props.data)"
                                 />
                             </div>
@@ -226,6 +186,7 @@ import {
     IconPencilCog,
     IconTrash,
 } from "@tabler/icons-vue";
+import * as TablerIcons from "@tabler/icons-vue";
 import DefaultToast from "../../Components/messages/DefaultToast.vue";
 import DefaultConfirmDialog from "../../Components/dialogs/DefaultConfirmDialog.vue";
 import SelectInput from "../../Components/inputs/SelectInput.vue";
@@ -241,14 +202,10 @@ const menu = ref(null);
 const statusForm = useForm({
     id: null,
     name: null,
-    district: null,
-    zipCode: null,
-    oldName: null,
-    code: null,
-    province: null,
-    isMunicipalities: false,
-    isChartered: false,
-    isActive: false,
+    icon: null,
+    type: null,
+    color: null,
+    isActive: true,
 });
 
 const toggleOption = (event, rowData) => {
@@ -288,13 +245,9 @@ const toggleModal = (res) => {
     if (res.type == "edit") {
         statusForm.id = res.data.id;
         statusForm.name = res.data.name;
-        statusForm.district = res.data.district;
-        statusForm.zipCode = res.data.zipcode;
-        statusForm.oldName = res.data.old_name;
-        statusForm.code = res.data.code;
-        statusForm.province = res.data.province_array;
-        statusForm.isChartered = res.data.is_chartered;
-        statusForm.isMunicipalities = res.data.is_municipality;
+        statusForm.type = res.data.type;
+        statusForm.icon = res.data.icon;
+        statusForm.color = res.data.color_array;
     }
 
     toolbarRef.value.openModal();
@@ -302,21 +255,18 @@ const toggleModal = (res) => {
 
 const deleteRow = (id) => {
     confirmRef.value.popupDialog(() => {
-        statusForm.delete(
-            route("location.cities.destroy", { id: id, type: "delete" }),
-            {
-                onSuccess: () => {
-                    statusForm.resetAndClearErrors();
-                    toastRef.value.show(page.props.flash);
-                },
-            }
-        );
+        statusForm.delete(route("status.destroy", { id: id, type: "delete" }), {
+            onSuccess: () => {
+                statusForm.resetAndClearErrors();
+                toastRef.value.show(page.props.flash);
+            },
+        });
     });
 };
 
 const submitForm = () => {
     if (!statusForm.id) {
-        statusForm.post(route("location.cities.store"), {
+        statusForm.post(route("status.store"), {
             onSuccess: () => {
                 statusForm.resetAndClearErrors();
                 toastRef.value.show(page.props.flash);
@@ -324,7 +274,7 @@ const submitForm = () => {
         });
     } else {
         statusForm.put(
-            route("location.cities.update", {
+            route("status.update", {
                 id: statusForm.id,
                 type: "form",
             }),
@@ -340,15 +290,12 @@ const submitForm = () => {
 };
 const updateStatus = (result) => {
     statusForm.isActive = result.is_active;
-    statusForm.put(
-        route("location.cities.update", { id: result.id, type: "status" }),
-        {
-            onSuccess: () => {
-                statusForm.clearErrors();
-                toastRef.value.show(page.props.flash);
-            },
-        }
-    );
+    statusForm.put(route("status.update", { id: result.id, type: "status" }), {
+        onSuccess: () => {
+            statusForm.clearErrors();
+            toastRef.value.show(page.props.flash);
+        },
+    });
 };
 
 const clearSearch = () => {
@@ -357,7 +304,7 @@ const clearSearch = () => {
 
 const loadPage = (page) => {
     router.get(
-        route("location.cities"),
+        route("statuses"),
         {
             page,
             search: searchInput.value,

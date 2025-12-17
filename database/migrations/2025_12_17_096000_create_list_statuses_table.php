@@ -11,21 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('school_campus_grades', function (Blueprint $table) {
+        Schema::create('list_statuses', function (Blueprint $table) {
             $table->id();
-            $table->integer('campus_id')->unsigned()->index();
-            $table->foreign('campus_id')->references('id')->on('school_campuses')->onDelete('cascade');
-            $table->string('grade')->nullable();
-            $table->string('lower')->nullable();
-            $table->string('upper')->nullable();
-            $table->boolean('is_failed')->default(false);
-            $table->boolean('is_incomplete')->default(false);
-            $table->boolean('is_drop')->default(false);
+            $table->string('name')->nullable();
+            $table->string('icon')->nullable();
+            $table->string('type')->nullable();
+            $table->foreignId('color_id')->nullable()->constrained('list_colors')->onDelete('set null');
             $table->boolean('is_active')->default(true);
             $table->boolean('is_delete')->default(false);
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
-
             $table->timestamps();
         });
     }
@@ -35,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('school_campus_grades');
+        Schema::dropIfExists('list_statuses');
     }
 };

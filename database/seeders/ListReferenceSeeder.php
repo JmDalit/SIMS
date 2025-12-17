@@ -326,6 +326,18 @@ class ListReferenceSeeder extends Seeder
                 'type' => 'School',
                 'others' => 'n/a',
             ],
+            [
+                'name' => 'Academic',
+                'classification' => 'Subject Class',
+                'type' => 'Subject',
+                'others' => 'n/a',
+            ],
+            [
+                'name' => 'Non-Academic',
+                'classification' => 'Subject Class',
+                'type' => 'Subject',
+                'others' => 'n/a',
+            ],
         ]);
     }
 }

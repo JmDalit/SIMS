@@ -3,16 +3,64 @@
 namespace App\References;
 
 use App\Models\ListAgencies;
+use App\Models\ListColors;
 use App\Models\ListCourse;
 use App\Models\ListReferences;
 use App\Models\ListRole;
 use App\Models\ListRoutes;
+use App\Models\ListStatuses;
 use App\Models\SchoolCampuses;
 use App\Models\Schools;
 use Illuminate\Support\Facades\Auth;
 
 class ListClass
 {
+    public function getStatuses(Bool $main, $search = null)
+    {
+        if ($main) {
+            return ListStatuses::where('is_delete', false)->when($search, function ($query) {
+                $search = strtolower(request('search'));
+
+                $query->where(function ($query) use ($search) {
+                    $query->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
+                });
+            })->with('color')->orderBy('type')->paginate(10);
+        } else {
+            return
+                ListStatuses::where('is_active', true)->where('is_delete', false)->get()->map(function ($q) {
+                    return [
+                        'id' => $q->id,
+                        'name' => $q->name,
+                    ];
+                });
+        }
+    }
+
+    public function getColors(Bool $main, $search = null)
+    {
+        if ($main) {
+            return ListColors::where('is_delete', false)->when($search, function ($query) {
+                $search = strtolower(request('search'));
+
+                $query->where(function ($query) use ($search) {
+                    $query->whereRaw('LOWER(background_color) LIKE ?', ["%{$search}%"])
+                        ->orWhereRaw('LOWER(text_color) LIKE ?', ["%{$search}%"]);
+                });
+            })->orderBy('id')->paginate(10);
+        } else {
+            return
+                ListColors::where('is_active', true)->where('is_delete', false)->get()->map(function ($q) {
+                    return [
+                        'id' => $q->id,
+                        'name' => $q->background_color . ' ' . $q->text_color,
+                        'bgColor' => $q->background_color,
+                        'textColor' => $q->text_color
+                    ];
+                });
+        }
+    }
+
+
     public function getRoles(Bool $main, $search = null)
     {
         if ($main) {
