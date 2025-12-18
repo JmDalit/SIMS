@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('scholar_addresses', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('scholar_id')->constrained('scholars')->nullOnDelete();
+            $table->text('address')->nullable();
+            $table->string('barangay_code')->nullable();
+            $table->foreign('barangay_code')->references('code')->on('location_barangays')->onDelete('set null');
+            $table->string('municipality_code')->nullable();
+            $table->foreign('municipality_code')->references('code')->on('location_cities')->onDelete('set null');
+            $table->string('province_code')->nullable();
+            $table->foreign('province_code')->references('code')->on('location_provinces')->onDelete('set null');
+            $table->string('region_code')->nullable();
+            $table->foreign('region_code')->references('code')->on('location_regions')->onDelete('set null');
         });
     }
 

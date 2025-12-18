@@ -15,6 +15,7 @@ use App\Http\Controllers\Web\LocationRegionController;
 use App\Http\Controllers\Web\ReferenceController;
 use App\Http\Controllers\Web\RoleController;
 use App\Http\Controllers\Web\RouteController;
+use App\Http\Controllers\Web\ScholarController;
 use App\Http\Controllers\Web\SchoolController;
 use App\Http\Controllers\Web\StatusController;
 use App\Http\Controllers\Web\UserController;
@@ -102,4 +103,5 @@ Route::middleware('auth', 'web', 'role')->group(function () {
     Route::get('academic/references', [ReferenceController::class, 'index'])->name('academic.references');
     Route::get('academic/schools', [SchoolController::class, 'index'])->name('academic.universities');
     Route::get('scholar/statuses', [StatusController::class, 'index'])->name('statuses');
+    Route::get('scholars', [ScholarController::class, 'index'])->name('scholars');
 });

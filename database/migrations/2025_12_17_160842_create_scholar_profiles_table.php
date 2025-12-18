@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('scholar_profiles', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('scholar_id')->constrained('scholars')->nullOnDelete();
+            $table->string('fname')->nullable();
+            $table->string('lname')->nullable();
+            $table->string('mname')->nullable();
+            $table->string('suffix')->nullable();
+            $table->string('photo')->nullable();
+            $table->string('contact_no')->nullable();
+            $table->date('birthdate')->nullable();
+            $table->string('email')->nullable();
+            $table->string('sex')->nullable();
         });
     }
 

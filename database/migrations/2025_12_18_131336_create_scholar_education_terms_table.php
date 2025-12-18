@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('scholar_educations', function (Blueprint $table) {
+        Schema::create('scholar_education_terms', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('scholar_id')->nullable()->constrained('scholars')->nullOnDelete();
-            $table->foreignId('campus_id')->nullable()->constrained('school_campuses')->nullOnDelete();
-            $table->foreignId('campus_course_id')->nullable()->constrained('school_campus_courses')->nullOnDelete();
+            $table->foreignId('education_id')->nullable()->constrained('scholar_educations')->nullOnDelete();
+            $table->foreignId('term_id')->nullable()->constrained('list_references')->nullOnDelete();
+            $table->string('school_year');
+            $table->date('start_date');
+            $table->date('end_date');
             $table->boolean('is_active')->default(true);
             $table->boolean('is_delete')->default(false);
             $table->string('verified_by')->nullable();
@@ -31,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('scholar_educations');
+        Schema::dropIfExists('scholar_education_terms');
     }
 };

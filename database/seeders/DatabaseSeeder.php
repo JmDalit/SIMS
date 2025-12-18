@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
 
 
         //done seeders
-        //$this->call(ListColorSeeder::class);
+        $this->call(ListColorSeeder::class);
         $this->call(ListAgencySeeder::class);
         $this->call(ListReferenceSeeder::class);
         $this->call(ListCourseSeeder::class);
@@ -49,8 +49,32 @@ class DatabaseSeeder extends Seeder
             'agency_id'     => null,
             'fname'         => 'john rey',
             'lname'         => 'dalit',
-            'contact_no'    => '09270097383',
+            'contact_no'    => '09321312412',
             'designation'   => 'project technical assistant VI',
+            'avatar'        => null,
+            'created_at'    => now(),
+            'updated_at'    => now()
+        ]);
+
+        User::create([
+            'email'         => 'mrcapistrano@sei.dost.gov.ph',
+            'role_id'       => 1,
+            'password'      => bcrypt('mrcapistrano'),
+            'can_edit'      => true,
+            'can_create'    => true,
+            'can_delete'    => true,
+            'is_verified'   => true,
+            'created_at'    => now(),
+            'updated_at'    => now(),
+        ]);
+
+        UserProfile::create([
+            'user_id'       => 2,
+            'agency_id'     => null,
+            'fname'         => 'Mark John Paul',
+            'lname'         => 'Capistrano',
+            'contact_no'    => '09312313139',
+            'designation'   => 'Senior Science Research Specialist',
             'avatar'        => null,
             'created_at'    => now(),
             'updated_at'    => now()
