@@ -41,33 +41,39 @@ class ScholarClass
             ->where('ss.spas_no', $id)
             ->orderBy('sccs.subject_code')
             ->select(
-                'ss.id',
-                'ss.subject_id',
-                'sccs.subject_code',
-                'sccs.name',
-                'sccs.unit',
                 'ss.term',
                 'ss.year_level',
                 'ss.school_year',
+                'sccs.subject_code',
+                'sccs.name',
+                'sccs.unit',
                 'sg.grade',
-                'ls.id as status_id',
                 'ls.name as status'
             )
             ->get()
-            ->map(function ($row) {
+            ->groupBy(
+                fn($row) =>
+                $row->term . '|' . $row->year_level . '|' . $row->school_year
+            )
+            ->map(function ($rows) {
+
+                $first = $rows->first();
+
                 return [
-                    'id' => $row->id,
-                    'subject_id' => $row->subject_id,
-                    'code' => $row->subject_code,
-                    'name' => $row->name,
-                    'unit' => $row->unit,
-                    'term' => $row->term,
-                    'year_level' => $row->year_level,
-                    'school_year' => $row->school_year,
-                    'grade' => $row->grade,
-                    'status_id' => $row->status_id,
-                    'status' => $row->status,
+                    'term' => $first->term,
+                    'year_level' => $first->year_level,
+                    'school_year' => $first->school_year,
+                    'subjects' => $rows->map(function ($row) {
+                        return [
+                            'code' => $row->subject_code,
+                            'subject_name' => $row->name,
+                            'unit' => $row->unit,
+                            'grade' => $row->grade,
+                            'status' => $row->status,
+                        ];
+                    })->values()
                 ];
-            });
+            })
+            ->values();
     }
 }

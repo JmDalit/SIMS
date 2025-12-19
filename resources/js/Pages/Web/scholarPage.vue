@@ -163,88 +163,58 @@
             hide-footer
             :icon="IconBook2"
             width-set="lg:!w-[80%]"
-            :title="selectedRow?.course?.name"
+            title="Grades"
             description="View all subjects offered under this course, including their codes, units, and classifications."
         >
             <template #forms>
-                <div class="my-5">
-                    <DefaultScrollTable :items="selectedRow?.subjects">
-                        <Column header="Class" field="subject_class.name">
-                        </Column>
+                <div
+                    class="my-5"
+                    v-for="(term, index) in page.props.scholarDetails"
+                    :key="index"
+                >
+                    <Divider type="dashed"></Divider>
+                    <div class="flex justify-between gap-5 p-2">
+                        <div class="flex items-center gap-2">
+                            <div class="bg-slate-200 p-2 shadow rounded-xl">
+                                <IconFileDescription size="20" />
+                            </div>
+                            <div class="flex flex-col">
+                                <div class="text-xs">TERM</div>
+                                <div class="text-sm font-bold">
+                                    {{ term.term }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <div class="bg-slate-200 p-2 shadow rounded-xl">
+                                <IconCalendarWeek size="20" />
+                            </div>
+                            <div class="flex flex-col">
+                                <div class="text-xs">School Year</div>
+                                <div class="text-sm font-bold">
+                                    {{ term.school_year }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <DefaultScrollTable :items="term.subjects">
                         <Column
                             header="Description"
                             class="capitalize"
-                            field="name"
+                            field="subject_name"
                             style="width: 30%"
                         >
                         </Column>
-                        <Column
-                            header="Code"
-                            class="uppercase"
-                            field="subject_code"
-                        >
+                        <Column header="Code" class="capitalize" field="code">
                         </Column>
-                        <Column header="Unit" field="unit"> </Column>
-                        <Column
-                            header="Created By"
-                            class="text-xs"
-                            field="created_by"
-                        >
+                        <Column header="UNIT" class="capitalize" field="unit">
                         </Column>
-                        <Column
-                            header="Created At"
-                            class="text-xs"
-                            field="formatted_date"
-                        >
+                        <Column header="Grades" class="" field="grade">
                         </Column>
-
-                        <Column
-                            header="Verified By"
-                            class="text-xs"
-                            field="verified_by"
-                        >
-                        </Column>
-                        <Column
-                            header="Verified At"
-                            class="text-xs"
-                            field="verified_at"
-                        >
-                        </Column>
-                        <Column>
-                            <template #header>
-                                <div class="w-full flex justify-end mr-1.5">
-                                    <IconSettings size="20" />
-                                </div>
-                            </template>
-                            <template #body="props">
-                                <div class="flex w-full justify-end gap-2">
-                                    <DefaultButton
-                                        severity="danger"
-                                        size="small"
-                                        rounded
-                                        text
-                                        :icon="IconTrashX"
-                                        @click="
-                                            deleteRow({
-                                                id: props.data.id,
-                                                type: 'subject',
-                                            })
-                                        "
-                                    >
-                                    </DefaultButton>
-                                </div>
-                            </template>
+                        <Column header="status" class="status" field="status">
                         </Column>
                     </DefaultScrollTable>
-
-                    <div
-                        class="flex items-center font-light text-sm gap-1 text-gray-400 px-3 pt-3"
-                    >
-                        <span class="font-semibold">
-                            {{ selectedRow?.subjects?.length ?? 0 }}
-                        </span>
-                        Registered Subjects
-                    </div>
                 </div>
             </template>
         </DefaultDialog>
@@ -259,7 +229,7 @@ import TextInput from "../../Components/inputs/TextInput.vue";
 import DefaultToggle from "../../Components/toggleswitches/DefaultToggle.vue";
 import DefaultToast from "../../Components/messages/DefaultToast.vue";
 import DefaultConfirmDialog from "../../Components/dialogs/DefaultConfirmDialog.vue";
-import AutoCompleteInput from "../../Components/inputs/AutoCompleteInput.vue";
+import DefaultScrollTable from "../../Components/tables/DefaultScrollTable.vue";
 import { computed, ref, watch } from "vue";
 import { Head, router, useForm, usePage } from "@inertiajs/vue3";
 import {
@@ -267,9 +237,13 @@ import {
     IconLock,
     IconUserCog,
     IconX,
+    IconBook2,
     IconPencilCog,
     IconTrash,
     IconBooks,
+    IconUserQuestion,
+    IconCalendarWeek,
+    IconFileDescription,
 } from "@tabler/icons-vue";
 import DefaultDialog from "../../Components/dialogs/DefaultDialog.vue";
 
