@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\SchoolRequest;
+use App\Models\SchoolCampusCourseCurriculums;
+use App\Models\SchoolCampuses;
 use App\Models\Schools;
 use App\References\ListClass;
 use App\References\LocationClass;
@@ -21,9 +23,70 @@ class SchoolController extends Controller
             'classificationOption' => $ref->getRefs('option', null, null, 'Term Type'),
             'agencyOption' => $ref->getAgencies(false),
             'gradingOption' => $ref->getRefs('option', null, null, 'Grading System'),
-            'resultSearch' => $location->getFullAddress($request->input('autosuggest')),
+            'resultSearch' => Inertia::lazy(function () use ($request, $location) {
+                $search = $request->input('autosuggest');
+                return $search
+                    ? $location->getFullAddress($search)
+                    : [];
+            }),
             'courseOption' => $ref->getCourses('option'),
-            'subClassOption' => $ref->getRefs('option', null, 'Subject', null)
+            'subClassOption' => Inertia::always(
+                fn() =>
+                $ref->getRefs('option', null, 'Subject', null)
+            ),
+            'schoolDetail' => request('id')
+                ? SchoolCampuses::with([
+                    'courses' => fn($q) =>
+                    $q->where('is_delete', false)
+                        ->with([
+                            'subjects' => fn($sq) => $sq->where('is_delete', false),
+                        ]),
+                    'grades'  => fn($q) =>
+                    $q->where('is_delete', false)
+                        ->orderBy('grade', 'asc'),
+                    'info' => fn($q) =>
+                    $q->select([
+                        'id',
+                        'campus_id',
+                        'dean',
+                        'registrar',
+                        'contact',
+                        'email',
+                    ])->where('is_delete', false),
+                    'semesters' => fn($q) =>
+                    $q->where('is_delete', false),
+                ])->find(request('id'))
+                : null,
+            'subjectDetail' => request('campusCourseId')
+                ? SchoolCampusCourseCurriculums::with([
+                    'subjects' => fn($q) =>
+                    $q->select(
+                        'id',
+                        'curriculum_id',
+                        'semester_id',
+                        'curriculum_id as curriculumId',
+                        'name',
+                        'subject_code as subjectCode',
+                        'year',
+                        'unit',
+                        'subject_class',
+                        'is_delete'
+                    )
+                        ->where('is_delete', false)
+                ])
+                ->select([
+                    'id',
+                    'campus_course_id',
+                    'total_year as yearNumber',
+                    'years as yearLevel'
+                ])
+                ->where('campus_course_id', request('campusCourseId'))->orderBy('id', 'desc')
+                ->get()->toArray();
+                : null,
+            'semesterOption' => request('semesterType') ? $ref->getRefs('option', null, null, request('semesterType')) : null,
+            'schoolEdit' => request('school_id')
+                ? Schools::with(['campuses'])->find(request('school_id'))
+                : null,
         ]);
     }
 
@@ -43,8 +106,11 @@ class SchoolController extends Controller
             $campusModel = $school->campuses()->create([
                 'is_main' => $campus['main'],
                 'term_id' => $campus['semester']['id'],
+                'name' => $campus['name'],
                 'agency_id' => $campus['agency']['id'],
                 'grading_id' => $campus['grading']['id'],
+                'start_date' => $campus['startDate'],
+                'end_date' => $campus['endDate'],
                 'created_by'    => Auth::user()->profile->fullname
             ]);
 
@@ -93,6 +159,9 @@ class SchoolController extends Controller
                         'is_main'     => $campus['main'],
                         'term_id'     => $campus['semester']['id'],
                         'agency_id'   => $campus['agency']['id'],
+                        'name'        => $campus['name'],
+                        'start_date'  => $campus['startDate'],
+                        'end_date'    => $campus['endDate'],
                         'grading_id'  => $campus['grading']['id'],
                         'updated_by'  => Auth::user()->profile->fullname,
                         'updated_at'  => now()

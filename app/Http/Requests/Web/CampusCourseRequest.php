@@ -47,11 +47,11 @@ class CampusCourseRequest extends FormRequest
                             ->ignore($this->id),
                     ],
                     'years'            => ['required'],
-                    'subjects.*.id'    => ['nullable'],
-                    'subjects.*.name'  => ['required'],
-                    'subjects.*.code'  => ['required'],
-                    'subjects.*.class' => ['required'],
-                    'subjects.*.unit'  => ['required']
+                    // 'subjects.*.id'    => ['nullable'],
+                    // 'subjects.*.name'  => ['required'],
+                    // 'subjects.*.code'  => ['required'],
+                    // 'subjects.*.class' => ['required'],
+                    // 'subjects.*.unit'  => ['required']
                 ];
                 break;
         }

@@ -212,21 +212,10 @@ class ListClass
                     SchoolCampuses::where([
                         'is_delete' => false,
                         'is_active' => true,
-                    ])
+                    ])->orderBy('school_id', 'asc')->orderBy('is_main', 'desc')
                     ->with([
                         'school',
-                        'school.reference',
-                        'school.campuses',
-                        'courses' => function ($q) {
-                            $q->where('is_delete', false);
-                        },
-                        'grades' => function ($q) {
-                            $q->where('is_delete', false)
-                                ->orderBy('grade', 'asc');
-                        },
-                        'courses.subjects' => function ($q) {
-                            $q->where('is_delete', false);
-                        },
+
                         'address',
                         'term',
                         'grading',

@@ -16,7 +16,11 @@ use App\Http\Controllers\Web\ReferenceController;
 use App\Http\Controllers\Web\RoleController;
 use App\Http\Controllers\Web\RouteController;
 use App\Http\Controllers\Web\ScholarController;
+use App\Http\Controllers\Web\SchoolCampusCurriculumController;
+use App\Http\Controllers\Web\SchoolCampusInfoController;
+use App\Http\Controllers\Web\SchoolCampusSemesterController;
 use App\Http\Controllers\Web\SchoolController;
+use App\Http\Controllers\Web\SchoolDetailController;
 use App\Http\Controllers\Web\StatusController;
 use App\Http\Controllers\Web\UserController;
 use App\Models\SchoolCampusCourseSubjects;
@@ -89,6 +93,18 @@ Route::middleware('auth', 'web')->group(function () {
     Route::post('statuses', [StatusController::class, 'store'])->name('status.store');
     Route::put('statuses/{id}/{type}', [StatusController::class, 'update'])->name('status.update');
     Route::delete('statuses/{id}/{type}', [StatusController::class, 'destroy'])->name('status.destroy');
+
+    Route::post('campus/info', [SchoolCampusInfoController::class, 'store'])->name('campus.info.store');
+    Route::put('campus/info/{id}/{type}', [SchoolCampusInfoController::class, 'update'])->name('campus.info.update');
+    Route::delete('campus/info/{id}/{type}', [SchoolCampusInfoController::class, 'destroy'])->name('campus.info.destroy');
+
+    Route::post('campus/semester', [SchoolCampusSemesterController::class, 'store'])->name('campus.semester.store');
+    Route::put('campus/semester/{id}/{type}', [SchoolCampusSemesterController::class, 'update'])->name('campus.semester.update');
+    Route::delete('campus/semester/{id}/{type}', [SchoolCampusSemesterController::class, 'destroy'])->name('campus.semester.destroy');
+
+    Route::post('campus/curriculum', [SchoolCampusCurriculumController::class, 'store'])->name('campus.curriculum.store');
+    Route::put('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'update'])->name('campus.curriculum.update');
+    Route::delete('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'destroy'])->name('campus.curriculum.destroy');
 });
 Route::middleware('auth', 'web', 'role')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

@@ -2,22 +2,24 @@
     <div class="w-full flex flex-col">
         <span class="text-sm font-medium" v-show="label">{{ label }}</span>
 
-        <InputText
-            :type="type"
-            :placeholder="placeholder"
+        <DatePicker
             v-model="modelValue"
+            view="month"
+            dateFormat="mm/yy"
             fluid
-            :disabled="disabled"
-            autocomplete="off"
             :pt="{
-                root: {
-                    class: [
+                pcInputText: {
+                    root: [
                         'dark:!bg-gray-700 !text-sm  border dark:!border-gray-700 dark:!text-white',
                         capitalize ? 'capitalize' : '',
                     ],
                 },
+                panel: {
+                    class: '!w-64 !text-sm',
+                },
             }"
         />
+
         <Message
             severity="secondary"
             class="mt-1 mx-1"
@@ -46,13 +48,9 @@ defineProps({
         type: String,
         default: null,
     },
-    disabled: {
-        type: Boolean,
-        default: false,
-    },
 });
 const modelValue = defineModel({
-    type: [String, Date, Object, null, Number],
+    type: [Date, null],
     required: true,
 });
 </script>

@@ -19,6 +19,8 @@
         </div>
 
         <div class="flex items-center gap-2">
+            <slot name="add2"></slot>
+            <slot name="add1"></slot>
             <DefaultButton
                 :icon="IconCirclePlusFilled"
                 :label="buttonLabel"
@@ -32,7 +34,7 @@
     <DefaultDialog
         v-model:visible="modal"
         :icon="dialogIcon"
-        width-set="lg:!w-[40%]"
+        width-set="lg:!w-[40%] "
         :title="dialogTitle"
         :description="dialogDescription"
         :button-label="dialogButtonLabel"

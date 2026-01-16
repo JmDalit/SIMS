@@ -28,7 +28,9 @@
                 </span>
             </div>
             <form @submit.prevent="submit">
-                <slot name="forms" />
+                <div :class="absoluteDiv ? 'overflow-y-auto lg:max-h-170' : ''">
+                    <slot name="forms" />
+                </div>
 
                 <div
                     class="flex justify-between items-center w-full gap-5 mt-7"
@@ -100,6 +102,10 @@ defineProps({
         default: false,
     },
     widthSet: String,
+    absoluteDiv: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const visible = defineModel("visible");

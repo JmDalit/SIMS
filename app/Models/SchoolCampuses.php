@@ -9,6 +9,9 @@ class SchoolCampuses extends Model
     protected $fillable = [
         'school_id',
         'term_id',
+        'name',
+        'start_date',
+        'end_date',
         'grading_id',
         'agency_id',
         'is_main',
@@ -56,6 +59,15 @@ class SchoolCampuses extends Model
         return $this->belongsTo(ListAgencies::class, 'agency_id', 'id');
     }
 
+    public function info()
+    {
+        return $this->hasOne(SchoolCampusInfo::class, 'campus_id', 'id');
+    }
+
+    public function semesters()
+    {
+        return $this->hasMany(SchoolCampusSemesters::class, 'campus_id', 'id');
+    }
 
 
     public function getFullnameCampusAttribute()

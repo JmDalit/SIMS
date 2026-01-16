@@ -4,8 +4,8 @@
             <div class="flex items-center gap-2">
                 <div class="">
                     <Avatar
-                        v-if="details.school.photo == null"
-                        :label="details.school.name.charAt(0).toUpperCase()"
+                        v-if="value.school.photo == null"
+                        :label="value.school.name.charAt(0).toUpperCase()"
                         style="background-color: #dee9fc; color: #1a2551"
                         shape="circle"
                         class="!w-[50px] !h-[50px] font-extrabold !text-2xl"
@@ -15,34 +15,70 @@
                         v-else
                         style="background-color: #dee9fc; color: #1a2551"
                         shape="circle"
-                        :image="details.school.photo"
+                        :image="value.school.photo"
                         class="!w-[50px] !h-[50px]"
                     />
                 </div>
 
                 <div class="flex flex-col">
-                    <div class="font-bold">
-                        {{ details.fullname_campus }}
+                    <div class="font-bold capitalize">
+                        {{ value.fullname_campus }}
                     </div>
                     <div class="text-xs flex items-center gap-1 text-gray-500">
                         <IconMapPin size="18" />
                         <div>
-                            {{ details.address.full_address.name }}
+                            {{ value.address.full_address.name }}
                         </div>
                     </div>
                 </div>
             </div>
         </template>
         <template #body>
-            <div class="flex items-center justify-end px-5">
-                <DefaultButton
-                    size="small"
-                    label="Update"
-                    :icon="IconPencil"
-                    :icon-size="18"
-                    raised
-                    class-name="!rounded-xl w-30 !text-xs"
-                />
+            <div class="flex items-center justify-between px-5 py-1">
+                <div>
+                    <DefaultMessages
+                        v-show="detailsForm.hasErrors"
+                        :message="detailsForm.errors"
+                        message-type="error"
+                    ></DefaultMessages>
+                </div>
+
+                <div class="flex items-center">
+                    <DefaultButton
+                        size="small"
+                        label="Update"
+                        :icon="IconSettingsFilled"
+                        :icon-size="18"
+                        raised
+                        v-if="!updateSchool"
+                        @click="openUpdateSchool()"
+                        class-name="w-30  !rounded-xl"
+                    />
+                    <div class="flex items-center gap-2" v-else>
+                        <DefaultButton
+                            size="small"
+                            :icon="IconX"
+                            :icon-size="18"
+                            raised
+                            @click="
+                                (updateSchool = false),
+                                    detailsForm.clearErrors()
+                            "
+                            severity="danger"
+                            class-name="w-30 !rounded-xl"
+                        />
+                        <DefaultButton
+                            size="small"
+                            :icon="IconCheck"
+                            :loading="detailsForm.processing"
+                            label="Update"
+                            @click="UpdateDetailsForm"
+                            :icon-size="18"
+                            raised
+                            class-name="w-30  !rounded-xl"
+                        />
+                    </div>
+                </div>
             </div>
             <div class="flex flex-col gap-5 px-5 py-2">
                 <div class="flex justify-between gap-2">
@@ -50,31 +86,53 @@
                         <div class="bg-slate-200 p-2 shadow rounded-xl">
                             <IconUserStar size="20" />
                         </div>
-                        <div class="flex flex-col flex-1">
+                        <div class="flex flex-col flex-1" v-if="!updateSchool">
                             <div
                                 class="text-xs font-semibold flex items-center"
                             >
                                 <div>DEAN:</div>
                             </div>
-                            <div class="text-sm font-light">
-                                John Doe Reverse
+                            <div
+                                class="text-sm font-light capitalize"
+                                v-if="value.info?.dean"
+                            >
+                                {{ value.info?.dean }}
+                            </div>
+                            <div v-else class="text-sm font-light">
+                                Not yet provided
                             </div>
                         </div>
+                        <TextInput
+                            v-else
+                            v-model="detailsForm.dean"
+                            placeholder="Dean's name"
+                        ></TextInput>
                     </div>
                     <div class="w-[50%] flex items-center gap-2">
                         <div class="bg-slate-200 p-2 shadow rounded-xl">
                             <IconUserQuestion size="20" />
                         </div>
-                        <div class="flex flex-col flex-1">
+                        <div class="flex flex-col flex-1" v-if="!updateSchool">
                             <div
                                 class="text-xs font-semibold flex items-center"
                             >
                                 <div>REGISTRAR:</div>
                             </div>
-                            <div class="text-sm font-light">
-                                John Doe Reverse
+                            <div
+                                class="text-sm font-light capitalize"
+                                v-if="value.info?.registrar"
+                            >
+                                {{ value.info?.registrar }}
+                            </div>
+                            <div v-else class="text-sm font-light">
+                                Not yet provided
                             </div>
                         </div>
+                        <TextInput
+                            v-else
+                            v-model="detailsForm.registrar"
+                            placeholder="Registrar's name"
+                        ></TextInput>
                     </div>
                 </div>
                 <div class="flex justify-between gap-2">
@@ -82,49 +140,46 @@
                         <div class="bg-slate-200 p-2 shadow rounded-xl">
                             <IconPhone size="20" />
                         </div>
-                        <div class="flex flex-col flex-1">
+                        <div class="flex flex-col flex-1" v-if="!updateSchool">
                             <div
                                 class="text-xs font-semibold flex items-center"
                             >
                                 <div>CONTACT NO:</div>
                             </div>
-                            <div class="text-sm font-light">973123613236</div>
+                            <div class="text-sm font-light">
+                                {{ value.info?.contact ?? "Not yet provided" }}
+                            </div>
                         </div>
+                        <TextInput
+                            v-else
+                            v-model="detailsForm.contact"
+                            placeholder="School Contact No."
+                        ></TextInput>
                     </div>
                     <div class="w-[50%] flex items-center gap-2">
                         <div class="bg-slate-200 p-2 shadow rounded-xl">
                             <IconAt size="20" />
                         </div>
-                        <div class="flex flex-col flex-1">
+                        <div class="flex flex-col flex-1" v-if="!updateSchool">
                             <div
                                 class="text-xs font-semibold flex items-center"
                             >
                                 <div>EMAIL:</div>
                             </div>
                             <div class="text-sm font-light">
-                                JohnDoe@gmail.com
+                                {{ value.info?.email ?? "Not yet provided" }}
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="flex justify-between gap-2">
-                    <div class="w-[50%] flex items-center gap-2">
-                        <div class="bg-slate-200 p-2 shadow rounded-xl">
-                            <IconWorldWww size="20" />
-                        </div>
-                        <div class="flex flex-col flex-1">
-                            <div
-                                class="text-xs font-semibold flex items-center"
-                            >
-                                <div>VISIT PAGE:</div>
-                            </div>
-                            <div class="text-sm font-light">dost.gov.ph</div>
-                        </div>
+                        <TextInput
+                            v-else
+                            v-model="detailsForm.email"
+                            placeholder="School Email"
+                        ></TextInput>
                     </div>
                 </div>
             </div>
             <Divider align="left" type="dashed" class="!m-0">
-                <span class="text-xs font-semibold">Courses</span>
+                <span class="text-xs font-semibold">Curriculum Management</span>
             </Divider>
             <div class="px-5 py-2 gap-5 flex flex-col">
                 <ToolbarModule
@@ -151,6 +206,28 @@
                     message-type="error"
                     ref="toolbarCourseRef"
                 >
+                    <template #add1>
+                        <DefaultButton
+                            :icon="IconReport"
+                            outlined
+                            @click="gradeSystemDialog = true"
+                            tooltip="Grade System"
+                            size="small"
+                            severity="secondary"
+                            class-name="!w-10 !rounded-xl"
+                        />
+                    </template>
+                    <template #add2>
+                        <DefaultButton
+                            :icon="IconCalendarWeek"
+                            outlined
+                            @click="semesterDialog = true"
+                            size="small"
+                            severity="secondary"
+                            tooltip="Semester"
+                            class-name="!w-10 !rounded-xl"
+                        />
+                    </template>
                     <template #form>
                         <div class="flex flex-col gap-3 mt-5 mb-2">
                             <SelectInput
@@ -166,98 +243,9 @@
                                 label="Years"
                             ></TextInput>
                         </div>
-                        <Divider type="dashed" />
-                        <div class="overflow-y-auto max-h-120 px-2">
-                            <div class="flex items-center justify-between">
-                                <div class="font-semibold">Subjects</div>
-                            </div>
-                            <div
-                                class="flex flex-col gap-2 mt-4"
-                                v-for="(item, index) in courseForm.subjects"
-                                :key="index"
-                            >
-                                <div class="flex justify-between items-center">
-                                    <div
-                                        class="text-xs bg-blue-100 dark:text-gray-700 w-fit font-semibold px-2 py-1 rounded-lg"
-                                    >
-                                        <span> {{ index + 1 }}# Subject</span>
-                                    </div>
-
-                                    <Button
-                                        v-show="
-                                            index != 0 &&
-                                            (hideRemoveButton == 'create' ||
-                                                courseForm.subjects[index].id ==
-                                                    null)
-                                        "
-                                        size="small"
-                                        class="!text-xs"
-                                        rounded
-                                        severity="danger"
-                                        outlined
-                                        @click="removeSubject(index)"
-                                    >
-                                        <div class="flex items-center gap-2">
-                                            <IconCircleXFilled
-                                                size="20"
-                                            ></IconCircleXFilled>
-                                            <div>Remove</div>
-                                        </div>
-                                    </Button>
-                                </div>
-                                <div class="flex gap-3">
-                                    <SelectInput
-                                        class="!w-[25rem]"
-                                        v-model="
-                                            courseForm.subjects[index].class
-                                        "
-                                        label="Class"
-                                        :options="subClassOption"
-                                        clearable
-                                    >
-                                    </SelectInput>
-                                    <TextInput
-                                        v-model="
-                                            courseForm.subjects[index].name
-                                        "
-                                        label="Description"
-                                        capitalize
-                                    ></TextInput>
-                                    <TextInput
-                                        v-model="
-                                            courseForm.subjects[index].code
-                                        "
-                                        class="!w-[25rem]"
-                                        label="Code"
-                                    ></TextInput>
-
-                                    <TextInput
-                                        v-model="
-                                            courseForm.subjects[index].unit
-                                        "
-                                        class="!w-[20rem]"
-                                        label="Unit"
-                                    ></TextInput>
-                                </div>
-                                <Divider type="dashed" />
-                            </div>
-                            <Button
-                                size="small"
-                                class="!text-xs !rounded-xl"
-                                fluid
-                                @click="addSubject"
-                            >
-                                <div class="flex items-center gap-2">
-                                    <IconCirclePlusFilled
-                                        size="18"
-                                    ></IconCirclePlusFilled>
-                                    <div>Add Subject</div>
-                                </div>
-                            </Button>
-                        </div>
                     </template>
                 </ToolbarModule>
-                <DefaultScrollTable :items="details.courses">
+                <DefaultScrollTable :items="value.courses">
                     <Column header="Name" field="course.name">
                         <template #body="props">
                             {{ props.data.course.name }}
@@ -322,7 +310,6 @@
                                             v-ripple
                                             class="flex items-center"
                                             v-bind="props.action"
-                                            @click="item.command"
                                         >
                                             <div>
                                                 <component
@@ -343,10 +330,19 @@
                     </Column>
                 </DefaultScrollTable>
             </div>
-            <Divider align="left" type="dashed" class="!m-0">
-                <span class="text-xs font-semibold">Gradings</span>
-            </Divider>
-            <div class="px-5 py-2 gap-5 flex flex-col">
+        </template>
+    </DefaultDrawer>
+
+    <DefaultDialog
+        v-model:visible="gradeSystemDialog"
+        hide-footer
+        :icon="IconBook2"
+        width-set="lg:!w-[35%]"
+        title="Grading System"
+        description="Shows how grades are computed, including score ranges, equivalents, and passing requirements."
+    >
+        <template #forms>
+            <div class="pt-5 gap-5 flex flex-col">
                 <ToolbarModule
                     v-model="searchInput"
                     @deleteSearch="clearSearch"
@@ -426,7 +422,7 @@
                         </div>
                     </template>
                 </ToolbarModule>
-                <DefaultScrollTable :items="details.grades">
+                <DefaultScrollTable :items="value?.grades">
                     <Column header="Description">
                         <template #body="props">
                             <div class="flex items-center">
@@ -564,94 +560,395 @@
                 </DefaultScrollTable>
             </div>
         </template>
-    </DefaultDrawer>
+    </DefaultDialog>
 
     <DefaultDialog
-        v-model:visible="subjectDialog"
-        hide-footer
+        v-model:visible="semesterDialog"
         :icon="IconBook2"
-        width-set="lg:!w-[80%]"
-        :title="selectedRow?.course?.name"
-        description="View all subjects offered under this course, including their codes, units, and classifications."
+        width-set="lg:!w-[35%]"
+        :loading="semesterForm.processing"
+        @submit-form="submitForm('semesters')"
+        message-type="error"
+        title="Semester Management"
+        description="Manage the academic semesters offered by the institution, including start and end dates."
     >
         <template #forms>
-            <div class="my-5">
-                <DefaultScrollTable :items="selectedRow?.subjects">
-                    <Column header="Class" field="subject_class.name"> </Column>
-                    <Column
-                        header="Description"
-                        class="capitalize"
-                        field="name"
-                        style="width: 30%"
-                    >
-                    </Column>
-                    <Column
-                        header="Code"
-                        class="uppercase"
-                        field="subject_code"
-                    >
-                    </Column>
-                    <Column header="Unit" field="unit"> </Column>
-                    <Column
-                        header="Created By"
-                        class="text-xs"
-                        field="created_by"
-                    >
-                    </Column>
-                    <Column
-                        header="Created At"
-                        class="text-xs"
-                        field="formatted_date"
-                    >
-                    </Column>
-
-                    <Column
-                        header="Verified By"
-                        class="text-xs"
-                        field="verified_by"
-                    >
-                    </Column>
-                    <Column
-                        header="Verified At"
-                        class="text-xs"
-                        field="verified_at"
-                    >
-                    </Column>
-                    <Column>
-                        <template #header>
-                            <div class="w-full flex justify-end mr-1.5">
-                                <IconSettings size="20" />
-                            </div>
-                        </template>
-                        <template #body="props">
-                            <div class="flex w-full justify-end gap-2">
-                                <DefaultButton
-                                    severity="danger"
-                                    size="small"
-                                    rounded
-                                    text
-                                    :icon="IconTrashX"
-                                    @click="
-                                        deleteRow({
-                                            id: props.data.id,
-                                            type: 'subject',
-                                        })
-                                    "
-                                >
-                                </DefaultButton>
-                            </div>
-                        </template>
-                    </Column>
-                </DefaultScrollTable>
-
+            <div class="pt-5 px-3 gap-5 flex flex-col">
                 <div
-                    class="flex items-center font-light text-sm gap-1 text-gray-400 px-3 pt-3"
+                    v-for="(semester, index) in page.props?.semesterOption"
+                    :key="index"
                 >
-                    <span class="font-semibold">
-                        {{ selectedRow?.subjects?.length ?? 0 }}
-                    </span>
-                    Registered Subjects
+                    <div
+                        :class="[
+                            'text-xs flex items-center rounded-2xl font-semibold px-2 gap-1 py-1 ',
+                            randomColor(index),
+                        ]"
+                    >
+                        <IconGridDots size="15" />
+                        <div>
+                            {{ semesterForm.semester[index]?.name }}
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 my-3">
+                        <DatePickerInput
+                            label="Start Date"
+                            v-model="semesterForm.semester[index].startDate"
+                        ></DatePickerInput>
+
+                        <DatePickerInput
+                            label="End Date"
+                            v-model="semesterForm.semester[index].endDate"
+                        ></DatePickerInput>
+                    </div>
                 </div>
+            </div>
+        </template>
+        <template #message>
+            <DefaultMessages
+                v-if="semesterForm.hasErrors"
+                message-type="error"
+                :message="semesterForm.errors"
+            />
+        </template>
+    </DefaultDialog>
+    <DefaultDialog
+        v-model:visible="subjectDialog"
+        :icon="IconBook2"
+        :loading="CurriculumForm.processing"
+        width-set="lg:!w-[70%]"
+        :submit-form="submitCurriculum"
+        :title="selectedRow?.course?.name"
+        @submit-form="submitCurriculum"
+        absolute-div
+        description="View all subjects offered under this course, including their codes, units, and classifications."
+    >
+        <template #message>
+            <DefaultMessages
+                v-if="CurriculumForm.hasErrors"
+                message-type="error"
+                :message="CurriculumForm.errors"
+            />
+        </template>
+        <template #forms>
+            <div class="mt-5">
+                <Tabs :value="0">
+                    <TabList>
+                        <Tab
+                            v-for="(curItem, curKey) in CurriculumForm.multi"
+                            :key="curKey"
+                            class="text-sm !font-bold !p-1 !text-center"
+                            :value="curKey"
+                        >
+                            <span>
+                                <div
+                                    class="flex items-end"
+                                    v-if="!curItem.edit"
+                                >
+                                    <div>
+                                        Curriculum {{ curItem.yearLevel }}
+                                    </div>
+
+                                    <div class="flex items-start">
+                                        <Button
+                                            severity="secondary"
+                                            variant="link"
+                                            size="small"
+                                            @click="curItem.edit = true"
+                                            class="!p-0"
+                                        >
+                                            <template #icon>
+                                                <IconPencil
+                                                    size="15"
+                                                ></IconPencil>
+                                            </template>
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div
+                                    v-else
+                                    class="inline-flex items-center gap-2 font-normal"
+                                >
+                                    <TextInput
+                                        placeholder="Select year"
+                                        v-model="curItem.yearLevel"
+                                    ></TextInput>
+
+                                    <DefaultButton
+                                        size="small"
+                                        :icon-size="20"
+                                        rounded
+                                        :icon="IconX"
+                                        @click="curItem.edit = false"
+                                        severity="danger"
+                                        text
+                                    ></DefaultButton>
+                                </div>
+                            </span>
+                        </Tab>
+                        <div class="flex items-end">
+                            <DefaultButton
+                                size="small"
+                                rounded
+                                class-name=" !rounded-xl "
+                                :icon-size="20"
+                                :icon="IconCirclePlusFilled"
+                                @click="addCurriculum"
+                                text
+                            ></DefaultButton>
+                        </div>
+                    </TabList>
+                    <TabPanels class="!p-0 !pt-10">
+                        <TabPanel
+                            v-for="(curItem, curKey) in CurriculumForm.multi"
+                            :key="curKey"
+                            :value="curKey"
+                            class="flex flex-col w-full gap-4"
+                        >
+                            <div
+                                v-for="year in parseInt(selectedRow.years)"
+                                :key="year"
+                            >
+                                <Panel
+                                    toggleable
+                                    :collapsed="year != 1 ? true : false"
+                                >
+                                    <template #header>
+                                        <div class="font-semibold text-sm">
+                                            {{ convertNumberToWord(year) }}
+                                            Year
+                                        </div>
+                                    </template>
+                                    <template #default>
+                                        <div
+                                            v-for="(sem, semKey) in page.props
+                                                ?.semesterOption"
+                                            :key="sem.id"
+                                            :value="semKey"
+                                            class="py-2"
+                                        >
+                                            <Panel
+                                                toggleable
+                                                :collapsed="
+                                                    semKey != 0 ? true : false
+                                                "
+                                                :pt="{
+                                                    root: ['!border-0 '],
+                                                    header: [
+                                                        randomColor(semKey),
+                                                        '!rounded-t-lg',
+                                                    ],
+                                                    content: [
+                                                        '!border-x-1 !rounded-bl-lg !rounded-br-lg !border-b-1  !border-gray-200',
+                                                    ],
+                                                }"
+                                            >
+                                                <template #header>
+                                                    <div
+                                                        :class="[
+                                                            'font-semibold text-sm',
+                                                        ]"
+                                                    >
+                                                        {{ sem.name }}
+                                                    </div>
+                                                </template>
+                                                <template #default>
+                                                    <div
+                                                        class="w-full h-fit pt-5"
+                                                    >
+                                                        <div
+                                                            class="flex items-center gap-2 pb-5"
+                                                        >
+                                                            <div
+                                                                class="bg-slate-100 text-slate-500 p-1 rounded-lg border-1 border-slate-500 shadow-slate-500"
+                                                            >
+                                                                <IconBooks
+                                                                    stroke-width="2"
+                                                                ></IconBooks>
+                                                            </div>
+                                                            <div
+                                                                class="flex-1 flex flex-col"
+                                                            >
+                                                                <div
+                                                                    class="font-bold text-sm"
+                                                                >
+                                                                    Subjects for
+                                                                    this
+                                                                    semester
+                                                                </div>
+                                                                <div
+                                                                    class="text-xs text-gray-400 font-light"
+                                                                >
+                                                                    This section
+                                                                    displays all
+                                                                    subjects
+                                                                    assigned for
+                                                                    the selected
+                                                                    year and
+                                                                    semester.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div
+                                                            class="w-full"
+                                                            v-for="(
+                                                                item, index
+                                                            ) in CurriculumForm
+                                                                .multi[curKey]
+                                                                .subjects"
+                                                            :key="index"
+                                                        >
+                                                            <div
+                                                                class="flex gap-2 items-center py-2"
+                                                                v-if="
+                                                                    item
+                                                                        .semester_array
+                                                                        .name ==
+                                                                        sem.name &&
+                                                                    parseInt(
+                                                                        item.year
+                                                                    ) == year
+                                                                "
+                                                            >
+                                                                <div
+                                                                    class="w-[20%]"
+                                                                >
+                                                                    <SelectInput
+                                                                        v-model="
+                                                                            item.class_array
+                                                                        "
+                                                                        :disable="
+                                                                            item.is_lock
+                                                                        "
+                                                                        label="Subject Class"
+                                                                        :options="
+                                                                            page
+                                                                                .props
+                                                                                ?.subClassOption
+                                                                        "
+                                                                    ></SelectInput>
+                                                                </div>
+                                                                <div
+                                                                    class="w-[40%]"
+                                                                >
+                                                                    <TextInput
+                                                                        v-model="
+                                                                            item.name
+                                                                        "
+                                                                        :disabled="
+                                                                            item.is_lock
+                                                                        "
+                                                                        capitalize
+                                                                        label="Description"
+                                                                    ></TextInput>
+                                                                </div>
+                                                                <div
+                                                                    class="w-[20%]"
+                                                                >
+                                                                    <TextInput
+                                                                        v-model="
+                                                                            item.subjectCode
+                                                                        "
+                                                                        :disabled="
+                                                                            item.is_lock
+                                                                        "
+                                                                        label="Subject Code"
+                                                                    ></TextInput>
+                                                                </div>
+                                                                <div
+                                                                    class="w-[10%]"
+                                                                >
+                                                                    <TextInput
+                                                                        v-model="
+                                                                            item.unit
+                                                                        "
+                                                                        :disabled="
+                                                                            item.is_lock
+                                                                        "
+                                                                        label="Unit"
+                                                                    ></TextInput>
+                                                                </div>
+                                                                <div
+                                                                    class="w-[10%] pt-5 gap-2 justify-start flex items-end h-full"
+                                                                >
+                                                                    <DefaultButton
+                                                                        size="small"
+                                                                        rounded
+                                                                        text
+                                                                        v-show="
+                                                                            item.is_lock !=
+                                                                            null
+                                                                        "
+                                                                        severity="secondary"
+                                                                        @click="
+                                                                            CurriculumForm.multi[
+                                                                                curKey
+                                                                            ].subjects[
+                                                                                index
+                                                                            ].is_lock =
+                                                                                !item.is_lock
+                                                                        "
+                                                                        :icon="
+                                                                            CurriculumForm
+                                                                                .multi[
+                                                                                curKey
+                                                                            ]
+                                                                                .subjects[
+                                                                                index
+                                                                            ]
+                                                                                .is_lock
+                                                                                ? IconLock
+                                                                                : IconLockOpen
+                                                                        "
+                                                                        tooltip="Unlock to edit"
+                                                                    />
+
+                                                                    <DefaultButton
+                                                                        size="small"
+                                                                        rounded
+                                                                        text
+                                                                        :tooltip="
+                                                                            !item.id
+                                                                                ? 'Remove'
+                                                                                : 'Delete'
+                                                                        "
+                                                                        severity="danger"
+                                                                        :icon="
+                                                                            !item.id
+                                                                                ? IconCircleMinus
+                                                                                : IconTrash
+                                                                        "
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <Divider
+                                                            type="dashed"
+                                                        ></Divider>
+                                                        <DefaultButton
+                                                            size="small"
+                                                            :icon="IconPlus"
+                                                            @click="
+                                                                addSubject(
+                                                                    curKey,
+                                                                    year,
+                                                                    sem
+                                                                )
+                                                            "
+                                                            class-name="w-full !rounded-xl"
+                                                            label="Add Subjects"
+                                                        ></DefaultButton>
+                                                    </div>
+                                                </template>
+                                            </Panel>
+                                        </div>
+                                    </template>
+                                </Panel>
+                            </div>
+                        </TabPanel>
+                    </TabPanels>
+                </Tabs>
             </div>
         </template>
     </DefaultDialog>
@@ -660,7 +957,7 @@
 <script setup>
 import {
     IconCirclePlusFilled,
-    IconPencil,
+    IconSettingsFilled,
     IconTrashX,
     IconUserCog,
     IconMapPin,
@@ -668,7 +965,6 @@ import {
     IconUserQuestion,
     IconPhone,
     IconAt,
-    IconWorldWww,
     IconBook2,
     IconCircleXFilled,
     IconCheck,
@@ -680,19 +976,34 @@ import {
     IconCircleX,
     IconDotsCircleHorizontal,
     IconCircleCheck,
+    IconTablePlus,
+    IconClipboardList,
+    IconReport,
+    IconArrowDownSquare,
+    IconCalendarWeek,
+    IconGridDots,
+    IconPlus,
+    IconEdit,
+    IconPencil,
+    IconZoomQuestion,
+    IconLock,
+    IconLockOpen,
+    IconCircleMinus,
 } from "@tabler/icons-vue";
 
 import DefaultScrollTable from "../../Components/tables/DefaultScrollTable.vue";
 import DefaultDrawer from "../../Components/dialogs/DefaultDrawer.vue";
 import DefaultDialog from "../../Components/dialogs/DefaultDialog.vue";
 import TextInput from "../../Components/inputs/TextInput.vue";
+import DatePickerInput from "../../Components/inputs/DatePickerInput.vue";
 import SelectInput from "../../Components/inputs/SelectInput.vue";
 import DefaultToast from "../../Components/messages/DefaultToast.vue";
 import DefaultButton from "../../Components/buttons/DefaultButton.vue";
+import DefaultToggle from "../../Components/toggleswitches/DefaultToggle.vue";
+import DefaultMessages from "../../Components/messages/DefaultMessages.vue";
 import ToolbarModule from "./ToolbarModule.vue";
 import { router, useForm, usePage } from "@inertiajs/vue3";
 import { computed, ref, watch } from "vue";
-import DefaultToggle from "../../Components/toggleswitches/DefaultToggle.vue";
 
 const props = defineProps({
     id: [Number, String],
@@ -702,38 +1013,94 @@ const props = defineProps({
     confirmRef: Object,
 });
 
+const convertNumberToWord = (number) => {
+    const words = [
+        "First",
+        "Second",
+        "Third",
+        "Fourth",
+        "Fifth",
+        "Sixth",
+        "Seventh",
+        "Eighth",
+        "Ninth",
+        "Tenth",
+    ];
+    return words[number - 1] || number;
+};
+
+const randomColor = (index) => {
+    const colors = [
+        "!text-sky-600 !bg-sky-50",
+        "!text-indigo-600 !bg-indigo-50",
+        "!text-rose-600 !bg-rose-50",
+        "!text-yellow-600 !bg-yellow-50",
+        "!text-purple-600 !bg-purple-50",
+        "!text-pink-600 !bg-pink-50",
+        "!text-indigo-600 !bg-indigo-50",
+        "!text-teal-600 !bg-teal-50",
+    ];
+    return colors[index % colors.length];
+};
+
 const page = usePage();
-const details = computed(
-    () =>
-        page.props.universities?.data?.find(
-            (u) => Number(u.id) === Number(props.id)
-        ) ?? props.value
-);
+
 const drawer = ref(false);
 const subjectDialog = ref(false);
+const updateSchool = ref(false);
 const typeDialog = ref(null);
+const semesterDialog = ref(false);
 const searchInput = ref(null);
 const toastRef = ref(null);
+const gradeSystemDialog = ref(false);
 const toolbarCourseRef = ref(null);
 const toolbarGradeRef = ref(null);
 const selectedRow = ref(null);
 const menu = ref(null);
 const menuGrade = ref(null);
 const hideRemoveButton = ref("create");
+
+const semesterForm = useForm({
+    type: "create",
+    campusId: null,
+    semester: [],
+});
+
+const CurriculumForm = useForm({
+    multi: [
+        // {
+        //     id: null,
+        //     edit: false,
+        //     yearNumber: null,
+        //     yearLevel: new Date().getFullYear(),
+        //     subjects: [],
+        // },
+    ],
+});
+
 const courseForm = useForm({
     id: null,
     campusId: null,
     course: null,
     years: null,
-    subjects: [
-        {
-            id: null,
-            name: null,
-            code: null,
-            class: null,
-            unit: null,
-        },
-    ],
+    // subjects: [
+    //     {
+    //         id: null,
+    //         name: null,
+    //         code: null,
+    //         class: null,
+    //         unit: null,
+    //     },
+    // ],
+});
+
+const detailsForm = useForm({
+    id: null,
+    campusId: null,
+    dean: null,
+    registrar: null,
+    contact: null,
+    email: null,
 });
 
 const gradeForm = useForm({
@@ -757,22 +1124,12 @@ const toggleGradeOption = (event, rowData) => {
     menuGrade.value.toggle(event);
 };
 
-const addSubject = () => {
-    courseForm.subjects.push({
-        id: null,
-        name: null,
-        code: null,
-        class: null,
-        unit: null,
-    });
-};
-
-const removeSubject = (index) => {
-    if (index == 0) {
-        return;
-    }
-    courseForm.subjects.splice(index, 1);
-};
+// const removeSubject = (index) => {
+//     if (index == 0) {
+//         return;
+//     }
+//     courseForm.subjects.splice(index, 1);
+// };
 
 const clearSearch = () => {
     searchInput.value = null;
@@ -783,11 +1140,10 @@ const openDrawer = () => {
 };
 
 const toggleModal = (res) => {
-    courseForm.resetAndClearErrors();
     typeDialog.value = res.class;
     hideRemoveButton.value = res.type;
-    courseForm.campusId = props.value.id;
-    gradeForm.campusId = props.value.id;
+    courseForm.resetAndClearErrors();
+    gradeForm.resetAndClearErrors();
     if (res.type === "edit" && res.class == "course") {
         courseForm.subjects = [];
         courseForm.id = selectedRow.value.id;
@@ -825,11 +1181,40 @@ const menuItems = computed(() => {
 
     return [
         {
-            label: "View Subjects",
+            label: "Subjects",
             icon: IconBooks,
             class: "text-gray-600",
             command: () => {
-                subjectDialog.value = true;
+                CurriculumForm.multi = [];
+                console.log();
+                router.reload({
+                    data: { campusCourseId: selectedRow.value.id },
+                    only: ["subjectDetail"],
+                    preserveState: true,
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        if (page.props?.subjectDetail.length != 0) {
+                            for (
+                                let index = 0;
+                                index < page.props?.subjectDetail.length;
+                                index++
+                            ) {
+                                CurriculumForm.multi.unshift(
+                                    page.props?.subjectDetail[index]
+                                );
+                            }
+                        } else {
+                            CurriculumForm.multi.forEach((cur, curkey) => {
+                                cur.yearNumber = parseInt(
+                                    selectedRow.value.years
+                                );
+                                cur.campus_course_id = selectedRow.value.id;
+                            });
+                        }
+
+                        subjectDialog.value = true;
+                    },
+                });
             },
         },
         {
@@ -854,6 +1239,67 @@ const menuItems = computed(() => {
         },
     ];
 });
+
+const addCurriculum = () => {
+    if (!selectedRow.value) return [];
+    CurriculumForm.multi.push({
+        yearNumber: parseInt(selectedRow.value.years),
+        campus_course_id: selectedRow.value.id,
+        edit: false,
+        yearLevel: null,
+        subjects: [],
+        id: null,
+    });
+
+    CurriculumForm.multi[CurriculumForm.multi.length - 1].subjects.forEach(
+        (cur, tests) => {
+            for (
+                let indexYear = 0;
+                indexYear < parseInt(selectedRow.value.years);
+                indexYear++
+            ) {
+                // CurriculumForm.multi[curkey].year.push({
+                //     id: null,
+                //     curriculumId: null,
+                //     year: indexYear,
+                //     semester: null,
+                //     name: null,
+                //     subjectCode: null,
+                //     subjectClass: null,
+                //     unit: null,
+                // });
+
+                page.props?.semesterOption.forEach((sem, semKey) => {
+                    CurriculumForm.multi[tests].subjects.push({
+                        id: null,
+                        curriculumId: null,
+                        year: indexYear + 1,
+                        semester: sem.name,
+                        semester_array: sem,
+                        name: null,
+                        class_array: null,
+                        subjectClass: null,
+                        unit: null,
+                    });
+                });
+            }
+        }
+    );
+};
+
+const addSubject = (curriculumKey, year, semester) => {
+    CurriculumForm.multi[curriculumKey].subjects.push({
+        id: null,
+        name: null,
+        semester: semester.name,
+        semester_array: semester,
+        class_array: null,
+        subjectClass: null,
+        subjectCode: null,
+        unit: null,
+        year: year,
+    });
+};
 
 const gradeMenuItems = computed(() => {
     if (!selectedRow.value) return [];
@@ -882,8 +1328,56 @@ const gradeMenuItems = computed(() => {
     ];
 });
 
+const openUpdateSchool = () => {
+    updateSchool.value = true;
+    detailsForm.campusId = props.id;
+    if (props.value.info) {
+        detailsForm.id = props.value.info.id;
+        detailsForm.dean = props.value.info.dean;
+        detailsForm.registrar = props.value.info.registrar;
+        detailsForm.contact = props.value.info.contact;
+        detailsForm.email = props.value.info.email;
+    }
+};
+
+const UpdateDetailsForm = () => {
+    if (!detailsForm.id) {
+        detailsForm.post(route("campus.info.store"), {
+            onSuccess: () => {
+                toastRef.value.show(page.props.flash);
+                detailsForm.clearErrors();
+                updateSchool.value = false;
+            },
+        });
+    } else {
+        detailsForm.put(
+            route("campus.info.update", {
+                id: detailsForm.id,
+                type: "form",
+            }),
+            {
+                onSuccess: () => {
+                    detailsForm.clearErrors();
+                    updateSchool.value = false;
+                    toastRef.value.show(page.props.flash);
+                },
+            }
+        );
+    }
+};
+
+const submitCurriculum = () => {
+    CurriculumForm.post(route("campus.curriculum.store"), {
+        onSuccess: () => {
+            courseForm.resetAndClearErrors();
+            toastRef.value.show(page.props.flash);
+        },
+    });
+};
+
 const submitForm = (res) => {
     if (res == "courses") {
+        courseForm.campusId = props.id;
         if (!courseForm.id) {
             courseForm.post(route("academic.universities.course.store"), {
                 onSuccess: () => {
@@ -899,14 +1393,69 @@ const submitForm = (res) => {
                 }),
                 {
                     onSuccess: () => {
-                        toolbarCourseRef.value.closeModal();
                         courseForm.resetAndClearErrors();
                         toastRef.value.show(page.props.flash);
                     },
                 }
             );
         }
+    } else if (res == "semesters") {
+        semesterForm.campusId = props.id;
+
+        if (semesterForm.type == "edit") {
+            semesterForm.semester.forEach((element) => {
+                if (element.startDate) {
+                    const d = new Date(element.startDate);
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, "0"); // +1 because JS months start at 0
+                    element.startDateFormatted = `${year}-${month}-01`;
+                }
+
+                if (element.endDate) {
+                    const d2 = new Date(element.endDate);
+                    const year2 = d2.getFullYear();
+                    const month2 = String(d2.getMonth() + 1).padStart(2, "0");
+                    element.endDateFormatted = `${year2}-${month2}-01`;
+                }
+            });
+            semesterForm.put(
+                route("campus.semester.update", {
+                    id: props.id,
+                    type: "form",
+                }),
+                {
+                    onSuccess: () => {
+                        semesterForm.clearErrors();
+                        toastRef.value.show(page.props.flash);
+                    },
+                }
+            );
+        } else {
+            semesterForm.semester.forEach((element) => {
+                if (element.startDate) {
+                    const d = new Date(element.startDate);
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, "0"); // +1 because JS months start at 0
+                    element.startDateFormatted = `${year}-${month}-01`;
+                }
+
+                if (element.endDate) {
+                    const d2 = new Date(element.endDate);
+                    const year2 = d2.getFullYear();
+                    const month2 = String(d2.getMonth() + 1).padStart(2, "0");
+                    element.endDateFormatted = `${year2}-${month2}-01`;
+                }
+            });
+
+            semesterForm.post(route("campus.semester.store"), {
+                onSuccess: () => {
+                    semesterForm.clearErrors();
+                    toastRef.value.show(page.props.flash);
+                },
+            });
+        }
     } else {
+        gradeForm.campusId = props.id;
         if (!gradeForm.id) {
             gradeForm.post(route("academic.universities.grade.store"), {
                 onSuccess: () => {
@@ -922,8 +1471,7 @@ const submitForm = (res) => {
                 }),
                 {
                     onSuccess: () => {
-                        toolbarCourseRef.value.closeModal();
-                        gradeForm.resetAndClearErrors();
+                        gradeForm.clearErrors();
                         toastRef.value.show(page.props.flash);
                     },
                 }
@@ -1009,6 +1557,45 @@ watch(
         if (val) {
             gradeForm.drop = false;
             gradeForm.fail = false;
+        }
+    }
+);
+
+watch(
+    () => page.props?.semesterOption,
+    (val) => {
+        semesterForm.semester = [];
+        if (!page.props?.semesterOption) {
+            return;
+        }
+
+        if (page.props?.schoolDetail?.semesters.length > 0) {
+            semesterForm.type = "edit";
+            page.props?.schoolDetail?.semesters.forEach((element) => {
+                semesterForm.semester.push({
+                    id: element.id,
+                    semesterId: element.semester_array.id,
+                    name: element.semester_array.name,
+                    startDate: new Date(element.start_date),
+                    startDateFormatted: new Date(element.start_date),
+                    endDate: new Date(element.end_date),
+                    endDateFormatted: new Date(element.end_date),
+                });
+            });
+            semesterForm.semester.sort((a, b) => a.name.localeCompare(b.name));
+        } else {
+            semesterForm.type = "create";
+            val.forEach((element) => {
+                semesterForm.semester.push({
+                    id: null,
+                    semesterId: element.id,
+                    name: element.name,
+                    startDate: null,
+                    startDateFormatted: null,
+                    endDate: null,
+                    endDateFormatted: null,
+                });
+            });
         }
     }
 );

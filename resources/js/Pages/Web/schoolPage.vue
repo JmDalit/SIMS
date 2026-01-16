@@ -47,7 +47,7 @@
                             </SelectInput>
                         </div>
                         <Divider type="dashed" />
-                        <div class="overflow-y-auto max-h-90 px-2">
+                        <div class="overflow-y-auto max-h-110 px-2">
                             <div class="flex items-center justify-between">
                                 <div class="font-semibold">Campus</div>
                             </div>
@@ -92,6 +92,14 @@
                                     </Button>
                                 </div>
                                 <div class="flex flex-col gap-3">
+                                    <TextInput
+                                        v-model="
+                                            universityForm.campuses[index].name
+                                        "
+                                        label="Name"
+                                        placeholder="(Optional)"
+                                        capitalize
+                                    ></TextInput>
                                     <div class="flex items-center gap-3">
                                         <SelectInput
                                             v-model="
@@ -101,7 +109,7 @@
                                             :options="
                                                 page.props.classificationOption
                                             "
-                                            label="Semester"
+                                            label="Academic Term"
                                             clearable
                                         >
                                         </SelectInput>
@@ -111,11 +119,27 @@
                                                     .grading
                                             "
                                             :options="page.props.gradingOption"
-                                            label="Grading"
+                                            label="Grading System"
                                             clearable
                                         >
                                         </SelectInput>
                                     </div>
+                                    <!-- <div class="flex items-center gap-3">
+                                        <DatePickerInput
+                                            label="Start of Term"
+                                            v-model="
+                                                universityForm.campuses[index]
+                                                    .startDate
+                                            "
+                                        ></DatePickerInput>
+                                        <DatePickerInput
+                                            label="End of Term"
+                                            v-model="
+                                                universityForm.campuses[index]
+                                                    .endDate
+                                            "
+                                        ></DatePickerInput>
+                                    </div> -->
                                     <SelectInput
                                         v-model="
                                             universityForm.campuses[index]
@@ -207,7 +231,7 @@
                                 </div>
 
                                 <div class="flex flex-col">
-                                    <div class="font-bold">
+                                    <div class="font-bold capitalize">
                                         {{ slotProps.data.school.name }}
                                     </div>
                                     <div class="text-xs">
@@ -244,7 +268,6 @@
                                             v-ripple
                                             class="flex items-center"
                                             v-bind="props.action"
-                                            @click="item.command"
                                         >
                                             <div>
                                                 <component
@@ -283,7 +306,10 @@
                                     />
                                 </div>
                                 <div>
-                                    {{ prop.data.address.municipality.name }}
+                                    {{
+                                        prop.data.name ??
+                                        prop.data.address.municipality.name
+                                    }}
                                 </div>
 
                                 <div
@@ -323,7 +349,7 @@
         <DrawerSchoolModule
             ref="drawerRef"
             :id="drawerId"
-            :value="dataDrawer"
+            :value="page.props?.schoolDetail"
             :course-option="page.props.courseOption"
             :sub-class-option="page.props.subClassOption"
             :confirm-ref="confirmRef"
@@ -343,7 +369,8 @@ import AutoCompleteInput from "../../Components/inputs/AutoCompleteInput.vue";
 import DefaultToast from "../../Components/messages/DefaultToast.vue";
 import DefaultConfirmDialog from "../../Components/dialogs/DefaultConfirmDialog.vue";
 import SelectInput from "../../Components/inputs/SelectInput.vue";
-
+import DrawerSchoolModule from "../../Modules/Others/DrawerSchoolModule.vue";
+import DatePickerInput from "../../Components/inputs/DatePickerInput.vue";
 import { computed, ref, watch } from "vue";
 import { Head, router, useForm, usePage } from "@inertiajs/vue3";
 import {
@@ -354,7 +381,6 @@ import {
     IconCircleXFilled,
     IconArrowRight,
 } from "@tabler/icons-vue";
-import DrawerSchoolModule from "../../Modules/Others/DrawerSchoolModule.vue";
 
 const page = usePage();
 const searchInput = ref(null);
@@ -376,7 +402,10 @@ const universityForm = useForm({
     campuses: [
         {
             id: null,
+            name: null,
             semester: null,
+            startDate: null,
+            endDate: null,
             grading: null,
             agency: null,
             street: null,
@@ -390,6 +419,9 @@ const universityForm = useForm({
 const addCampus = () => {
     universityForm.campuses.push({
         main: false,
+        name: null,
+        startDate: null,
+        endDate: null,
         semester: null,
         agency: null,
         grading: null,
@@ -413,7 +445,15 @@ const toggleOption = (event, rowData) => {
 const openDrawer = (res) => {
     dataDrawer.value = res.data;
     drawerId.value = res.data.id;
-    drawerRef.value.openDrawer();
+    router.reload({
+        data: { id: res.data.id, semesterType: res.data.term.name },
+        only: ["schoolDetail", "semesterOption", "subClassOption"],
+        preserveState: true,
+        preserveScroll: true,
+        onSuccess: () => {
+            drawerRef.value.openDrawer();
+        },
+    });
 };
 
 const menuItems = computed(() => {
@@ -447,26 +487,44 @@ const toggleModal = (res) => {
     hideRemoveButton.value = res.type;
 
     if (res.type === "edit") {
-        universityForm.campuses = [];
-        universityForm.id = res.data.school.id;
-        universityForm.name = res.data.school.name;
-        universityForm.abbreviation = res.data.school.shortcut;
+        router.reload({
+            data: { school_id: res.data.school.id },
+            only: ["schoolEdit"],
+            preserveState: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                universityForm.campuses = [];
+                universityForm.id = page.props.schoolEdit?.id;
+                universityForm.name = page.props.schoolEdit?.name;
+                universityForm.abbreviation = page.props.schoolEdit?.shortcut;
+                universityForm.class = page.props.schoolEdit?.reference_array;
+                page.props.schoolEdit?.campuses
+                    .sort((a, b) => b.is_main - a.is_main) // true first
+                    .forEach((element) => {
+                        universityForm.campuses.push({
+                            id: element.id,
+                            semester: element.term_array,
+                            grading: element.grading_array,
+                            agency: element.agency_array,
+                            startDate: element.start_date
+                                ? new Date(element.start_date)
+                                : null,
+                            endDate: element.end_date
+                                ? new Date(element.end_date)
+                                : null,
+                            name: element.name,
+                            street: element.address.address,
+                            address: element.address.full_address,
+                            main: element.is_main,
+                        });
+                    });
 
-        universityForm.class = res.data.school.reference.reference_array;
-        res.data.school.campuses.forEach((element) => {
-            universityForm.campuses.push({
-                id: element.id,
-                semester: element.term_array,
-                grading: element.grading_array,
-                agency: element.agency_array,
-                street: element.address.address,
-                address: element.address.full_address,
-                main: element.is_main,
-            });
+                toolbarRef.value.openModal();
+            },
         });
+    } else {
+        toolbarRef.value.openModal();
     }
-
-    toolbarRef.value.openModal();
 };
 
 const deleteRow = (id) => {
@@ -524,18 +582,17 @@ const clearSearch = () => {
 };
 
 const autoSearch = (event) => {
-    router.visit(
-        route("academic.universities", {
-            autosuggest: event,
-        }),
+    router.get(
+        route("academic.universities"),
+        { autosuggest: event },
         {
             preserveState: true,
             preserveScroll: true,
-            replace: false,
+            replace: true,
+            only: ["resultSearch"],
         }
     );
 };
-
 const loadPage = (page) => {
     router.get(
         route("academic.universities"),
