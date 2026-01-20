@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\ActivationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OtpRequestController;
 use App\Http\Controllers\Web\CampusCourseController;
@@ -34,6 +35,8 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [LoginController::class, 'store'])->name('login.store');
     Route::post('otp/request', [OtpRequestController::class, 'create'])->name('otp.check');
     Route::post('otp/login', [OtpRequestController::class, 'store'])->name('otp.store');
+    Route::get('/activate/{token}', [ActivationController::class, 'show'])->name('activation.show');
+    Route::post('/activate', [ActivationController::class, 'update'])->name('activation.update');
 });
 
 Route::middleware('auth', 'web')->group(function () {
@@ -104,7 +107,8 @@ Route::middleware('auth', 'web')->group(function () {
 
     Route::post('campus/curriculum', [SchoolCampusCurriculumController::class, 'store'])->name('campus.curriculum.store');
     Route::put('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'update'])->name('campus.curriculum.update');
-    Route::delete('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'destroy'])->name('campus.curriculum.destroy');
+    Route::delete('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'destroySubject'])->name('campus.curriculum.destroySubject');
+    Route::delete('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'destroyCurriculum'])->name('campus.curriculum.destroyCurriculum');
 });
 Route::middleware('auth', 'web', 'role')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

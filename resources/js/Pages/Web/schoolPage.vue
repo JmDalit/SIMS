@@ -241,7 +241,8 @@
                                         }}</span>
                                         | Classification:
                                         <span class="font-semibold">{{
-                                            slotProps.data.school.reference.name
+                                            slotProps.data.school
+                                                .reference_array.name
                                         }}</span>
                                     </div>
                                 </div>
@@ -308,7 +309,8 @@
                                 <div>
                                     {{
                                         prop.data.name ??
-                                        prop.data.address.municipality.name
+                                        prop.data.address.municipality_array
+                                            .name
                                     }}
                                 </div>
 
@@ -324,21 +326,21 @@
                     <Column header="Term">
                         <template #body="prop">
                             <div class="text-xs">
-                                {{ prop.data.term.name }}
+                                {{ prop.data.term_array.name }}
                             </div>
                         </template>
                     </Column>
                     <Column header="Grading">
                         <template #body="prop">
                             <div class="text-xs">
-                                {{ prop.data.grading.name }}
+                                {{ prop.data.grading_array.name }}
                             </div>
                         </template>
                     </Column>
                     <Column header="Regional Office">
                         <template #body="prop">
                             <div class="text-xs">
-                                {{ prop.data.agency.name }}
+                                {{ prop.data.agency_array.name }}
                             </div>
                         </template>
                     </Column>
@@ -349,7 +351,6 @@
         <DrawerSchoolModule
             ref="drawerRef"
             :id="drawerId"
-            :value="page.props?.schoolDetail"
             :course-option="page.props.courseOption"
             :sub-class-option="page.props.subClassOption"
             :confirm-ref="confirmRef"
@@ -445,14 +446,14 @@ const toggleOption = (event, rowData) => {
 const openDrawer = (res) => {
     dataDrawer.value = res.data;
     drawerId.value = res.data.id;
+    const id = Number(res.data.id);
+    const semesterType = res.data?.term_array?.name ?? null;
+
     router.reload({
-        data: { id: res.data.id, semesterType: res.data.term.name },
+        data: JSON.parse(JSON.stringify({ id, semesterType })),
         only: ["schoolDetail", "semesterOption", "subClassOption"],
-        preserveState: true,
-        preserveScroll: true,
-        onSuccess: () => {
-            drawerRef.value.openDrawer();
-        },
+        replace: true,
+        onSuccess: () => drawerRef.value.openDrawer(),
     });
 };
 

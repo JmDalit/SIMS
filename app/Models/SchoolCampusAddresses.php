@@ -16,7 +16,22 @@ class SchoolCampusAddresses extends Model
 
     ];
 
-    protected $appends = ['full_address'];
+    protected $appends = [
+        'full_address',
+        'barangay_array',
+        'municipality_array',
+        'province_array',
+        'region_array'
+    ];
+
+    protected $hidden = [
+        'barangay',
+        'municipality',
+        'province',
+        'region',
+        'created_at',
+        'updated_at'
+    ];
 
     public function campus()
     {
@@ -38,6 +53,41 @@ class SchoolCampusAddresses extends Model
     public function region()
     {
         return $this->belongsTo(LocationRegions::class, 'region_code', 'code');
+    }
+
+    public function getBarangayArrayAttribute()
+    {
+        return $this->barangay ? [
+            'code' => $this->barangay->code,
+            'name' => $this->barangay->name
+        ] : null;
+    }
+
+    // Municipality
+    public function getMunicipalityArrayAttribute()
+    {
+        return $this->municipality ? [
+            'code' => $this->municipality->code,
+            'name' => $this->municipality->name
+        ] : null;
+    }
+
+    // Province
+    public function getProvinceArrayAttribute()
+    {
+        return $this->province ? [
+            'code' => $this->province->code,
+            'name' => $this->province->name
+        ] : null;
+    }
+
+    // Region
+    public function getRegionArrayAttribute()
+    {
+        return $this->region ? [
+            'code' => $this->region->code,
+            'name' => $this->region->name
+        ] : null;
     }
 
     public function getFullAddressAttribute()

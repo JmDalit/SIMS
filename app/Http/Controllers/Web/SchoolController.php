@@ -17,46 +17,41 @@ class SchoolController extends Controller
 {
     public function index(ListClass $ref, Request $request, LocationClass $location)
     {
+
+        $schoolDetail = null;
+
+        if ($id = request('id')) {
+            $school = SchoolCampuses::with([
+                'courses.subjects' => fn($q) => $q->where('is_delete', false),
+                'grades' => fn($q) => $q->where('is_delete', false)->orderBy('grade', 'asc'),
+                'info' => fn($q) => $q->select(['id', 'campus_id', 'dean', 'registrar', 'contact', 'email'])->where('is_delete', false),
+                'semesters' => fn($q) => $q->where('is_delete', false),
+            ])->find($id);
+
+            // Convert entire object recursively to plain arrays
+            $schoolDetail = $school ? json_decode(json_encode($school), true) : null;
+        }
+
         return Inertia::render('Web/schoolPage', [
+            //table shool
             'universities' => $ref->getSchools('table', $request->input('search')),
+            //option ref
             'classOption' => $ref->getRefs('option', null, null, 'Class'),
             'classificationOption' => $ref->getRefs('option', null, null, 'Term Type'),
             'agencyOption' => $ref->getAgencies(false),
             'gradingOption' => $ref->getRefs('option', null, null, 'Grading System'),
-            'resultSearch' => Inertia::lazy(function () use ($request, $location) {
-                $search = $request->input('autosuggest');
-                return $search
-                    ? $location->getFullAddress($search)
-                    : [];
-            }),
             'courseOption' => $ref->getCourses('option'),
-            'subClassOption' => Inertia::always(
-                fn() =>
-                $ref->getRefs('option', null, 'Subject', null)
-            ),
-            'schoolDetail' => request('id')
-                ? SchoolCampuses::with([
-                    'courses' => fn($q) =>
-                    $q->where('is_delete', false)
-                        ->with([
-                            'subjects' => fn($sq) => $sq->where('is_delete', false),
-                        ]),
-                    'grades'  => fn($q) =>
-                    $q->where('is_delete', false)
-                        ->orderBy('grade', 'asc'),
-                    'info' => fn($q) =>
-                    $q->select([
-                        'id',
-                        'campus_id',
-                        'dean',
-                        'registrar',
-                        'contact',
-                        'email',
-                    ])->where('is_delete', false),
-                    'semesters' => fn($q) =>
-                    $q->where('is_delete', false),
-                ])->find(request('id'))
+            'subClassOption' => $ref->getRefs('option', null, 'Subject', null),
+
+            'semesterOption' => request('semesterType')
+                ? $ref->getRefs('option', null, null, request('semesterType'))
                 : null,
+            //search
+            'resultSearch' => request('autosuggest')
+                ? ($location->getFullAddress(request('autosuggest'))?->toArray() ?? [])
+                : [],
+            'schoolDetail' => $schoolDetail,
+
             'subjectDetail' => request('campusCourseId')
                 ? SchoolCampusCourseCurriculums::with([
                     'subjects' => fn($q) =>
@@ -70,22 +65,29 @@ class SchoolController extends Controller
                         'year',
                         'unit',
                         'subject_class',
-                        'is_delete'
-                    )
-                        ->where('is_delete', false)
+                        'updated_at',
+                        'updated_by',
+                        'created_by',
+                    )->where('is_delete', false)
                 ])
                 ->select([
                     'id',
                     'campus_course_id',
                     'total_year as yearNumber',
-                    'years as yearLevel'
+                    'years as yearLevel',
+                    'semester_type_id as semesterTypeId'
                 ])
-                ->where('campus_course_id', request('campusCourseId'))->orderBy('id', 'desc')
-                ->get()->toArray();
+                ->where('campus_course_id', request('campusCourseId'))
+                ->where('semester_type_id', request('semTypeId'))
+                ->where('is_delete', false)
+                ->orderBy('id', 'desc')
+                ->get()
+                ->toArray()
                 : null,
-            'semesterOption' => request('semesterType') ? $ref->getRefs('option', null, null, request('semesterType')) : null,
+
+
             'schoolEdit' => request('school_id')
-                ? Schools::with(['campuses'])->find(request('school_id'))
+                ? Schools::with(['campuses'])->find(request('school_id'))?->toArray()
                 : null,
         ]);
     }

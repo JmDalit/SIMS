@@ -15,24 +15,25 @@ class UserCreatedMail extends Mailable
 
 
     public $user;
-    public $password;
+    public $activation;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($user, $password)
+    public function __construct($user, $activation)
     {
         $this->user = $user;
-        $this->password = $password;
+        $this->activation = $activation;
     }
 
     public function build()
     {
+
         return $this->subject('Welcome to STSIMS')
             ->view(('UserMail'))
             ->with([
                 'user' => $this->user,
-                'passrword' => $this->password,
+                'url' => route('activation.show',  $this->activation),
             ]);
     }
 }

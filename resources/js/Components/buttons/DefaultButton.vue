@@ -7,6 +7,7 @@
         :loading="loading"
         :severity="severity"
         @click="onClick"
+        :variant="variant"
         :raised="raised"
         :text="text"
         :outlined="outlined"
@@ -83,6 +84,10 @@ defineProps({
         default: null,
     },
     tooltip: {
+        type: String,
+        default: null,
+    },
+    variant: {
         type: String,
         default: null,
     },

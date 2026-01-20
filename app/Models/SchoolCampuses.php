@@ -22,6 +22,12 @@ class SchoolCampuses extends Model
     ];
 
 
+    protected $hidden = [
+        'agency',
+        'grading',
+        'term'
+    ];
+
     protected $appends = ['fullname_campus', 'term_array', 'grading_array', 'agency_array'];
 
     public function school()

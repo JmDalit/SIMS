@@ -277,15 +277,19 @@
 										<tbody>
 											<tr>
 												<td class="column column-1" width="100%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; padding-bottom: 5px; padding-top: 5px; vertical-align: top;">
-													<table class="list_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; color: #101112; direction: ltr; font-family: 'Montserrat', 'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma, sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 0px; line-height: 1.2; text-align: left; mso-line-height-alt: 19px;">
+													<table class="heading_block block-1" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 														<tr>
-															<td class="pad" style="padding-bottom:10px;padding-left:60px;padding-right:60px;padding-top:10px;">
-																<div style="margin-left:-20px">
-																	<ul style="margin-top: 0; margin-bottom: 0; list-style-type: revert;">
-																		<li style="Margin: 0 0 0 0;"><strong>Email</strong>:&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{{$user->email}}</li>
-																		<li style="Margin: 0 0 0 0;"><strong>Password</strong>:&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; {{$password}}</li>
-																	</ul>
-																</div>
+															<td class="pad" style="text-align:center;width:100%;">
+																   <a href="{{ $url }}"
+                                                                   style="background-color:#4137ff;
+                                                                          color:#ffffff;
+                                                                          padding:12px 24px;
+                                                                          text-decoration:none;
+                                                                          border-radius:6px;
+                                                                          display:inline-block;
+                                                                          font-weight:600;">
+                                                                    Activate Account
+                                                                </a>
 															</td>
 														</tr>
 													</table>

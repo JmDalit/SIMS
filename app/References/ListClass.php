@@ -214,9 +214,8 @@ class ListClass
                         'is_active' => true,
                     ])->orderBy('school_id', 'asc')->orderBy('is_main', 'desc')
                     ->with([
-                        'school',
-
-                        'address',
+                        'school:id,name,reference_id,shortcut,photo',
+                        'address:id,campus_id,municipality_code,barangay_code,region_code',
                         'term',
                         'grading',
                         'agency'
@@ -242,8 +241,8 @@ class ListClass
                 return ListRoutes::where('is_delete', false)->where('is_submenu', false)->where('is_active', true)
                     ->whereRaw("
                         EXISTS (
-                            SELECT 1 
-                            FROM json_array_elements(roles) elem 
+                            SELECT 1
+                            FROM json_array_elements(roles) elem
                             WHERE (elem->>'id')::int = ?
                         )
                     ", [Auth::user()->role_id ?? null])

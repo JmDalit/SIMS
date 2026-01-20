@@ -15,13 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('email')->unique();
             $table->foreignId('role_id')->nullable()->constrained('list_roles')->onDelete('set null');
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->boolean('can_edit')->default(false);
             $table->boolean('can_create')->default(false);
             $table->boolean('can_delete')->default(false);
             $table->boolean('is_verified')->default(false);
             $table->boolean('is_active')->default(true);
             $table->boolean('is_delete')->default(false);
+            $table->string('activation_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

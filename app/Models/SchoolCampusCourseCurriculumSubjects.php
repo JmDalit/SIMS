@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class SchoolCampusCourseCurriculumSubjects extends Model
@@ -22,10 +23,11 @@ class SchoolCampusCourseCurriculumSubjects extends Model
     protected $hidden = [
         'semester',
         'class',
-        'curriculum_id'
+        'curriculum_id',
+        'is_delete'
     ];
 
-    protected $appends = ['semester_array', 'class_array', 'is_lock'];
+    protected $appends = ['semester_array', 'class_array', 'is_lock', 'updated_at_formatted', 'created_at_formatted'];
 
     protected function semester()
     {
@@ -55,6 +57,19 @@ class SchoolCampusCourseCurriculumSubjects extends Model
             'id'    => $this->class->id,
             'name'  => $this->class->name
         ] : null;
+    }
+
+    public function getUpdatedAtFormattedAttribute()
+    {
+        return Carbon::parse($this->updated_at)
+            ->format('M d, Y | g:ia'); // Jan 16, 2026 | 7:22am
+    }
+
+    // Similarly, for created_at if needed
+    public function getCreatedAtFormattedAttribute()
+    {
+        return Carbon::parse($this->created_at)
+            ->format('M d, Y | g:ia');
     }
 
     protected function getIsLockAttribute()

@@ -37,12 +37,12 @@ class SchoolCampusCurriculumRequest extends FormRequest
                     'multi'                             => ['nullable', 'array'],
                     'multi.*.id'                        => ['nullable'],
                     'multi.*.campus_course_id'          => ['nullable'],
-                    'multi.*.semester_type_id'          => ['nullable'],
+                    'multi.*.semesterTypeId'            => ['nullable'],
                     'multi.*.yearLevel'                 => ['required'],
                     'multi.*.yearNumber'                => ['nullable'],
                     'multi.*.subjects'                  => ['required', 'array'],
                     'multi.*.subjects.*.id'             => ['nullable'],
-                    'multi.*.subjects.*.name'           => ['required', 'lowercase'],
+                    'multi.*.subjects.*.name'           => ['required'],
                     'multi.*.subjects.*.semester_array' => ['nullable', 'array'],
                     'multi.*.subjects.*.class_array'    => ['required', 'array'],
                     'multi.*.subjects.*.subjectCode'    => ['required'],
@@ -59,7 +59,7 @@ class SchoolCampusCurriculumRequest extends FormRequest
         return [
             'multi.*.subjects'                 => 'Please make sure to include subjects before proceeding.',
             'multi.*.subjects.*.name'          => 'Please provide the subject name.',
-            'multi.*.subjects.*.class_array'  => 'Please select a subject class. ',
+            'multi.*.subjects.*.class_array'   => 'Please select a subject class. ',
             'multi.*.subjects.*.subjectCode'   => 'Please enter the subject code.',
             'multi.*.subjects.*.unit'          => 'Please specify the number of units.',
         ];

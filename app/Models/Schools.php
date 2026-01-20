@@ -16,7 +16,7 @@ class Schools extends Model
         'is_delete',
         'photo',
     ];
-
+    protected $hidden = ['reference'];
     protected $appends = ['reference_array'];
 
     public function reference()

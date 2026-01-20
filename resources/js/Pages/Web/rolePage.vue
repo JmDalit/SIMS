@@ -175,7 +175,6 @@
                                             v-ripple
                                             class="flex items-center"
                                             v-bind="props.action"
-                                            @click="item.command"
                                         >
                                             <div>
                                                 <component

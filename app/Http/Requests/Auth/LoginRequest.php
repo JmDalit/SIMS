@@ -61,7 +61,7 @@ class LoginRequest extends FormRequest
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => 'Your account is deactivated. Please contact support.',
+                'email' => 'Your account is deactivated. Check your email to activate or Please contact support.',
             ]);
         }
 

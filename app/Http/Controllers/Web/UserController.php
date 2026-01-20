@@ -43,24 +43,25 @@ class UserController extends Controller
     {
 
         $data = $request->validated();
-        $password = Str::random(10);
+        $activation = Str::random(64);
 
 
         $user = User::create([
-            'email'         => $data['email'],
-            'role_id'       => $data['role']['id'],
-            'password'      => $password,
-            'can_create'    => $data['canCreate'],
-            'can_edit'      => $data['canEdit'],
-            'can_delete'    => $data['canDelete'],
+            'email'             => $data['email'],
+            'role_id'           => $data['role']['id'],
+            'can_create'        => $data['canCreate'],
+            'can_edit'          => $data['canEdit'],
+            'activation_token'  => $activation,
+            'can_delete'        => $data['canDelete'],
+            'is_active'         => false
         ]);
 
         $user->profile()->create([
-            'fname' => $data['fname'],
-            'lname' => $data['lname']
+            'fname' =>  Str::lower($data['fname']),
+            'lname' => Str::lower($data['lname'])
         ]);
 
-        Mail::to($data['email'])->send(new UserCreatedMail($user, $password));
+        Mail::to($data['email'])->send(new UserCreatedMail($user, $activation));
 
 
         return redirect()->back()->with('flash', [

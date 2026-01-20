@@ -28,7 +28,8 @@ class User extends Authenticatable
         'is_verified',
         'is_delete',
         'password',
-        'remember'
+        'remember',
+        'activation_token'
     ];
 
     /**
@@ -39,6 +40,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'activation_token'
     ];
     protected $appends = ['formatted_date', 'role_array'];
     /**
