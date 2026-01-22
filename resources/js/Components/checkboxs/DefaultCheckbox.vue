@@ -1,20 +1,16 @@
 <template>
     <div class="flex items-center gap-2">
-        <Checkbox
-            v-model="modelValue"
-            :inputId="label + '_id'"
-            :value="value"
-            :binary="binary"
-            :size="size"
-            :pt="{
-                box: {
-                    class: 'dark:!bg-gray-700 dark:!border-gray-600 !border !text-sm',
-                },
-            }"
-        />
-        <label :for="label + '_id'" class="text-sm text-gray-500">
-            {{ label }}
-        </label>
+        <Checkbox v-model="modelValue" :inputId="label + '_id'" :value="value" :binary="binary" :size="size" :pt="{
+            box: {
+                class: 'dark:!bg-gray-700 dark:!border-gray-600 !border !text-sm',
+            },
+        }" />
+        <div>
+            <label :for="label + '_id'" class="text-sm text-gray-500 whitespace-nowrap">
+                {{ label }}
+            </label>
+        </div>
+
     </div>
 </template>
 

@@ -36,7 +36,7 @@ Route::middleware('guest')->group(function () {
     Route::post('otp/request', [OtpRequestController::class, 'create'])->name('otp.check');
     Route::post('otp/login', [OtpRequestController::class, 'store'])->name('otp.store');
     Route::get('/activate/{token}', [ActivationController::class, 'show'])->name('activation.show');
-    Route::post('/activate', [ActivationController::class, 'update'])->name('activation.update');
+    Route::post('/activate/{id}', [ActivationController::class, 'update'])->name('activation.update');
 });
 
 Route::middleware('auth', 'web')->group(function () {

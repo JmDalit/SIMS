@@ -40,7 +40,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-        'activation_token'
+        'activation_token',
+        'role',
     ];
     protected $appends = ['formatted_date', 'role_array'];
     /**
@@ -62,7 +63,7 @@ class User extends Authenticatable
 
     public function profile()
     {
-        return $this->hasOne(UserProfile::class);
+        return $this->hasOne(UserProfile::class, 'user_id', 'id');
     }
 
     public function getFormattedDateAttribute()

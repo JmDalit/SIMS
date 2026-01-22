@@ -43,6 +43,7 @@
                     <ul
                         class="pl-2 my-0 leading-normal !text-xs flex flex-col gap-1"
                     >
+                        <li>● Must be at least 6 characters long</li>
                         <li>● At least one lowercase</li>
                         <li>● At least one uppercase</li>
                         <li>● At least one numeric</li>

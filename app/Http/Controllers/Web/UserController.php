@@ -28,8 +28,19 @@ class UserController extends Controller
                         });
                 });
             })
-            ->with(['role', 'profile'])->orderBy('id')
+            ->with(['role', 'profile'])
+            ->orderBy('id')
             ->paginate(10);
+
+        // Add avatar URL to each user
+        $user->getCollection()->transform(function ($u) {
+            $u->avatar_url = $u->profile && $u->profile->avatar
+                ? asset("storage/avatars/{$u->id}/{$u->profile->avatar}")
+                : null;
+
+            return $u;
+        });
+
 
 
         return Inertia::render('Web/userPage', [
@@ -53,7 +64,7 @@ class UserController extends Controller
             'can_edit'          => $data['canEdit'],
             'activation_token'  => $activation,
             'can_delete'        => $data['canDelete'],
-            'is_active'         => false
+
         ]);
 
         $user->profile()->create([

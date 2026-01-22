@@ -6,7 +6,7 @@
         :size="size"
         :loading="loading"
         :severity="severity"
-        @click="onClick"
+        @click="onClick($event)"
         :variant="variant"
         :raised="raised"
         :text="text"
@@ -93,7 +93,7 @@ defineProps({
     },
 });
 
-function onClick() {
-    emit("click");
+function onClick(event) {
+    emit("click", event);
 }
 </script>

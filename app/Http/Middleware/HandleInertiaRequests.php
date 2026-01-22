@@ -44,11 +44,14 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-
-
-
         return array_merge(parent::share($request), [
-            'user' => fn() => Auth::user()?->load(['role', 'profile']),
+            'user' => fn() => tap(Auth::user()?->load(['role', 'profile', 'profile.agency']), function ($user) {
+                if ($user && $user->profile && $user->profile->avatar) {
+                    $user->profile->avatar_url = asset(
+                        'storage/avatars/' . $user->id . '/' . $user->profile->avatar
+                    );
+                }
+            }),
             'menu' => fn() => $this->menu?->getMenu('sidebar')
         ]);
     }

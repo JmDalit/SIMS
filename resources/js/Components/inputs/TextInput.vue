@@ -14,6 +14,7 @@
                     class: [
                         'dark:!bg-gray-700 !text-sm  border dark:!border-gray-700 dark:!text-white',
                         capitalize ? 'capitalize' : '',
+                        uppercase ? 'uppercase' : '',
                     ],
                 },
             }"
@@ -41,6 +42,7 @@ defineProps({
         type: String,
     },
     capitalize: { type: Boolean, default: false },
+    uppercase: { type: Boolean, default: false },
     error: { type: [String, Array, Object], default: "" },
     message: {
         type: String,

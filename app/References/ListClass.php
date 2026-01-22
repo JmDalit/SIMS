@@ -208,20 +208,46 @@ class ListClass
                 break;
             default:
 
-                return
-                    SchoolCampuses::where([
-                        'is_delete' => false,
-                        'is_active' => true,
-                    ])->orderBy('school_id', 'asc')->orderBy('is_main', 'desc')
-                    ->with([
-                        'school:id,name,reference_id,shortcut,photo',
-                        'address:id,campus_id,municipality_code,barangay_code,region_code',
-                        'term',
-                        'grading',
-                        'agency'
-                    ])
-                    ->paginate(10);
-                break;
+
+
+                if (Auth::user()->role_array['name'] == 'regional staff') {
+                    return
+                        SchoolCampuses::where([
+                            'is_delete' => false,
+                            'is_active' => true,
+                        ])
+                        ->orderBy('school_id', 'asc')
+                        ->orderBy('is_main', 'desc')
+                        ->whereHas('address', function ($q) {
+                            $q->where('region_code', Auth::user()->profile->agency->region_code);
+                        })
+                        ->with([
+                            'school:id,name,reference_id,shortcut,photo',
+                            'address:id,campus_id,municipality_code,barangay_code,region_code',
+                            'term',
+                            'grading',
+                            'agency'
+                        ])
+                        ->paginate(10);
+                    break;
+                } else {
+                    return
+                        SchoolCampuses::where([
+                            'is_delete' => false,
+                            'is_active' => true,
+                        ])
+                        ->orderBy('school_id', 'asc')
+                        ->orderBy('is_main', 'desc')
+                        ->with([
+                            'school:id,name,reference_id,shortcut,photo',
+                            'address:id,campus_id,municipality_code,barangay_code,region_code',
+                            'term',
+                            'grading',
+                            'agency'
+                        ])
+                        ->paginate(10);
+                    break;
+                }
         }
     }
 
@@ -238,19 +264,22 @@ class ListClass
                 });
                 break;
             case 'sidebar':
-                return ListRoutes::where('is_delete', false)->where('is_submenu', false)->where('is_active', true)
+                return ListRoutes::where('is_delete', false)
+                    ->where('is_submenu', false)
+                    ->where('is_active', true)
                     ->whereRaw("
-                        EXISTS (
-                            SELECT 1
-                            FROM json_array_elements(roles) elem
-                            WHERE (elem->>'id')::int = ?
-                        )
-                    ", [Auth::user()->role_id ?? null])
+        EXISTS (
+            SELECT 1
+            FROM json_array_elements(roles) elem
+            WHERE (elem->>'id')::int = ?
+        )
+    ", [Auth::user()->role_id ?? null])
                     ->with(['children' => function ($q) {
                         $q->where('is_delete', false);
                     }])
                     ->orderBy('order_no')
-                    ->get()->map(function ($route) {
+                    ->get()
+                    ->map(function ($route) {
                         return [
                             'key'   => (string) $route->id,
                             'icon'  => $route->icon,
@@ -260,22 +289,38 @@ class ListClass
                             'component' => $route->component,
                             'is_active' => $route->is_active,
                             'items' => $route->children
-                                ->filter(fn($child) => $child->is_active)
+                                ->filter(function ($child) {
+                                    if (empty($child->roles)) return false;
+
+                                    // Decode roles if stored as JSON
+                                    $roles = is_string($child->roles) ? json_decode($child->roles, true) : $child->roles;
+
+                                    // Check if current user's role exists in roles
+                                    $hasAccess = !empty($roles) && collect($roles)->pluck('id')->contains(Auth::user()->role_id);
+
+                                    return $child->is_active && $hasAccess;
+                                })
+
                                 ->map(function ($child, $index) use ($route) {
 
+
+
                                     return [
-                                        'key' => "{$route->id}-{$index}",
-                                        'icon' => $child->icon,
-                                        'label' => $child->label,
-                                        'slug'  => $child->slug,
-                                        'route' => $child->route,
+                                        'key'     => "{$route->id}-{$index}",
+                                        'icon'    => $child->icon,
+                                        'label'   => $child->label,
+                                        'roleId'  => $roles ?? [], // always an array
+                                        'slug'    => $child->slug,
+                                        'route'   => $child->route,
                                         'subItem' => $child->is_submenu,
                                         'component' => $child->component,
                                         'is_active' => $child->is_active,
+
                                     ];
                                 })->values()->toArray(),
                         ];
                     });
+
                 break;
             default:
                 return ListRoutes::where('is_delete', false)->where('is_submenu', false)

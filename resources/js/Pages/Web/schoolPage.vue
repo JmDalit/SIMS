@@ -1,49 +1,25 @@
 <template>
+
     <Head title="Schools" />
     <AuthLayout>
         <div class="flex flex-col w-full h-full gap-5">
             <div class="flex">
-                <HeaderModule
-                    title="Schools"
-                    description="School information and management"
-                />
+                <HeaderModule title="Schools" description="School information and management" />
             </div>
             <div class="flex-1 flex flex-col gap-2">
-                <ToolbarModule
-                    v-model="searchInput"
-                    @deleteSearch="clearSearch"
-                    @saveForm="submitForm"
-                    button-label="Create"
-                    :dialog-title="
-                        !universityForm.id ? 'Create Role' : 'Edit Role'
-                    "
-                    dialog-description="Define a new role and configure its access permissions."
-                    :dialog-button-loading="universityForm.processing"
-                    :dialog-icon="IconUserCog"
-                    dialog-button-label="Save"
-                    :message-has-errors="universityForm.hasErrors"
-                    :message-errors="universityForm.errors"
-                    @buttonOpenModal="toggleModal({ type: 'create' })"
-                    message-type="error"
-                    ref="toolbarRef"
-                >
+                <ToolbarModule v-model="searchInput" @deleteSearch="clearSearch" @saveForm="submitForm"
+                    button-label="Create" :dialog-title="!universityForm.id ? 'Create Role' : 'Edit Role'
+                        " dialog-description="Define a new role and configure its access permissions."
+                    :dialog-button-loading="universityForm.processing" :dialog-icon="IconUserCog"
+                    dialog-button-label="Save" :message-has-errors="universityForm.hasErrors"
+                    :message-errors="universityForm.errors" @buttonOpenModal="toggleModal({ type: 'create' })"
+                    message-type="error" ref="toolbarRef">
                     <template #form>
                         <div class="flex flex-col gap-3 mt-5 mb-2">
-                            <TextInput
-                                v-model="universityForm.name"
-                                label="Name"
-                                capitalize
-                            ></TextInput>
-                            <TextInput
-                                v-model="universityForm.abbreviation"
-                                label="Abbreviation"
-                            ></TextInput>
-                            <SelectInput
-                                v-model="universityForm.class"
-                                :options="page.props.classOption"
-                                label="Class"
-                                clearable
-                            >
+                            <TextInput v-model="universityForm.name" label="Name" capitalize></TextInput>
+                            <TextInput v-model="universityForm.abbreviation" label="Abbreviation"></TextInput>
+                            <SelectInput v-model="universityForm.class" :options="page.props.classOption" label="Class"
+                                clearable>
                             </SelectInput>
                         </div>
                         <Divider type="dashed" />
@@ -51,183 +27,96 @@
                             <div class="flex items-center justify-between">
                                 <div class="font-semibold">Campus</div>
                             </div>
-                            <div
-                                class="flex flex-col gap-2 mt-4"
-                                v-for="(item, index) in universityForm.campuses"
-                                :key="index"
-                            >
+                            <div class="flex flex-col gap-2 mt-4" v-for="(item, index) in universityForm.campuses"
+                                :key="index">
                                 <div class="flex justify-between items-center">
                                     <div
-                                        class="text-xs bg-blue-100 dark:text-gray-700 w-fit font-semibold px-2 py-1 rounded-lg"
-                                    >
-                                        <span
-                                            v-if="index == 0"
-                                            class="uppercase font-bold"
-                                            >Main</span
-                                        >
-                                        <span v-else> {{ index + 1 }}#</span>
+                                        class="text-xs bg-blue-100 dark:text-gray-700 w-fit font-semibold px-2 py-1 rounded-lg">
+
+                                        <span> {{ index + 1 }}#</span>
                                         Campus
                                     </div>
 
-                                    <Button
-                                        v-show="
-                                            index != 0 &&
-                                            (hideRemoveButton == 'create' ||
-                                                universityForm.campuses[index]
-                                                    .id == null)
-                                        "
-                                        size="small"
-                                        class="!text-xs"
-                                        rounded
-                                        severity="danger"
-                                        outlined
-                                        @click="removeCampus(index)"
-                                    >
+                                    <Button v-show="index != 0 &&
+                                        (hideRemoveButton == 'create' ||
+                                            universityForm.campuses[index]
+                                                .id == null)
+                                        " size="small" class="!text-xs" rounded severity="danger" outlined
+                                        @click="removeCampus(index)">
                                         <div class="flex items-center gap-2">
-                                            <IconCircleXFilled
-                                                size="20"
-                                            ></IconCircleXFilled>
+                                            <IconCircleXFilled size="20"></IconCircleXFilled>
                                             <div>Remove</div>
                                         </div>
                                     </Button>
                                 </div>
                                 <div class="flex flex-col gap-3">
-                                    <TextInput
-                                        v-model="
-                                            universityForm.campuses[index].name
-                                        "
-                                        label="Name"
-                                        placeholder="(Optional)"
-                                        capitalize
-                                    ></TextInput>
+                                    <TextInput v-model="universityForm.campuses[index].name
+                                        " label="Name" placeholder="(Optional)" capitalize></TextInput>
                                     <div class="flex items-center gap-3">
-                                        <SelectInput
-                                            v-model="
-                                                universityForm.campuses[index]
-                                                    .semester
-                                            "
-                                            :options="
-                                                page.props.classificationOption
-                                            "
-                                            label="Academic Term"
-                                            clearable
-                                        >
+                                        <SelectInput v-model="universityForm.campuses[index]
+                                            .semester
+                                            " :options="page.props.classificationOption
+                                                " label="Academic Term" clearable>
                                         </SelectInput>
-                                        <SelectInput
-                                            v-model="
-                                                universityForm.campuses[index]
-                                                    .grading
-                                            "
-                                            :options="page.props.gradingOption"
-                                            label="Grading System"
-                                            clearable
-                                        >
+                                        <SelectInput v-model="universityForm.campuses[index]
+                                            .grading
+                                            " :options="page.props.gradingOption" label="Grading System" clearable>
                                         </SelectInput>
                                     </div>
-                                    <!-- <div class="flex items-center gap-3">
-                                        <DatePickerInput
-                                            label="Start of Term"
-                                            v-model="
-                                                universityForm.campuses[index]
-                                                    .startDate
-                                            "
-                                        ></DatePickerInput>
-                                        <DatePickerInput
-                                            label="End of Term"
-                                            v-model="
-                                                universityForm.campuses[index]
-                                                    .endDate
-                                            "
-                                        ></DatePickerInput>
-                                    </div> -->
-                                    <SelectInput
-                                        v-model="
-                                            universityForm.campuses[index]
-                                                .agency
-                                        "
-                                        :options="page.props.agencyOption"
-                                        label="Regional Office"
-                                        clearable
-                                    >
+                                    <SelectInput v-model="universityForm.campuses[index]
+                                        .agency
+                                        " :options="page.props.agencyOption" label="Regional Office" clearable>
                                     </SelectInput>
-                                    <TextInput
-                                        v-model="
-                                            universityForm.campuses[index]
-                                                .street
-                                        "
-                                        label="Address"
-                                        placeholder="Street"
-                                        capitalize
-                                    ></TextInput>
-                                    <AutoCompleteInput
-                                        v-model="
-                                            universityForm.campuses[index]
-                                                .address
-                                        "
-                                        :options="page.props.resultSearch"
+                                    <TextInput v-model="universityForm.campuses[index]
+                                        .street
+                                        " label="Address" placeholder="Street" capitalize></TextInput>
+
+                                    <AutoCompleteInput v-model="universityForm.campuses[index]
+                                        .address
+                                        " :options="page.props.resultSearch"
                                         placeholder="Find by Barangay, City, Province, or Region"
-                                        @complete="autoSearch"
-                                    ></AutoCompleteInput>
+                                        @complete="autoSearch"></AutoCompleteInput>
+                                    <div class="flex justify-end gap-3 items-center">
+                                        <div class="text-sm font-semibold">Is main campus?</div>
+
+                                        <DefaultToggle v-model="universityForm.campuses[index].main"
+                                            :check-icon="IconCheck" :un-check-icon="IconX" />
+                                    </div>
                                 </div>
                                 <Divider type="dashed" />
                             </div>
-                            <Button
-                                size="small"
-                                class="!text-xs !rounded-xl"
-                                fluid
-                                @click="addCampus"
-                            >
+                            <Button size="small" class="!text-xs !rounded-xl" fluid @click="addCampus">
                                 <div class="flex items-center gap-2">
-                                    <IconCirclePlusFilled
-                                        size="18"
-                                    ></IconCirclePlusFilled>
+                                    <IconCirclePlusFilled size="18"></IconCirclePlusFilled>
                                     <div>Add Campus</div>
                                 </div>
                             </Button>
                         </div>
                     </template>
                 </ToolbarModule>
-                <DefaultTable
-                    :items="page.props.universities.data"
-                    :pagination="{
-                        total: page.props.universities.total,
-                        perPage: page.props.universities.per_page,
-                        currentPage: page.props.universities.current_page,
-                    }"
-                    group-rows-by="school.name"
-                    row-group-mode="subheader"
-                    @paginate="loadPage"
-                >
+                <DefaultTable :items="page.props.universities.data" :pagination="{
+                    total: page.props.universities.total,
+                    perPage: page.props.universities.per_page,
+                    currentPage: page.props.universities.current_page,
+                }" group-rows-by="school.name" row-group-mode="subheader" @paginate="loadPage">
                     <template #groupheader="slotProps">
                         <div class="flex w-full items-center justify-between">
                             <div class="flex items-center gap-2">
                                 <div class="">
-                                    <Avatar
-                                        v-if="
-                                            slotProps.data.school.photo == null
-                                        "
-                                        :label="
-                                            slotProps.data.school.name
-                                                .charAt(0)
-                                                .toUpperCase()
-                                        "
-                                        style="
+                                    <Avatar v-if="
+                                        slotProps.data.school.photo == null
+                                    " :label="slotProps.data.school.name
+                                        .charAt(0)
+                                        .toUpperCase()
+                                        " style="
                                             background-color: #dee9fc;
                                             color: #1a2551;
-                                        "
-                                        shape="circle"
-                                        class="!w-[40px] !h-[40px]"
-                                    />
+                                        " shape="circle" class="!w-[40px] !h-[40px]" />
 
-                                    <Avatar
-                                        v-else
-                                        style="
+                                    <Avatar v-else style="
                                             background-color: #dee9fc;
                                             color: #1a2551;
-                                        "
-                                        shape="circle"
-                                        :image="page.props.user.avatar"
-                                    />
+                                        " shape="circle" :image="page.props.user.avatar" />
                                 </div>
 
                                 <div class="flex flex-col">
@@ -248,35 +137,16 @@
                                 </div>
                             </div>
                             <div class="flex justify-end">
-                                <Button
-                                    text
-                                    v-tooltip.top="'Options'"
-                                    rounded
-                                    size="small"
-                                    severity="secondary"
-                                    icon="pi pi-ellipsis-v"
-                                    @click="
+                                <Button text v-tooltip.top="'Options'" rounded size="small" severity="secondary"
+                                    icon="pi pi-ellipsis-v" @click="
                                         (e) => toggleOption(e, slotProps.data)
-                                    "
-                                />
-                                <Menu
-                                    ref="menu"
-                                    :model="menuItems"
-                                    :popup="true"
-                                >
+                                    " />
+                                <Menu ref="menu" :model="menuItems" :popup="true">
                                     <template #item="{ item, props }">
-                                        <a
-                                            v-ripple
-                                            class="flex items-center"
-                                            v-bind="props.action"
-                                        >
+                                        <a v-ripple class="flex items-center" v-bind="props.action">
                                             <div>
-                                                <component
-                                                    :is="item.icon"
-                                                    :class="item.class"
-                                                    size="20"
-                                                    stroke-width="1.5"
-                                                ></component>
+                                                <component :is="item.icon" :class="item.class" size="20"
+                                                    stroke-width="1.5"></component>
                                             </div>
                                             <span class="ml-2 text-xs">{{
                                                 item.label
@@ -287,24 +157,13 @@
                             </div>
                         </div>
                     </template>
-                    <Column
-                        field="school.name"
-                        header="Representative"
-                    ></Column>
+                    <Column field="school.name" header="Representative"></Column>
                     <Column header="Name">
                         <template #body="prop">
                             <div class="flex items-center gap-2">
                                 <div class="">
-                                    <DefaultButton
-                                        size="small"
-                                        rounded
-                                        class-name="!p-0 !m-0"
-                                        :icon="IconArrowRight"
-                                        :icon-size="18"
-                                        @click="openDrawer(prop)"
-                                        text
-                                        severity="secondary"
-                                    />
+                                    <DefaultButton size="small" rounded class-name="!p-0 !m-0" :icon="IconArrowRight"
+                                        :icon-size="18" @click="openDrawer(prop)" text severity="secondary" />
                                 </div>
                                 <div>
                                     {{
@@ -314,10 +173,8 @@
                                     }}
                                 </div>
 
-                                <div
-                                    v-show="prop.data.is_main"
-                                    class="text-[10px] font-semibold bg-rose-100 px-2 rounded-lg text-red-700"
-                                >
+                                <div v-show="prop.data.is_main"
+                                    class="text-[10px] font-semibold bg-rose-100 px-2 rounded-lg text-red-700">
                                     MAIN
                                 </div>
                             </div>
@@ -348,13 +205,8 @@
             </div>
         </div>
 
-        <DrawerSchoolModule
-            ref="drawerRef"
-            :id="drawerId"
-            :course-option="page.props.courseOption"
-            :sub-class-option="page.props.subClassOption"
-            :confirm-ref="confirmRef"
-        ></DrawerSchoolModule>
+        <DrawerSchoolModule ref="drawerRef" :id="drawerId" :course-option="page.props.courseOption"
+            :sub-class-option="page.props.subClassOption" :confirm-ref="confirmRef"></DrawerSchoolModule>
         <DefaultConfirmDialog ref="confirmRef" />
         <DefaultToast ref="toastRef" />
     </AuthLayout>
@@ -371,7 +223,6 @@ import DefaultToast from "../../Components/messages/DefaultToast.vue";
 import DefaultConfirmDialog from "../../Components/dialogs/DefaultConfirmDialog.vue";
 import SelectInput from "../../Components/inputs/SelectInput.vue";
 import DrawerSchoolModule from "../../Modules/Others/DrawerSchoolModule.vue";
-import DatePickerInput from "../../Components/inputs/DatePickerInput.vue";
 import { computed, ref, watch } from "vue";
 import { Head, router, useForm, usePage } from "@inertiajs/vue3";
 import {
@@ -381,7 +232,10 @@ import {
     IconCirclePlusFilled,
     IconCircleXFilled,
     IconArrowRight,
+    IconCheck,
+    IconX,
 } from "@tabler/icons-vue";
+import DefaultToggle from "../../Components/toggleswitches/DefaultToggle.vue";
 
 const page = usePage();
 const searchInput = ref(null);
@@ -608,6 +462,8 @@ const loadPage = (page) => {
     );
 };
 
+
+
 watch(
     () => searchInput.value,
     () => {
@@ -615,6 +471,25 @@ watch(
         timerBounce.value = setTimeout(() => {
             loadPage(1);
         }, 300);
+    }
+);
+watch(
+    () => universityForm.campuses.map(c => c.main),
+    (newVal) => {
+
+        universityForm.campuses.forEach((element, key) => {
+
+        });
+
+        console.log(newVal);
+        // if (trueIndex !== -1) {
+        //     universityForm.campuses.forEach((campus, i) => {
+        //         if (i !== trueIndex) {
+        //             universityForm.campuses[i].main = false;
+        //         }
+        //     });
+        // }
+
     }
 );
 </script>

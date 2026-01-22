@@ -19,8 +19,20 @@ class UserProfile extends Model
 
     protected $appends = [
         'fullname',
-
+        'agency_array'
     ];
+
+
+
+    public function agency()
+    {
+        return $this->belongsTo(ListAgencies::class, 'agency_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     public function getFullnameAttribute()
     {
@@ -32,9 +44,13 @@ class UserProfile extends Model
         return $fullname === '' ? null : $fullname;
     }
 
-
-    public function user()
+    public function getAgencyArrayAttribute()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->agency
+            ? [
+                'id'   => $this->agency->id,
+                'name' => $this->agency->name
+            ]
+            : null;
     }
 }
