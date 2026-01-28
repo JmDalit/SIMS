@@ -1,32 +1,111 @@
 <template>
     <FileUpload
-        mode="basic"
-        name="files[]"
-        :url="url"
+        name="demo[]"
+        :show-upload-button="false"
+        :pt="{
+            root: { class: '!rounded-[15px]' },
+        }"
         :accept="accept"
-        :maxFileSize="maxFileSize"
-        :auto="auto"
-        :disabled="disabled"
-        :chooseLabel="label"
-        class="!text-sm !py-1 !px-5 !rounded-2xl"
-        @upload="onUpload"
-    />
-</template>
+        customUpload
+        @remove="onRemoveUploadedFile"
+        @select="(files) => emit('select-files', files)"
+    >
+        <template #empty>
+            <div
+                class="w-full flex items-center justify-center text-gray-400 text-sm italic"
+            >
+                <div>Drag and drop files to here to upload.</div>
+            </div>
+        </template>
+        <template
+            #content="{
+                files,
+                uploadedFiles,
+                removeUploadedFileCallback,
+                removeFileCallback,
+                progress,
+                messages,
+            }"
+        >
+            <div class="'flex flex-col w-full">
+                <div class="" v-show="messages.length !== 0">
+                    <DefaultMessages
+                        message-type="error"
+                        :message="messages"
+                    ></DefaultMessages>
+                </div>
+                <div>
+                    <div v-for="(item, key) in files" :key="key" class="w-full">
+                        <div class="flex items-center gap-3 m-2">
+                            <Avatar class="!w-[40px] !h-[40px]">
+                                <IconFileDescription size="24" />
+                            </Avatar>
 
+                            <div class="flex flex-col gap-2 w-full">
+                                <div class="flex justify-between">
+                                    <div
+                                        class="text-sm text-gray-700 flex items-end gap-2"
+                                    >
+                                        <div>{{ item.name }}</div>
+                                        <div class="text-gray-400 text-[10px]">
+                                            ({{ formatFileSize(item.size) }})
+                                        </div>
+                                    </div>
+                                    <Button
+                                        text
+                                        severity="danger"
+                                        class="!rounded-[15px] !h-[20px] !w-[20px] !p-0"
+                                        @click="removeFileCallback(key)"
+                                    >
+                                        <IconX size="30" />
+                                    </Button>
+                                </div>
+
+                                <ProgressBar
+                                    class="!h-[10px] !rounded-[5px]"
+                                    :pt="{ label: { class: '!text-[8px]' } }"
+                                ></ProgressBar>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </FileUpload>
+</template>
 <script setup>
+import { IconFileDescription, IconX } from "@tabler/icons-vue";
+import { ref } from "vue";
+import DefaultMessages from "../messages/DefaultMessages.vue";
+
+const emit = defineEmits(["select-files", "remove-file"]);
+
 defineProps({
-    label: { type: String, default: "Upload File" },
-    message: { type: String, default: null },
-    disabled: { type: Boolean, default: false },
-    url: { type: String, required: true },
-    accept: { type: String, default: "*" },
-    maxFileSize: { type: Number, default: 1000000 },
-    auto: { type: Boolean, default: true },
+    accept: {
+        type: String,
+        default: "",
+    },
 });
 
-const emit = defineEmits(["upload"]);
-
-const onUpload = (event) => {
-    emit("upload", event);
-};
+function formatFileSize(size) {
+    const units = ["Bytes", "KB", "MB", "GB", "TB"];
+    if (!size || size === 0) return "0 Bytes";
+    const i = Math.floor(Math.log(size) / Math.log(1024));
+    return (size / Math.pow(1024, i)).toFixed(2) + " " + units[i];
+}
+function onRemoveUploadedFile() {
+    emit("remove-file");
+}
 </script>
+
+<style>
+.p-fileupload-choose-button {
+    border-radius: 15px !important;
+    font-size: 12px !important;
+}
+.p-fileupload-cancel-button {
+    border-radius: 15px !important;
+    font-size: 12px !important;
+    color: #8d8d8d;
+}
+</style>

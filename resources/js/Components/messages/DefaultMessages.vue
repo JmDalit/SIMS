@@ -7,12 +7,12 @@
                     messageType === 'error'
                         ? 'dark:!bg-red-800/30 dark:!text-red-500 dark:!outline-red-700'
                         : messageType === 'warn'
-                        ? 'dark:!bg-yellow-800/30 dark:!text-yellow-500 dark:!outline-yellow-700'
-                        : messageType === 'info'
-                        ? 'dark:!bg-blue-800/30 dark:!text-blue-500 dark:!outline-blue-700'
-                        : messageType === 'success'
-                        ? 'dark:!bg-green-800/30 dark:!text-green-500 dark:!outline-green-700'
-                        : '',
+                          ? 'dark:!bg-yellow-800/30 dark:!text-yellow-500 dark:!outline-yellow-700'
+                          : messageType === 'info'
+                            ? 'dark:!bg-blue-800/30 dark:!text-blue-500 dark:!outline-blue-700'
+                            : messageType === 'success'
+                              ? 'dark:!bg-green-800/30 dark:!text-green-500 dark:!outline-green-700'
+                              : '',
             },
         }"
         :closable="closable"

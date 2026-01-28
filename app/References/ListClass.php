@@ -88,20 +88,30 @@ class ListClass
         if ($main) {
             return ListAgencies::where('is_delete', false)->when($search, function ($query) {
                 $search = strtolower(request('search'));
-
                 $query->where(function ($query) use ($search) {
                     $query->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
                         ->orWhereRaw('LOWER(slug) LIKE ?', ["%{$search}%"]);
                 });
             })->orderBy('id', 'desc')->paginate(10);
         } else {
-            return
-                ListAgencies::where('is_active', true)->where('is_delete', false)->get()->map(function ($role) {
-                    return [
-                        'id' => $role->id,
-                        'name' => $role->name,
-                    ];
-                });
+
+            if (Auth::check() && Auth::user()->role_array['name'] == 'regional staff' && Auth::user()->is_verified) {
+                return
+                    ListAgencies::where('is_active', true)->where('is_delete', false,)->where('id', Auth::user()->profile->agency_array['id'])->get()->map(function ($role) {
+                        return [
+                            'id' => $role->id,
+                            'name' => $role->name,
+                        ];
+                    });
+            } else {
+                return
+                    ListAgencies::where('is_active', true)->where('is_delete', false)->get()->map(function ($role) {
+                        return [
+                            'id' => $role->id,
+                            'name' => $role->name,
+                        ];
+                    });
+            }
         }
     }
 
@@ -209,45 +219,70 @@ class ListClass
             default:
 
 
+                return
+                    SchoolCampuses::where([
+                        'is_delete' => false,
+                        'is_active' => true,
+                    ])->when($search, function ($query) {
+                        $search = strtolower(request('search'));
+                        $query->whereHas('school', function ($q) use ($search) {
+                            $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
+                                ->orWhereRaw('LOWER(shortcut) LIKE ?', ["%{$search}%"]);
+                        });
+                    })
+                    ->orderBy('school_id', 'asc')
+                    ->orderBy('is_main', 'desc')
+                    ->orderBy('agency_id', 'asc')
+                    ->with([
+                        'school:id,name,reference_id,shortcut,photo',
+                        'address:id,campus_id,municipality_code,barangay_code,region_code',
+                        'term',
+                        'grading',
+                        'agency',
 
-                if (Auth::user()->role_array['name'] == 'regional staff') {
-                    return
-                        SchoolCampuses::where([
-                            'is_delete' => false,
-                            'is_active' => true,
-                        ])
-                        ->orderBy('school_id', 'asc')
-                        ->orderBy('is_main', 'desc')
-                        ->whereHas('address', function ($q) {
-                            $q->where('region_code', Auth::user()->profile->agency->region_code);
-                        })
-                        ->with([
-                            'school:id,name,reference_id,shortcut,photo',
-                            'address:id,campus_id,municipality_code,barangay_code,region_code',
-                            'term',
-                            'grading',
-                            'agency'
-                        ])
-                        ->paginate(10);
-                    break;
-                } else {
-                    return
-                        SchoolCampuses::where([
-                            'is_delete' => false,
-                            'is_active' => true,
-                        ])
-                        ->orderBy('school_id', 'asc')
-                        ->orderBy('is_main', 'desc')
-                        ->with([
-                            'school:id,name,reference_id,shortcut,photo',
-                            'address:id,campus_id,municipality_code,barangay_code,region_code',
-                            'term',
-                            'grading',
-                            'agency'
-                        ])
-                        ->paginate(10);
-                    break;
-                }
+                    ])
+
+                    ->withCount('courses')
+                    ->paginate(10);
+                break;
+                // if (Auth::user()->role_array['name'] == 'regional staff') {
+                //     return
+                //         SchoolCampuses::where([
+                //             'is_delete' => false,
+                //             'is_active' => true,
+                //         ])
+                //         ->orderBy('school_id', 'asc')
+                //         ->orderBy('is_main', 'desc')
+                //         ->whereHas('address', function ($q) {
+                //             $q->where('region_code', Auth::user()->profile->agency->region_code);
+                //         })
+                //         ->with([
+                //             'school:id,name,reference_id,shortcut,photo',
+                //             'address:id,campus_id,municipality_code,barangay_code,region_code',
+                //             'term',
+                //             'grading',
+                //             'agency'
+                //         ])
+                //         ->paginate(10);
+                //     break;
+                // } else {
+                //     return
+                //         SchoolCampuses::where([
+                //             'is_delete' => false,
+                //             'is_active' => true,
+                //         ])
+                //         ->orderBy('school_id', 'asc')
+                //         ->orderBy('is_main', 'desc')
+                //         ->with([
+                //             'school:id,name,reference_id,shortcut,photo',
+                //             'address:id,campus_id,municipality_code,barangay_code,region_code',
+                //             'term',
+                //             'grading',
+                //             'agency'
+                //         ])
+                //         ->paginate(10);
+                //     break;
+                // }
         }
     }
 

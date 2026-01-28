@@ -7,7 +7,11 @@
             <div class="bg-white dark:!bg-gray-800 p-5 rounded-2xl shadow lg:w-[30%]">
                 <div class="flex flex-col gap-2">
                     <div class="flex flex-col items-center mb-10 w-full text-slate-800">
-                        <Avatar size="large" image="/images/seilogo.png" />
+                        <div class="flex items-center gap-2">
+                            <Avatar size="large" image="/images/seilogo.png" />
+                            <Avatar size="large" image="/images/dostlogo.svg" />
+                        </div>
+
                         <div
                             class="font-semibold text-2xl md:text-[30px] text-gray-600 text-center antialiased dark:!text-gray-300 p-2">
                             Activate your

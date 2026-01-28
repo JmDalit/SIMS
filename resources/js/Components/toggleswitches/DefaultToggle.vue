@@ -1,10 +1,5 @@
 <template>
-    <ToggleSwitch
-        v-model="model"
-        v-tooltip.bottom="tooltip"
-        @update:model-value="updateValue()"
-        :disabled="disabled"
-    >
+    <ToggleSwitch v-model="model" v-tooltip.bottom="tooltip" @update:model-value="updateValue()" :disabled="disabled">
         <template #handle="{ checked }">
             <component :is="checkIcon" v-if="checked" size="12" />
             <component :is="unCheckIcon" v-else size="12" />

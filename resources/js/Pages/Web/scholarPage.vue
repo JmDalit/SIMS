@@ -1,78 +1,57 @@
 <template>
-    <Head title="Courses" />
+    <Head title="Scholars" />
     <AuthLayout>
         <div class="flex flex-col w-full h-full gap-10">
             <div class="flex">
                 <HeaderModule
-                    title="List of Courses"
-                    description="Course information and management"
+                    title="Scholar Records"
+                    description="Access all scholar profiles, programs, and status updates in one place."
                 />
             </div>
             <div class="flex-1 flex flex-col gap-2">
                 <ToolbarModule
                     v-model="searchInput"
                     @deleteSearch="clearSearch"
-                    @saveForm="submitForm"
+                    @saveForm="submitForm({ type: 'create' })"
                     button-label="Create"
                     :dialog-title="
-                        !scholarForm.id ? 'Create Scholar' : 'Edit Scholar'
+                        !filesUploadForm.id ? 'Create Scholar' : 'Edit Scholar'
                     "
                     dialog-description="Define a new scholar and configure its access permissions."
-                    :dialog-button-loading="scholarForm.processing"
+                    :dialog-button-loading="filesUploadForm.processing"
                     :dialog-icon="IconUserCog"
                     dialog-button-label="Save"
-                    :message-has-errors="scholarForm.hasErrors"
-                    :message-errors="scholarForm.errors"
+                    :message-has-errors="filesUploadForm.hasErrors"
+                    :message-errors="filesUploadForm.errors"
                     @buttonOpenModal="toggleModal({ type: 'create' })"
                     message-type="error"
                     ref="toolbarRef"
                 >
                     <template #form>
-                        <Stepper v-model:value="scholarStepper">
-                            <StepPanels>
-                                <StepPanel :value="1">
-                                    <div class="flex gap-3 mt-5">
-                                        <div
-                                            class="w-90 flex flex-col items-center justify-between"
-                                        >
-                                            <Avatar
-                                                icon="pi pi-user"
-                                                class="mr-2"
-                                                size="xlarge"
-                                            />
-                                        </div>
-                                        <Divider layout="vertical" />
-                                        <div class="flex flex-col gap-5">
-                                            <TextInput
-                                                v-model="scholarForm.name"
-                                                label="SPAS ID"
-                                            ></TextInput>
-                                            <TextInput
-                                                v-model="scholarForm.name"
-                                                label="Last Name"
-                                            ></TextInput>
-                                            <TextInput
-                                                v-model="scholarForm.name"
-                                                label="First Name"
-                                            ></TextInput>
-                                            <div
-                                                class="flex items-center gap-4"
-                                            >
-                                                <TextInput
-                                                    v-model="scholarForm.name"
-                                                    label="Middle Name"
-                                                ></TextInput>
-                                                <TextInput
-                                                    v-model="scholarForm.name"
-                                                    label="Suffix"
-                                                    class="!w-50"
-                                                ></TextInput>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </StepPanel>
-                            </StepPanels>
-                        </Stepper>
+                        <div class="my-5">
+                            <div
+                                class="flex justify-between text-xs text-gray-400 italic"
+                            >
+                                <div>
+                                    To get the scholars template, please
+                                    <a
+                                        href="/templates/scholar_template.xlsx"
+                                        download
+                                        class="text-blue-500 underline text-xs"
+                                        >Download Here</a
+                                    >
+                                </div>
+                            </div>
+                            <UploadInput
+                                @remove-file="removeFile"
+                                @select-files="handleFiles"
+                                accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                            ></UploadInput>
+                            <span class="text-gray-400 text-xs"
+                                >**Please upload a CSV or Excel file containing
+                                scholar</span
+                            >
+                        </div>
                     </template>
                 </ToolbarModule>
                 <DefaultTable
@@ -158,66 +137,6 @@
         </div>
         <DefaultToast ref="toastRef" />
         <DefaultConfirmDialog ref="confirmRef" />
-        <DefaultDialog
-            v-model:visible="gradeDialog"
-            hide-footer
-            :icon="IconBook2"
-            width-set="lg:!w-[80%]"
-            title="Grades"
-            description="View all subjects offered under this course, including their codes, units, and classifications."
-        >
-            <template #forms>
-                <div
-                    class="my-5"
-                    v-for="(term, index) in page.props.scholarDetails"
-                    :key="index"
-                >
-                    <Divider type="dashed"></Divider>
-                    <div class="flex justify-between gap-5 p-2">
-                        <div class="flex items-center gap-2">
-                            <div class="bg-slate-200 p-2 shadow rounded-xl">
-                                <IconFileDescription size="20" />
-                            </div>
-                            <div class="flex flex-col">
-                                <div class="text-xs">TERM</div>
-                                <div class="text-sm font-bold">
-                                    {{ term.term }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-2">
-                            <div class="bg-slate-200 p-2 shadow rounded-xl">
-                                <IconCalendarWeek size="20" />
-                            </div>
-                            <div class="flex flex-col">
-                                <div class="text-xs">School Year</div>
-                                <div class="text-sm font-bold">
-                                    {{ term.school_year }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <DefaultScrollTable :items="term.subjects">
-                        <Column
-                            header="Description"
-                            class="capitalize"
-                            field="subject_name"
-                            style="width: 30%"
-                        >
-                        </Column>
-                        <Column header="Code" class="capitalize" field="code">
-                        </Column>
-                        <Column header="UNIT" class="capitalize" field="unit">
-                        </Column>
-                        <Column header="Grades" class="" field="grade">
-                        </Column>
-                        <Column header="status" class="status" field="status">
-                        </Column>
-                    </DefaultScrollTable>
-                </div>
-            </template>
-        </DefaultDialog>
     </AuthLayout>
 </template>
 <script setup>
@@ -246,10 +165,10 @@ import {
     IconFileDescription,
 } from "@tabler/icons-vue";
 import DefaultDialog from "../../Components/dialogs/DefaultDialog.vue";
+import UploadInput from "../../Components/inputs/UploadInput.vue";
 
 const page = usePage();
 const searchInput = ref(null);
-const scholarStepper = ref(1);
 const timerBounce = ref(null);
 const selectedRow = ref(null);
 const toolbarRef = ref(null);
@@ -257,18 +176,17 @@ const toastRef = ref(null);
 const confirmRef = ref(null);
 const menu = ref(null);
 const suggestions = ref(null);
-const gradeDialog = ref(false);
-const scholarForm = useForm({
-    id: null,
-    name: null,
-    field: null,
-    abbreviation: null,
-    isActive: false,
+const filesUploadForm = useForm({
+    files: [],
 });
 
 const toggleOption = (event, rowData) => {
     selectedRow.value = rowData;
     menu.value.toggle(event);
+};
+
+const handleFiles = (e) => {
+    filesUploadForm.files = Array.from(e.files);
 };
 
 const menuItems = computed(() => {
@@ -305,12 +223,9 @@ const menuItems = computed(() => {
     ];
 });
 
-const openGradeScholar = () => {
-    gradeDialog.value = true;
-};
-
 const toggleModal = (res) => {
-    scholarForm.resetAndClearErrors();
+    filesUploadForm.files = [];
+    filesUploadForm.resetAndClearErrors();
 
     if (res.type === "edit") {
         scholarForm.id = res.data.id;
@@ -332,62 +247,54 @@ const deleteRow = (id) => {
                     scholarForm.resetAndClearErrors();
                     toastRef.value.show(page.props.flash);
                 },
-            }
+            },
         );
     });
 };
 
-const submitForm = () => {
-    if (!scholarForm.id) {
-        scholarForm.post(route("academic.courses.store"), {
+const removeFile = (e) => {
+    filesUploadForm.files = [];
+    filesUploadForm.resetAndClearErrors();
+};
+
+const submitForm = (res) => {
+    console.log(filesUploadForm.files);
+    if (res.type === "create") {
+        filesUploadForm.post(route("scholar.store"), {
+            forceFormData: true,
             onSuccess: () => {
-                scholarForm.resetAndClearErrors();
                 toastRef.value.show(page.props.flash);
             },
         });
-    } else {
-        scholarForm.put(
-            route("academic.courses.update", {
-                id: scholarForm.id,
-                type: "form",
-            }),
-            {
-                onSuccess: () => {
-                    toolbarRef.value.closeModal();
-                    scholarForm.resetAndClearErrors();
-                    toastRef.value.show(page.props.flash);
-                },
-            }
-        );
     }
 };
-const updateStatus = (result) => {
-    scholarForm.isActive = result.is_active;
-    scholarForm.put(
-        route("academic.courses.update", { id: result.id, type: "status" }),
-        {
-            onSuccess: () => {
-                toastRef.value.show(page.props.flash);
-            },
-        }
-    );
-};
+// const updateStatus = (result) => {
+//     scholarForm.isActive = result.is_active;
+//     scholarForm.put(
+//         route("academic.courses.update", { id: result.id, type: "status" }),
+//         {
+//             onSuccess: () => {
+//                 toastRef.value.show(page.props.flash);
+//             },
+//         },
+//     );
+// };
 
 const clearSearch = () => {
     searchInput.value = null;
 };
 
-const autoSearch = (event) => {
-    setTimeout(() => {
-        if (!event.trim().length) {
-            suggestions.value = [...countries.value];
-        } else {
-            suggestions.value = page.props.categories.filter((search) => {
-                return search.name.toLowerCase().includes(event.toLowerCase());
-            });
-        }
-    }, 250);
-};
+// const autoSearch = (event) => {
+//     setTimeout(() => {
+//         if (!event.trim().length) {
+//             suggestions.value = [...countries.value];
+//         } else {
+//             suggestions.value = page.props.categories.filter((search) => {
+//                 return search.name.toLowerCase().includes(event.toLowerCase());
+//             });
+//         }
+//     }, 250);
+// };
 
 const loadPage = (page) => {
     router.get(
@@ -399,17 +306,17 @@ const loadPage = (page) => {
         {
             preserveState: true,
             preserveScroll: true,
-        }
+        },
     );
 };
 
-watch(
-    () => searchInput.value,
-    () => {
-        clearTimeout(timerBounce.value);
-        timerBounce.value = setTimeout(() => {
-            loadPage(1);
-        }, 300);
-    }
-);
+// watch(
+//     () => searchInput.value,
+//     () => {
+//         clearTimeout(timerBounce.value);
+//         timerBounce.value = setTimeout(() => {
+//             loadPage(1);
+//         }, 300);
+//     },
+// );
 </script>

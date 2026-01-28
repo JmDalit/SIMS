@@ -6,6 +6,7 @@ use App\Models\LocationBarangays;
 use App\Models\LocationCity;
 use App\Models\LocationProvinces;
 use App\Models\LocationRegions;
+use Illuminate\Support\Facades\Auth;
 
 class LocationClass
 {
@@ -124,27 +125,60 @@ class LocationClass
     public function getFullAddress($search  = '')
     {
 
-        return
-            LocationBarangays::where('is_active', true)->where('is_delete', false)->with(['cityCode'])->when($search, function ($query) use ($search) {
+        return LocationBarangays::where('is_active', true)
+            ->where('is_delete', false)
+            ->with(['cityCode.provinceCode.regionCode'])
+            ->when(
+                Auth::check() &&
+                    Auth::user()->role_array['name'] == 'regional staff' &&
+                    Auth::user()->is_verified,
+                function ($query) {
+                    $region = Auth::user()->profile->agency->region_code;
+
+                    $query->whereHas('cityCode.provinceCode.regionCode', function ($q) use ($region) {
+                        $q->where('code', $region); // use region_code OR code depending on table
+                    });
+                }
+            )
+            ->when($search, function ($query, $search) {
 
                 $search = strtolower($search);
 
-                $query->where(function ($query) use ($search) {
-                    $query->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
-                        ->orwhereHas('cityCode', function ($query) use ($search) {
-                            $query->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
-                                ->orWhereHas('provinceCode', function ($query) use ($search) {
-                                    $query->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
-                                        ->orWhereHas('regionCode', function ($query) use ($search) {
-                                            $query->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
-                                        });
-                                });
+                $query->where(function ($q) use ($search) {
+
+                    // barangay
+                    $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
+
+                        // city
+                        ->orWhereHas('cityCode', function ($q) use ($search) {
+                            $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
+                        })
+
+                        // province
+                        ->orWhereHas('cityCode.provinceCode', function ($q) use ($search) {
+                            $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
+                        })
+
+                        // region
+                        ->orWhereHas('cityCode.provinceCode.regionCode', function ($q) use ($search) {
+                            $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
                         });
                 });
-            })->limit(50)->get()->map(function ($row) {
+            })
+
+            ->limit(200)
+            ->get()
+            ->map(function ($row) {
                 return [
-                    'id' => $row->code . '-' . $row->cityCode->code . '-' . $row->cityCode->provinceCode->code . '-' . $row->cityCode->provinceCode->regionCode->code,
-                    'name' => $row->name . ', ' . $row->cityCode->name . ', ' . $row->cityCode->provinceCode->name . ', ' . $row->cityCode->provinceCode->regionCode->name,
+                    'id' => $row->code . '-' .
+                        $row->cityCode->code . '-' .
+                        $row->cityCode->provinceCode->code . '-' .
+                        $row->cityCode->provinceCode->regionCode->code,
+
+                    'name' => $row->name . ', ' .
+                        $row->cityCode->name . ', ' .
+                        $row->cityCode->provinceCode->name . ', ' .
+                        $row->cityCode->provinceCode->regionCode->name,
                 ];
             });
     }

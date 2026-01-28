@@ -11,6 +11,7 @@ use App\References\ListClass;
 use App\References\LocationClass;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class SchoolController extends Controller
@@ -48,7 +49,7 @@ class SchoolController extends Controller
                 : null,
             //search
             'resultSearch' => request('autosuggest')
-                ? ($location->getFullAddress(request('autosuggest'))?->toArray() ?? [])
+                ? ($location->getFullAddress(request('autosuggest')) ?? [])
                 : [],
             'schoolDetail' => $schoolDetail,
 
@@ -73,7 +74,7 @@ class SchoolController extends Controller
                 ->select([
                     'id',
                     'campus_course_id',
-                    'total_year as yearNumber',
+
                     'years as yearLevel',
                     'semester_type_id as semesterTypeId'
                 ])
@@ -84,11 +85,27 @@ class SchoolController extends Controller
                 ->get()
                 ->toArray()
                 : null,
-
+            'regionAccess' => request('id') ?
+                SchoolCampuses::when(Auth::check() &&  Auth::user()->role_array['name'] == 'regional staff', function ($query) {
+                    $query->where('agency_id', Auth::user()->profile->agency_array['id']);
+                })
+                ->where('id', request('id'))
+                ->exists()
+                : false,
 
             'schoolEdit' => request('school_id')
-                ? Schools::with(['campuses'])->find(request('school_id'))?->toArray()
-                : null,
+                ? Schools::with(['campuses' => function ($query) {
+                    if (Auth::user()->role_array['name'] != 'Administrator') {
+
+                        $query->whereHas('agency', function ($q) {
+                            $q->where('name',  Auth::user()->profile->agency->name);
+                        });
+                    }
+                    $query->with('address'); // Always load address
+                }])
+                ->where('id', request('school_id'))
+                ->first()?->toArray()
+                : null
         ]);
     }
 
@@ -97,7 +114,7 @@ class SchoolController extends Controller
         $data = $request->validated();
 
         $school = Schools::create([
-            'name' => $data['name'],
+            'name' => Str::lower($data['name']),
             'shortcut' => $data['abbreviation'],
             'reference_id' => $data['class']['id'],
             'created_by'    => Auth::user()->profile->fullname
@@ -108,11 +125,9 @@ class SchoolController extends Controller
             $campusModel = $school->campuses()->create([
                 'is_main' => $campus['main'],
                 'term_id' => $campus['semester']['id'],
-                'name' => $campus['name'],
+                'name' => isset($campus['name']) ? Str::lower($campus['name']) : null,
                 'agency_id' => $campus['agency']['id'],
                 'grading_id' => $campus['grading']['id'],
-                'start_date' => $campus['startDate'],
-                'end_date' => $campus['endDate'],
                 'created_by'    => Auth::user()->profile->fullname
             ]);
 
@@ -161,7 +176,7 @@ class SchoolController extends Controller
                         'is_main'     => $campus['main'],
                         'term_id'     => $campus['semester']['id'],
                         'agency_id'   => $campus['agency']['id'],
-                        'name'        => $campus['name'],
+                        'name' => isset($campus['name']) ? Str::lower($campus['name']) : null,
                         'start_date'  => $campus['startDate'],
                         'end_date'    => $campus['endDate'],
                         'grading_id'  => $campus['grading']['id'],
@@ -209,17 +224,19 @@ class SchoolController extends Controller
         ]);
     }
 
-    // function destroy(int $id)
-    // {
-    //     $find = LocationCity::findOrFail($id);
-    //     $find->update([
-    //         'is_delete' => true,
-    //     ]);
+    function destroyCampus(int $id)
+    {
+        $find = SchoolCampuses::findOrFail($id);
+        $find->update([
+            'is_delete' => true,
+        ]);
 
-    //     return redirect()->back()->with('flash', [
-    //         'status' => 'success',
-    //         'title'  => 'University Deleted',
-    //         'message' => 'University successfully deleted.',
-    //     ]);
-    // }
+
+
+        return redirect()->back()->with('flash', [
+            'status' => 'success',
+            'title'  => 'School Campus Deleted',
+            'message' => 'School campus successfully deleted.',
+        ]);
+    }
 }

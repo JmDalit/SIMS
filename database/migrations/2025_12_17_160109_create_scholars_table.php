@@ -14,9 +14,8 @@ return new class extends Migration
         Schema::create('scholars', function (Blueprint $table) {
             $table->id();
             $table->string('spas_id')->unique();
-            $table->string('program');
-            // $table->tinyInteger('program_id')->unsigned()->index();
-            // $table->foreign('program_id')->references('id')->on('list_programs')->onDelete('cascade');
+            $table->tinyInteger('program_id')->unsigned()->index();
+            $table->foreign('program_id')->references('id')->on('list_programs')->onDelete('cascade');
             $table->tinyInteger('category_id')->unsigned()->index();
             $table->foreign('category_id')->references('id')->on('list_references')->onDelete('cascade');
             $table->tinyInteger('status_id')->unsigned()->index();

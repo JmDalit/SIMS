@@ -62,7 +62,7 @@
                 <span class="font-semibold">{{
                     Math.min(
                         pagination.currentPage * pagination.perPage,
-                        pagination.total
+                        pagination.total,
                     )
                 }}</span>
                 of
@@ -139,14 +139,17 @@ function onPageChange(event) {
     margin-right: 1rem !important;
     display: block;
 }
+
 ::v-deep(.p-datatable-header-cell) {
     background-color: transparent !important;
 }
+
 ::v-deep(.p-datatable-column-header-content) {
     &:where(.dark, .dark *) {
         color: #d1d1d1;
     }
 }
+
 /* ::v-deep(.p-datatable-tbody) {
     background-color: transparent !important;
 } */

@@ -13,6 +13,7 @@ use App\Http\Controllers\Web\LocationBarangayController;
 use App\Http\Controllers\Web\LocationCityController;
 use App\Http\Controllers\Web\LocationProvinceController;
 use App\Http\Controllers\Web\LocationRegionController;
+use App\Http\Controllers\Web\programController;
 use App\Http\Controllers\Web\ReferenceController;
 use App\Http\Controllers\Web\RoleController;
 use App\Http\Controllers\Web\RouteController;
@@ -53,6 +54,12 @@ Route::middleware('auth', 'web')->group(function () {
     Route::put('users/{id}/{type}', [UserController::class, 'update'])->name('users.update');
     Route::delete('users/{id}/{type}', [UserController::class, 'destroy'])->name('users.destroy');
 
+
+
+    Route::post('programs', [programController::class, 'store'])->name('programs.store');
+    Route::put('programs/{id}/{type}', [programController::class, 'update'])->name('programs.update');
+    Route::delete('programs/{id}/{type}', [programController::class, 'destroy'])->name('programs.destroy');
+
     Route::post('location/regions', [LocationRegionController::class, 'store'])->name('location.regions.store');
     Route::put('location/regions/{id}/{type}', [LocationRegionController::class, 'update'])->name('location.regions.update');
     Route::delete('location/regions/{id}/{type}', [LocationRegionController::class, 'destroy'])->name('location.regions.destroy');
@@ -79,7 +86,7 @@ Route::middleware('auth', 'web')->group(function () {
 
     Route::post('academic/universities', [SchoolController::class, 'store'])->name('academic.universities.store');
     Route::put('academic/universities/{id}/{type}', [SchoolController::class, 'update'])->name('academic.universities.update');
-    Route::delete('academic/universities/{id}/{type}', [SchoolController::class, 'destroy'])->name('academic.universities.destroy');
+    Route::delete('academic/universities/{id}/{type}', [SchoolController::class, 'destroyCampus'])->name('academic.universities.campus');
 
     Route::post('academic/universities/course', [CampusCourseController::class, 'store'])->name('academic.universities.course.store');
     Route::put('academic/universities/course/{id}/{type}', [CampusCourseController::class, 'update'])->name('academic.universities.course.update');
@@ -109,6 +116,10 @@ Route::middleware('auth', 'web')->group(function () {
     Route::put('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'update'])->name('campus.curriculum.update');
     Route::delete('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'destroySubject'])->name('campus.curriculum.destroySubject');
     Route::delete('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'destroyCurriculum'])->name('campus.curriculum.destroyCurriculum');
+
+    Route::post('scholar', [ScholarController::class, 'store'])->name('scholar.store');
+    Route::put('scholar/{id}/{type}', [ScholarController::class, 'update'])->name('scholar.update');
+    Route::delete('scholar/{id}/{type}', [ScholarController::class, 'destroy'])->name('scholar.destroy');
 });
 Route::middleware('auth', 'web', 'role')->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -124,4 +135,5 @@ Route::middleware('auth', 'web', 'role')->group(function () {
     Route::get('academic/schools', [SchoolController::class, 'index'])->name('academic.universities');
     Route::get('scholar/statuses', [StatusController::class, 'index'])->name('statuses');
     Route::get('scholars', [ScholarController::class, 'index'])->name('scholars');
+    Route::get('programs', [programController::class, 'index'])->name('programs');
 });

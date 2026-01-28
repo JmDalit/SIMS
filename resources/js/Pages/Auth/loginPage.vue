@@ -1,16 +1,18 @@
 <template>
+
     <Head title="Log in" />
     <GuestLayout>
         <div class="w-full max-w-md mx-auto">
             <div class="flex flex-col gap-4">
-                <div
-                    class="flex flex-col items-center mb-10 w-full text-slate-800"
-                >
-                    <div
-                        class="font-semibold text-2xl md:text-[30px] text-center antialiased dark:!text-gray-300 p-2"
-                    >
+                <div class="flex flex-col items-center mb-10 w-full text-slate-800">
+                    <div class="flex items-center  gap-2">
+                        <Avatar size="large" image="/images/seilogo.png" />
+                        <Avatar size="large" image="/images/dostlogo.svg" />
+                    </div>
+
+                    <div class="font-semibold text-2xl md:text-[30px] text-center antialiased dark:!text-gray-300 p-2">
                         Welcome to
-                        <span class="text-blue-600">STSIMS!</span>
+                        <span class="text-blue-600">SIMS!</span>
                         🎓
                     </div>
                     <div class="w-full text-center text-[14px] text-gray-400">
@@ -19,75 +21,38 @@
                     </div>
                 </div>
                 <div class="">
-                    <DefaultButton
-                        label="Login OTP"
-                        outlined
-                        class-name="w-full"
-                        severity="secondary"
-                        :icon="IconPasswordUser"
-                        @click="openModal"
-                    />
-                    <Divider
-                        align="center"
-                        :pt="{
-                            content: {
-                                class: 'dark:!bg-gray-800 dark:!text-gray-200',
-                            },
-                        }"
-                    >
-                        <span class="text-xs text-gray-400"
-                            >Or continue with email</span
-                        >
+                    <DefaultButton label="Login OTP" outlined class-name="w-full" severity="secondary"
+                        :icon="IconPasswordUser" @click="openModal" />
+                    <Divider align="center" :pt="{
+                        content: {
+                            class: 'dark:!bg-gray-800 dark:!text-gray-200',
+                        },
+                    }">
+                        <span class="text-xs text-gray-400">Or continue with email</span>
                     </Divider>
                 </div>
-                <DefaultMessages
-                    v-if="loginForm.hasErrors"
-                    :message="loginForm.errors"
-                    message-type="error"
-                    :icon="IconAlertCircle"
-                ></DefaultMessages>
+                <DefaultMessages v-if="loginForm.hasErrors" :message="loginForm.errors" message-type="error"
+                    :icon="IconAlertCircle"></DefaultMessages>
                 <form @submit.prevent="submitForm">
                     <div class="w-full flex-1 flex flex-col gap-4">
-                        <TextInput
-                            label="Email"
-                            type="email"
-                            v-model="loginForm.email"
-                        />
+                        <TextInput label="Email" type="email" v-model="loginForm.email" />
                         <div class="flex flex-col">
-                            <PasswordInput
-                                label="Password"
-                                v-model="loginForm.password"
-                                :feedback="false"
-                                toggle-icon
-                            />
+                            <PasswordInput label="Password" v-model="loginForm.password" :feedback="false"
+                                toggle-icon />
                             <div class="flex justify-between py-2">
-                                <DefaultCheckbox
-                                    label="Remember Me"
-                                    v-model="loginForm.remember"
-                                    binary
-                                ></DefaultCheckbox>
+                                <DefaultCheckbox label="Remember Me" v-model="loginForm.remember" binary>
+                                </DefaultCheckbox>
                             </div>
                         </div>
 
-                        <DefaultButton
-                            label="Login"
-                            class="mt-5"
-                            :loading="loginForm.processing"
-                            :disabled="loginForm.processing"
-                            raised
-                        />
+                        <DefaultButton label="Login" class="mt-5" :loading="loginForm.processing"
+                            :disabled="loginForm.processing" raised />
                     </div>
                 </form>
-                <span class="text-center mt-5 text-sm text-gray-400"
-                    >@SEI - 2025</span
-                >
+                <!-- <span class="text-center mt-5 text-sm text-gray-400">@SEI - 2025</span> -->
             </div>
         </div>
-        <OtpDialog
-            v-model:visible="otpModal"
-            :icon="IconPasswordUser"
-            button-label="Send OTP"
-        ></OtpDialog>
+        <OtpDialog v-model:visible="otpModal" :icon="IconPasswordUser" button-label="Send OTP"></OtpDialog>
     </GuestLayout>
 </template>
 <script setup>

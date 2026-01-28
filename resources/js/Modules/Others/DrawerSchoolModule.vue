@@ -25,14 +25,34 @@
                 </div>
 
                 <div class="flex flex-col">
-                    <div class="font-bold capitalize">
-                        <span>{{ page.props?.schoolDetail.school.name }}</span>
-                        -
-                        {{
-                            page.props?.schoolDetail.name ??
-                            page.props?.schoolDetail.address.municipality_array
-                                .name
-                        }}
+                    <div class="font-bold flex items-center gap-1 capitalize">
+                        <div>
+                            <span>{{
+                                page.props?.schoolDetail.school.name
+                            }}</span>
+                            -
+
+                            {{
+                                page.props?.schoolDetail.name ??
+                                page.props?.schoolDetail.address
+                                    .municipality_array.name
+                            }}
+                        </div>
+
+                        <DefaultButton
+                            rounded
+                            text
+                            size="small"
+                            :icon-size="15"
+                            severity="danger"
+                            :icon="IconTrash"
+                            @click="
+                                deleteRow({
+                                    id: page.props?.schoolDetail.id,
+                                    type: 'campus',
+                                })
+                            "
+                        ></DefaultButton>
                     </div>
                     <div class="text-xs flex items-center gap-1 text-gray-500">
                         <IconMapPin size="18" />
@@ -107,7 +127,7 @@
                                 <div
                                     class="text-xs font-semibold flex items-center"
                                 >
-                                    <div>DEAN:</div>
+                                    <div>PRESIDENT:</div>
                                 </div>
                                 <div class="text-sm font-light">
                                     {{
@@ -154,7 +174,8 @@
                                 v-else
                                 v-model="detailsForm.registrar"
                                 placeholder="Registrar's name"
-                            ></TextInput>
+                            >
+                            </TextInput>
                         </div>
                     </div>
                     <div class="flex justify-between gap-2">
@@ -182,7 +203,8 @@
                                 v-else
                                 v-model="detailsForm.contact"
                                 placeholder="School Contact No."
-                            ></TextInput>
+                            >
+                            </TextInput>
                         </div>
                         <div class="w-[50%] flex items-center gap-2">
                             <div class="bg-slate-200 p-2 shadow rounded-xl">
@@ -284,7 +306,7 @@
                     <DefaultScrollTable
                         :items="page.props?.schoolDetail.courses"
                     >
-                        <Column header="Name" field="course.name">
+                        <Column header="Programs" field="course.name">
                             <template #body="props">
                                 {{ props.data.course.name }}
                             </template>
@@ -633,12 +655,14 @@
                         <DatePickerInput
                             label="Start Date"
                             v-model="semesterForm.semester[index].startDate"
-                        ></DatePickerInput>
+                        >
+                        </DatePickerInput>
 
                         <DatePickerInput
                             label="End Date"
                             v-model="semesterForm.semester[index].endDate"
-                        ></DatePickerInput>
+                        >
+                        </DatePickerInput>
                     </div>
                 </div>
             </div>
@@ -733,7 +757,8 @@
                                         placeholder="Select year"
                                         class="!w-25"
                                         v-model="curItem.yearLevel"
-                                    ></TextInput>
+                                    >
+                                    </TextInput>
 
                                     <DefaultButton
                                         size="small"
@@ -775,9 +800,60 @@
                                     :collapsed="year != 1 ? true : false"
                                 >
                                     <template #header>
-                                        <div class="font-semibold text-sm">
-                                            {{ convertNumberToWord(year) }}
-                                            Year
+                                        <div
+                                            class="flex w-full items-center justify-between"
+                                        >
+                                            <div class="text-sm font-semibold">
+                                                {{ convertNumberToWord(year) }}
+                                                Year
+                                            </div>
+                                            <div
+                                                class="flex items-center gap-5 px-10"
+                                            >
+                                                <div
+                                                    class="flex items-center gap-2"
+                                                >
+                                                    <IconBooks></IconBooks>
+
+                                                    <div
+                                                        class="text-xs font-bold"
+                                                    >
+                                                        {{
+                                                            totalYearSubject({
+                                                                curriculumKey:
+                                                                    curKey,
+                                                                year: year,
+                                                            })
+                                                        }}
+                                                        <span
+                                                            class="font-medium"
+                                                            >Total
+                                                            Subjects</span
+                                                        >
+                                                    </div>
+                                                </div>
+
+                                                <div
+                                                    class="flex items-center gap-2"
+                                                >
+                                                    <IconNotebook></IconNotebook>
+                                                    <div
+                                                        class="text-xs font-bold"
+                                                    >
+                                                        {{
+                                                            totalYearUnit({
+                                                                curriculumKey:
+                                                                    curKey,
+                                                                year: year,
+                                                            })
+                                                        }}
+                                                        <span
+                                                            class="font-medium"
+                                                            >Total units</span
+                                                        >
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </template>
                                     <template #default>
@@ -993,7 +1069,8 @@
                                                                         "
                                                                         capitalize
                                                                         label="Description"
-                                                                    ></TextInput>
+                                                                    >
+                                                                    </TextInput>
                                                                 </div>
                                                                 <div
                                                                     class="w-[20%]"
@@ -1103,7 +1180,8 @@
                                                             "
                                                             class-name="w-full !rounded-xl"
                                                             label="Add Subjects"
-                                                        ></DefaultButton>
+                                                        >
+                                                        </DefaultButton>
                                                     </div>
                                                 </template>
                                             </Panel>
@@ -1180,7 +1258,6 @@ import {
     ref,
     watch,
 } from "vue";
-import { button, root } from "@primeuix/themes/aura/inputnumber";
 
 const props = defineProps({
     id: [Number, String],
@@ -1229,6 +1306,26 @@ const countSubject = (res) => {
     return count;
 };
 
+const totalYearSubject = (res) => {
+    console.log(curriculumForm.multi[res.curriculumKey].subjects);
+
+    const count = curriculumForm.multi[res.curriculumKey].subjects.filter(
+        (s) => s.year == res.year,
+    ).length;
+
+    return count;
+};
+
+const totalYearUnit = (res) => {
+    console.log(curriculumForm.multi[res.curriculumKey].subjects);
+
+    const count = curriculumForm.multi[res.curriculumKey].subjects
+        .filter((s) => s.year == res.year)
+        .reduce((sum, s) => sum + parseInt(s.unit), 0);
+
+    return count;
+};
+
 const countUnit = (res) => {
     const count = curriculumForm.multi[res.curriculumKey].subjects
         .filter(
@@ -1267,6 +1364,7 @@ const recentUpdateSubject = (res) => {
 const page = usePage();
 
 const drawer = ref(false);
+
 const subjectDialog = ref(false);
 const updateSchool = ref(false);
 const typeDialog = ref(null);
@@ -1609,6 +1707,7 @@ const UpdateDetailsForm = () => {
 const submitCurriculum = () => {
     curriculumForm.post(route("campus.curriculum.store"), {
         onSuccess: () => {
+            curriculumForm.multi = [];
             curriculumForm.resetAndClearErrors();
             if (page.props?.subjectDetail.length != 0) {
                 for (
@@ -1760,6 +1859,22 @@ const deleteRow = (res) => {
                 );
             });
             break;
+        case "campus":
+            props.confirmRef.popupDialog(() => {
+                router.delete(
+                    route("academic.universities.campus", {
+                        id: res.id,
+                        type: "delete",
+                    }),
+                    {
+                        onSuccess: () => {
+                            toastRef.value.show(page.props.flash);
+                            drawer.value = false;
+                        },
+                    },
+                );
+            });
+            break;
         default:
             props.confirmRef.popupDialog(() => {
                 router.delete(
@@ -1786,7 +1901,7 @@ watch(
     () => subjectDialog.value,
     (val) => {
         if (val) return;
-        // curriculumForm.multi = JSON.parse(JSON.stringify([]));
+        curriculumForm.multi = JSON.parse(JSON.stringify([]));
         curriculumForm.resetAndClearErrors();
         curriculumForm.reset();
     },
