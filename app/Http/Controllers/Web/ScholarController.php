@@ -41,7 +41,7 @@ class ScholarController extends Controller
                     'created_at' => $file->created_at,
                     'validated_by' => $file->validated_by,
                     'validated_at' => $file->validated_at,
-                ]),
+                ]) : []
         ]);
     }
 

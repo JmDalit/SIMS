@@ -31,7 +31,7 @@ use App\Http\Controllers\Web\UserController;
 use App\Models\SchoolCampusCourseSubjects;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::middleware('guest')->group(function () {
