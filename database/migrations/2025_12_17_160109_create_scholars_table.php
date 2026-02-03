@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('scholars', function (Blueprint $table) {
             $table->id();
-            $table->string('spas_id')->unique();
+            $table->string('spas_no')->unique();
             $table->tinyInteger('program_id')->unsigned()->index();
             $table->foreign('program_id')->references('id')->on('list_programs')->onDelete('cascade');
             $table->tinyInteger('category_id')->unsigned()->index();
             $table->foreign('category_id')->references('id')->on('list_references')->onDelete('cascade');
+            $table->tinyInteger('type_id')->unsigned()->index();
+            $table->foreign('type_id')->references('id')->on('list_references')->onDelete('cascade');
             $table->tinyInteger('status_id')->unsigned()->index();
             $table->foreign('status_id')->references('id')->on('list_statuses')->onDelete('cascade');
             $table->boolean('is_active')->default(true);

@@ -55,7 +55,13 @@
                                         text
                                         severity="danger"
                                         class="!rounded-[15px] !h-[20px] !w-[20px] !p-0"
-                                        @click="removeFileCallback(key)"
+                                        @click="
+                                            handleRemoveFile(
+                                                key,
+                                                item,
+                                                removeFileCallback,
+                                            )
+                                        "
                                     >
                                         <IconX size="30" />
                                     </Button>
@@ -78,7 +84,7 @@ import { IconFileDescription, IconX } from "@tabler/icons-vue";
 import { ref } from "vue";
 import DefaultMessages from "../messages/DefaultMessages.vue";
 
-const emit = defineEmits(["select-files", "remove-file"]);
+const emit = defineEmits(["select-files", "remove-file", "single-remove-file"]);
 
 defineProps({
     accept: {
@@ -96,6 +102,11 @@ function formatFileSize(size) {
 function onRemoveUploadedFile() {
     emit("remove-file");
 }
+
+const handleRemoveFile = (key, file, removeFileCallback) => {
+    removeFileCallback(key);
+    emit("remove-file", file);
+};
 </script>
 
 <style>

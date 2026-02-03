@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('school_campuses', function (Blueprint $table) {
             $table->id();
             $table->string('name')->nullable();
+            $table->string('generated_name')->nullable();
             $table->foreignId('school_id')->constrained('schools')->onDelete('set null');
             $table->foreignId('agency_id')->constrained('list_agencies')->onDelete('set null');
             $table->foreignId('term_id')->constrained('list_references')->onDelete('set null');

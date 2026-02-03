@@ -82,6 +82,31 @@ class UserController extends Controller
         ]);
     }
 
+    function resend(string $id)
+    {
+        $user = User::findOrFail($id);
+        $activation = Str::random(64);
+
+        if ($user->is_verified) {
+            return redirect()->back()->with('flash', [
+                'status' => 'error',
+                'title'  => 'Cannot Resend Email',
+                'message' => 'User is already verified.',
+            ]);
+        }
+
+        $user->update([
+            'activation_token'  => $activation,
+        ]);
+        Mail::to($user->email)->send(new UserCreatedMail($user, $activation));
+
+        return redirect()->back()->with('flash', [
+            'status' => 'success',
+            'title'  => 'Email Resent',
+            'message' => 'User activation email successfully resent.',
+        ]);
+    }
+
     function update(UserRequest $request, string $id, string $type)
     {
 

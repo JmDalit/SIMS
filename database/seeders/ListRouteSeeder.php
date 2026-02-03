@@ -270,7 +270,7 @@ class ListRouteSeeder extends Seeder
                 ],
                 [
                     "id" => 6,
-                    "label" => "universities",
+                    "label" => "Schools",
                     "roles" =>  json_encode([
                         [
                             'id' => 1,
@@ -279,7 +279,7 @@ class ListRouteSeeder extends Seeder
                     ]),
                     "main_id" => 5,
                     "route" => "/academic/universities",
-                    "component" => "Web/universityPage",
+                    "component" => "Web/schoolPage",
                     "slug" => "universities",
                     "icon" => "IconBuildings",
                     "order_no" => 5,

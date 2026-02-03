@@ -1,14 +1,17 @@
 <?php
 
 use App\Http\Controllers\Auth\ActivationController;
+use App\Http\Controllers\Auth\ChangePasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OtpRequestController;
+use App\Http\Controllers\profileController;
 use App\Http\Controllers\Web\CampusCourseController;
 use App\Http\Controllers\Web\CampusCourseSubjectController;
 use App\Http\Controllers\Web\CampusGradeController;
 use App\Http\Controllers\Web\CourseController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\DashboardController;
+use App\Http\Controllers\Web\eventController;
 use App\Http\Controllers\Web\LocationBarangayController;
 use App\Http\Controllers\Web\LocationCityController;
 use App\Http\Controllers\Web\LocationProvinceController;
@@ -46,11 +49,15 @@ Route::middleware('auth', 'web')->group(function () {
     Route::put('roles/{id}/{type}', [RoleController::class, 'update'])->name('roles.update');
     Route::delete('roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy');
 
+    Route::post('user/changePassword', [ChangePasswordController::class, 'update'])->name('user.changePassword');
+
+
     Route::post('routes', [RouteController::class, 'store'])->name('routes.store');
     Route::put('routes/{id}/{type}', [RouteController::class, 'update'])->name('routes.update');
     Route::delete('routes/{id}', [RouteController::class, 'destroy'])->name('routes.destroy');
 
     Route::post('users', [UserController::class, 'store'])->name('users.store');
+    Route::post('users/email/{id}', [UserController::class, 'resend'])->name('users.resend');
     Route::put('users/{id}/{type}', [UserController::class, 'update'])->name('users.update');
     Route::delete('users/{id}/{type}', [UserController::class, 'destroy'])->name('users.destroy');
 
@@ -136,4 +143,5 @@ Route::middleware('auth', 'web', 'role')->group(function () {
     Route::get('scholar/statuses', [StatusController::class, 'index'])->name('statuses');
     Route::get('scholars', [ScholarController::class, 'index'])->name('scholars');
     Route::get('programs', [programController::class, 'index'])->name('programs');
+    Route::get('events', [eventController::class, 'index'])->name('events');
 });

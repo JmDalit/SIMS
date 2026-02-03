@@ -39,7 +39,7 @@ class StatusRequest extends FormRequest
                     'name' => ['required', 'string', 'lowercase'],
                     'type' => ['required', 'string', 'lowercase'],
                     'icon' => ['nullable'],
-                    'color' => ['nullable']
+                    'color' => ['required']
                 ];
                 break;
         }

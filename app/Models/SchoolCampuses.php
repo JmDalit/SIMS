@@ -17,6 +17,7 @@ class SchoolCampuses extends Model
         'is_main',
         'created_by',
         'updated_by',
+        'generated_name',
         'is_active',
         'is_delete',
     ];

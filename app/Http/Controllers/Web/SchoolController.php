@@ -101,7 +101,8 @@ class SchoolController extends Controller
                             $q->where('name',  Auth::user()->profile->agency->name);
                         });
                     }
-                    $query->with('address'); // Always load address
+                    $query->with('address');
+                    $query->where('is_delete', false);
                 }])
                 ->where('id', request('school_id'))
                 ->first()?->toArray()
@@ -122,12 +123,14 @@ class SchoolController extends Controller
 
         foreach ($data['campuses'] as $campus) {
             $slice = explode('-', $campus['address']['id']);
+            $sliceName = explode(',', $campus['address']['name']);
             $campusModel = $school->campuses()->create([
                 'is_main' => $campus['main'],
                 'term_id' => $campus['semester']['id'],
                 'name' => isset($campus['name']) ? Str::lower($campus['name']) : null,
                 'agency_id' => $campus['agency']['id'],
                 'grading_id' => $campus['grading']['id'],
+                'generated_name' => isset($campus['name']) ? Str::upper($data['name']) . '-' . Str::upper($campus['name']) : Str::upper($data['name']) . '-' . Str::of($sliceName[1])->trim()->upper(),
                 'created_by'    => Auth::user()->profile->fullname
             ]);
 
@@ -168,8 +171,7 @@ class SchoolController extends Controller
 
             foreach ($data['campuses'] as $campus) {
                 $slice = explode('-', $campus['address']['id']);
-
-
+                $sliceName = explode(',', $campus['address']['name']);
                 if (!empty($campus['id'])) {
                     $campusModel = $find->campuses()->find($campus['id']);
                     $campusModel->update([
@@ -177,8 +179,7 @@ class SchoolController extends Controller
                         'term_id'     => $campus['semester']['id'],
                         'agency_id'   => $campus['agency']['id'],
                         'name' => isset($campus['name']) ? Str::lower($campus['name']) : null,
-                        'start_date'  => $campus['startDate'],
-                        'end_date'    => $campus['endDate'],
+                        'generated_name' => isset($campus['name']) ? Str::upper($data['name']) . '-' . Str::upper($campus['name']) : Str::upper($data['name']) . '-' . Str::of($sliceName[1])->trim()->upper(),
                         'grading_id'  => $campus['grading']['id'],
                         'updated_by'  => Auth::user()->profile->fullname,
                         'updated_at'  => now()
@@ -197,6 +198,7 @@ class SchoolController extends Controller
                         'is_main'     => $campus['main'],
                         'term_id'     => $campus['semester']['id'],
                         'agency_id'   => $campus['agency']['id'],
+                        'generated_name' => isset($campus['name']) ? Str::upper($data['name']) . '-' . Str::upper($campus['name']) : Str::upper($data['name']) . '-' . Str::of($sliceName[1])->trim()->upper(),
                         'grading_id'  => $campus['grading']['id'],
                         'created_by'  => Auth::user()->profile->fullname,
                     ]);

@@ -27,13 +27,27 @@
                     message-type="error"
                     ref="toolbarRef"
                 >
+                    <template #add1>
+                        <DefaultButton
+                            rounded
+                            size="small"
+                            :icon="IconFileTime"
+                            :icon-size="25"
+                            @click="openHistoryFiles"
+                            text
+                            tooltip="History Files"
+                            severity="secondary"
+                        ></DefaultButton>
+                    </template>
                     <template #form>
                         <div class="my-5">
                             <div
-                                class="flex justify-between text-xs text-gray-400 italic"
+                                class="flex justify-between text-xs text-gray-400"
                             >
-                                <div>
-                                    To get the scholars template, please
+                                <div class="flex items-end italic gap-1">
+                                    <div>
+                                        To get the scholars template, please
+                                    </div>
                                     <a
                                         href="/templates/scholar_template.xlsx"
                                         download
@@ -45,6 +59,7 @@
                             <UploadInput
                                 @remove-file="removeFile"
                                 @select-files="handleFiles"
+                                @single-remove-file="removeFile"
                                 accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                             ></UploadInput>
                             <span class="text-gray-400 text-xs"
@@ -137,6 +152,29 @@
         </div>
         <DefaultToast ref="toastRef" />
         <DefaultConfirmDialog ref="confirmRef" />
+        <DefaultDialog
+            v-model:visible="historyFilesDialog"
+            title="History Files"
+            :icon="IconFileText"
+            hide-footer
+            description="Displays a record of all file uploads, modifications, and related activities."
+        >
+            <template #forms>
+                <div class="pt-5">
+                    <DefaultTable
+                        :items="page.props.history.data"
+                        :pagination="{
+                            total: page.props.history.total,
+                            perPage: page.props.history.per_page,
+                            currentPage: page.props.history.current_page,
+                        }"
+                        @paginate="loadPage"
+                    >
+                        <Column header="Files"></Column>
+                    </DefaultTable>
+                </div>
+            </template>
+        </DefaultDialog>
     </AuthLayout>
 </template>
 <script setup>
@@ -144,11 +182,12 @@ import AuthLayout from "../../Layouts/AuthLayout.vue";
 import HeaderModule from "../../Modules/Others/HeaderModule.vue";
 import DefaultTable from "../../Components/tables/DefaultTable.vue";
 import ToolbarModule from "../../Modules/Others/ToolbarModule.vue";
-import TextInput from "../../Components/inputs/TextInput.vue";
-import DefaultToggle from "../../Components/toggleswitches/DefaultToggle.vue";
 import DefaultToast from "../../Components/messages/DefaultToast.vue";
 import DefaultConfirmDialog from "../../Components/dialogs/DefaultConfirmDialog.vue";
-import DefaultScrollTable from "../../Components/tables/DefaultScrollTable.vue";
+import DefaultDialog from "../../Components/dialogs/DefaultDialog.vue";
+import UploadInput from "../../Components/inputs/UploadInput.vue";
+import DefaultButton from "../../Components/buttons/DefaultButton.vue";
+
 import { computed, ref, watch } from "vue";
 import { Head, router, useForm, usePage } from "@inertiajs/vue3";
 import {
@@ -163,9 +202,10 @@ import {
     IconUserQuestion,
     IconCalendarWeek,
     IconFileDescription,
+    IconFileTime,
+    IconHistory,
+    IconFileText,
 } from "@tabler/icons-vue";
-import DefaultDialog from "../../Components/dialogs/DefaultDialog.vue";
-import UploadInput from "../../Components/inputs/UploadInput.vue";
 
 const page = usePage();
 const searchInput = ref(null);
@@ -176,6 +216,7 @@ const toastRef = ref(null);
 const confirmRef = ref(null);
 const menu = ref(null);
 const suggestions = ref(null);
+const historyFilesDialog = ref(false);
 const filesUploadForm = useForm({
     files: [],
 });
@@ -222,6 +263,15 @@ const menuItems = computed(() => {
         },
     ];
 });
+const openHistoryFiles = () => {
+    historyFilesDialog.value = true;
+
+    router.reload({
+        data: { fileStatus: "open" },
+        only: ["history"],
+        preserveScroll: true,
+    });
+};
 
 const toggleModal = (res) => {
     filesUploadForm.files = [];

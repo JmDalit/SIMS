@@ -302,7 +302,7 @@
                     <Column header="Name">
                         <template #body="prop">
                             <div class="flex items-center gap-2">
-                                <div>
+                                <div class="capitalize">
                                     {{
                                         prop.data.name ??
                                         prop.data.address.municipality_array

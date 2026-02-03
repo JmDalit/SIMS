@@ -73,49 +73,50 @@
             </template>
         </Menu>
     </div>
-    <!-- <DefaultDialog
-        class="absolute"
-        v-model:visible="openModal"
-        @submit-form="submitForm()"
-        :icons="IconPasswordUser"
+    <DefaultDialog
+        v-model:visible="passDialog"
+        :icon="IconPasswordUser"
+        width-set="lg:!w-[35%]"
+        :loading="passwordForm.processing"
+        @submit-form="submitForm"
         title="Update Your Password"
-        caption="Keep your account secure by choosing a strong, unique password."
+        description="To ensure your account remains protected at all times, please choose a password that is strong, unique, and difficult for others to guess."
     >
-        <template #popup-message>
-            <messageComponent
-                v-show="passwordForm.hasErrors"
-                :message="passwordForm.errors"
+        <template #message>
+            <DefaultMessages
+                v-if="passwordForm.hasErrors"
                 message-type="error"
-                :icons="IconExclamationCircleFilled"
-            ></messageComponent>
+                :message="passwordForm.errors"
+            />
         </template>
-        <div class="flex flex-col gap-5">
-            <inputComponent
-                label="Current Password"
-                type="password"
-                id="opass"
-                with-eye
-                v-model="passwordForm.current"
-            ></inputComponent>
-            <inputComponent
-                label="New Password"
-                type="password"
-                id="npass"
-                v-model="passwordForm.new"
-            ></inputComponent>
-            <inputComponent
-                label="Confirm Password"
-                id="cpass"
-                type="password"
-                v-model="passwordForm.confirm"
-            ></inputComponent>
-        </div>
-    </DefaultDialog> -->
+        <template #forms>
+            <div class="pt-5 flex flex-col gap-5">
+                <PasswordInput
+                    label="Current Password"
+                    v-model="passwordForm.current"
+                    :feedback="false"
+                    toggle-icon
+                />
+                <PasswordInput
+                    label="New Password"
+                    v-model="passwordForm.new"
+                    :feedback="true"
+                    toggle-icon
+                />
+                <PasswordInput
+                    label="Confirm Password"
+                    v-model="passwordForm.confirm"
+                    :feedback="false"
+                />
+            </div>
+        </template>
+    </DefaultDialog>
+    <DefaultToast ref="toastRef" />
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { router, usePage, useForm } from "@inertiajs/vue3";
+import { nextTick, ref } from "vue";
+import { router, usePage, useForm, useRemember } from "@inertiajs/vue3";
 import {
     IconUserCircle,
     IconLogout2,
@@ -123,15 +124,22 @@ import {
     IconPasswordUser,
     IconExclamationCircleFilled,
 } from "@tabler/icons-vue";
+import DefaultDialog from "../dialogs/DefaultDialog.vue";
+import PasswordInput from "../inputs/PasswordInput.vue";
+import DefaultMessages from "../messages/DefaultMessages.vue";
+import DefaultToast from "../messages/DefaultToast.vue";
 
+const passDialog = ref(false);
 const page = usePage();
-// const openModal = ref(false);
-
-// const passwordForm = useForm({
-//     current: "",
-//     new: "",
-//     confirm: "",
-// });
+const toastRef = ref(null);
+const passwordForm = useForm(
+    {
+        current: null,
+        new: null,
+        confirm: null,
+    },
+    { useRemember: false },
+);
 
 const menu = ref();
 const items = ref([
@@ -177,30 +185,25 @@ const toggle = (event) => {
     menu.value.toggle(event);
 };
 
-// const openDialog = () => {
-//     openModal.value = true;
-//     passwordForm.reset();
-//     passwordForm.clearErrors();
-// };
+const openDialog = () => {
+    passDialog.value = true;
+    passwordForm.resetAndClearErrors();
+};
 
-// const submitForm = () => {
-//     passwordForm.put(route("changepassword.update"), {
-//         onSuccess: (res) => {
-//             var result = res.props.result;
-
-//             toast.add({
-//                 severity: result.status,
-//                 summary: "Success",
-//                 detail: result.message,
-//                 group: "bc",
-//                 life: 3000,
-//             });
-
-//             openModal.value = false;
-//             passwordForm.reset();
-//         },
-//     });
-// };
+const submitForm = () => {
+    passwordForm.post(route("user.changePassword"), {
+        fresh: true,
+        replace: true,
+        onSuccess: () => {
+            toastRef.value.show(page.props.flash);
+            passDialog.value = false;
+            passwordForm.resetAndClearErrors();
+            nextTick(() => {
+                window.location.reload();
+            });
+        },
+    });
+};
 
 // const openProfile = () => {
 //     router.get(route("profile.index"));
