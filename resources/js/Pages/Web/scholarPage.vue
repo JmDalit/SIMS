@@ -12,7 +12,7 @@
                 <ToolbarModule
                     v-model="searchInput"
                     @deleteSearch="clearSearch"
-                    @saveForm="submitForm({ type: 'create' })"
+                    @saveForm="submitForm"
                     button-label="Create"
                     :dialog-title="
                         !filesUploadForm.id ? 'Create Scholar' : 'Edit Scholar'
@@ -23,24 +23,12 @@
                     dialog-button-label="Save"
                     :message-has-errors="filesUploadForm.hasErrors"
                     :message-errors="filesUploadForm.errors"
-                    @buttonOpenModal="toggleModal({ type: 'create' })"
+                    @buttonOpenModal="toggleModal()"
                     message-type="error"
                     ref="toolbarRef"
                 >
-                    <template #add1>
-                        <DefaultButton
-                            rounded
-                            size="small"
-                            :icon="IconFileTime"
-                            :icon-size="25"
-                            @click="openHistoryFiles"
-                            text
-                            tooltip="History Files"
-                            severity="secondary"
-                        ></DefaultButton>
-                    </template>
                     <template #form>
-                        <div class="my-5">
+                        <div class="my-1">
                             <div
                                 class="flex justify-between text-xs text-gray-400"
                             >
@@ -67,6 +55,137 @@
                                 scholar</span
                             >
                         </div>
+                        <Divider type="dashed" align="left">
+                            <span class="text-xs font-bold"
+                                >Uploaded Files</span
+                            >
+                        </Divider>
+                        <div class="flex justify-end mb-3">
+                            <SelectButton
+                                v-model="filterFileStatus"
+                                :options="filterFileOption"
+                                @update:model-value="loadFilePage"
+                                size="small"
+                            />
+                        </div>
+
+                        <DefaultTable
+                            :items="page.props.files.data"
+                            :pagination="{
+                                total: page.props.files.total,
+                                perPage: page.props.files.per_page,
+                                currentPage: page.props.files.current_page,
+                            }"
+                            @paginate="loadFilePage"
+                        >
+                            <Column header="Files">
+                                <template #body="props">
+                                    <div class="flex items-center gap-2">
+                                        <Avatar
+                                            style="
+                                                background-color: #dee9fc;
+                                                color: #1a2551;
+                                            "
+                                            class="!rounded-xl !w-10 !h-10"
+                                        >
+                                            <IconFileText size="25" />
+                                        </Avatar>
+                                        <div class="flex flex-col">
+                                            <div>{{ props.data.filename }}</div>
+                                            <a
+                                                :href="props.data.file_url"
+                                                download
+                                                class="text-blue-500 underline text-xs"
+                                                >Click to download</a
+                                            >
+                                        </div>
+                                    </div>
+                                </template>
+                            </Column>
+                            <Column header="Created By">
+                                <template #body="props">
+                                    <div class="flex flex-col text-xs">
+                                        <div>{{ props.data.created_by }}</div>
+                                        <div
+                                            class="font-semibold text-gray-500"
+                                        >
+                                            {{ props.data.formatted_date }}
+                                        </div>
+                                    </div>
+                                </template>
+                            </Column>
+                            <Column>
+                                <template #header>
+                                    <div
+                                        class="flex justify-center w-full text-xs font-semibold"
+                                    >
+                                        <div>Validate Status</div>
+                                    </div>
+                                </template>
+                                <template #body="props">
+                                    <div
+                                        class="flex justify-center items-center"
+                                    >
+                                        <div
+                                            v-if="!props.data.validated_by"
+                                            class="bg-amber-50 px-3 py-1 rounded-2xl antialiased text-amber-600 flex gap-2 items-center"
+                                        >
+                                            <IconDotsCircleHorizontal
+                                                size="15"
+                                                stroke-width="3"
+                                            />
+                                            <div class="text-xs uppercase">
+                                                Pending
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </Column>
+
+                            <Column>
+                                <template #header>
+                                    <div
+                                        class="flex justify-end w-full text-xs font-semibold"
+                                    >
+                                        <IconSettings :size="20" />
+                                    </div>
+                                </template>
+                                <template #body="props">
+                                    <div
+                                        class="flex justify-end items-center gap-2"
+                                    >
+                                        <DefaultButton
+                                            rounded
+                                            size="small"
+                                            severity="danger"
+                                            text
+                                            tooltip="Reject"
+                                            :icon="IconX"
+                                            @click="
+                                                validateFiles({
+                                                    type: 'reject',
+                                                    id: props.data.hash_id,
+                                                })
+                                            "
+                                        ></DefaultButton>
+                                        <DefaultButton
+                                            rounded
+                                            size="small"
+                                            severity="success"
+                                            tooltip="Accept"
+                                            text
+                                            :icon="IconCheck"
+                                            @click="
+                                                validateFiles({
+                                                    type: 'accept',
+                                                    id: props.data.hash_id,
+                                                })
+                                            "
+                                        ></DefaultButton>
+                                    </div>
+                                </template>
+                            </Column>
+                        </DefaultTable>
                     </template>
                 </ToolbarModule>
                 <DefaultTable
@@ -128,7 +247,6 @@
                                             v-ripple
                                             class="flex items-center"
                                             v-bind="props.action"
-                                            @click="item.command"
                                         >
                                             <div>
                                                 <component
@@ -152,29 +270,6 @@
         </div>
         <DefaultToast ref="toastRef" />
         <DefaultConfirmDialog ref="confirmRef" />
-        <DefaultDialog
-            v-model:visible="historyFilesDialog"
-            title="History Files"
-            :icon="IconFileText"
-            hide-footer
-            description="Displays a record of all file uploads, modifications, and related activities."
-        >
-            <template #forms>
-                <div class="pt-5">
-                    <DefaultTable
-                        :items="page.props.history.data"
-                        :pagination="{
-                            total: page.props.history.total,
-                            perPage: page.props.history.per_page,
-                            currentPage: page.props.history.current_page,
-                        }"
-                        @paginate="loadPage"
-                    >
-                        <Column header="Files"></Column>
-                    </DefaultTable>
-                </div>
-            </template>
-        </DefaultDialog>
     </AuthLayout>
 </template>
 <script setup>
@@ -205,6 +300,8 @@ import {
     IconFileTime,
     IconHistory,
     IconFileText,
+    IconDotsCircleHorizontal,
+    IconSettings,
 } from "@tabler/icons-vue";
 
 const page = usePage();
@@ -215,8 +312,10 @@ const toolbarRef = ref(null);
 const toastRef = ref(null);
 const confirmRef = ref(null);
 const menu = ref(null);
+const filterFileStatus = ref("Pending");
+
+const filterFileOption = ref(["Pending", "Accept", "Reject"]);
 const suggestions = ref(null);
-const historyFilesDialog = ref(false);
 const filesUploadForm = useForm({
     files: [],
 });
@@ -263,29 +362,20 @@ const menuItems = computed(() => {
         },
     ];
 });
-const openHistoryFiles = () => {
-    historyFilesDialog.value = true;
+const openHistoryFiles = () => {};
 
-    router.reload({
-        data: { fileStatus: "open" },
-        only: ["history"],
-        preserveScroll: true,
-    });
-};
-
-const toggleModal = (res) => {
-    filesUploadForm.files = [];
-    filesUploadForm.resetAndClearErrors();
-
-    if (res.type === "edit") {
-        scholarForm.id = res.data.id;
-        scholarForm.name = res.data.name;
-        scholarForm.abbreviation = res.data.abbreviation;
-
-        scholarForm.field = res.data.suggestion_array;
+const toggleModal = () => {
+    if (filesUploadForm.files.length != 0) {
+        filesUploadForm.files = [];
+        filesUploadForm.resetAndClearErrors();
     }
-
-    toolbarRef.value.openModal();
+    router.reload({
+        data: { OpenFiles: true },
+        only: ["files"],
+        onSuccess: () => {
+            toolbarRef.value.openModal();
+        },
+    });
 };
 
 const deleteRow = (id) => {
@@ -307,17 +397,33 @@ const removeFile = (e) => {
     filesUploadForm.resetAndClearErrors();
 };
 
-const submitForm = (res) => {
-    console.log(filesUploadForm.files);
-    if (res.type === "create") {
-        filesUploadForm.post(route("scholar.store"), {
-            forceFormData: true,
+const submitForm = () => {
+    filesUploadForm.post(route("scholar.store"), {
+        forceFormData: true,
+        onSuccess: () => {
+            toastRef.value.show(page.props.flash);
+            filesUploadForm.files = [];
+            filesUploadForm.resetAndClearErrors();
+        },
+    });
+};
+
+const validateFiles = (res) => {
+    router.post(
+        route("scholar.insert", res.id),
+        {
+            status: res.type,
+        },
+        {
+            preserveScroll: true,
+            preserveState: true,
             onSuccess: () => {
                 toastRef.value.show(page.props.flash);
             },
-        });
-    }
+        },
+    );
 };
+
 // const updateStatus = (result) => {
 //     scholarForm.isActive = result.is_active;
 //     scholarForm.put(
@@ -358,6 +464,13 @@ const loadPage = (page) => {
             preserveScroll: true,
         },
     );
+};
+
+const loadFilePage = (page) => {
+    router.reload({
+        data: { OpenFiles: true, page, status: filterFileStatus.value },
+        only: ["files"],
+    });
 };
 
 // watch(

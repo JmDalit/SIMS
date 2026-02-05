@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('created_by')->nullable();
             $table->string('validated_by')->nullable();
             $table->dateTime('validated_at')->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
         });
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\References\ListClass;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Illuminate\Support\Facades\Auth;
@@ -36,7 +37,7 @@ class HandleInertiaRequests extends Middleware
     }
 
     /**
-     * Define the props that are shared by default. 
+     * Define the props that are shared by default.
      *
      * @see https://inertiajs.com/shared-data
      *
@@ -52,6 +53,18 @@ class HandleInertiaRequests extends Middleware
                     );
                 }
             }),
+            'notif' => fn() => auth('web')
+                ->user()
+                ?->notifications()
+                ->latest()
+                ->limit(50)
+                ->get()
+                ->map(function ($notification) {
+                    $notification->diff_time = $notification->created_at
+                        ? Carbon::parse($notification->created_at)->diffForHumans()
+                        : null;
+                    return $notification;
+                }),
             'menu' => fn() => $this->menu?->getMenu('sidebar')
         ]);
     }

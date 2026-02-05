@@ -7,6 +7,9 @@ use App\Http\Requests\Web\ScholarRequest;
 use App\Imports\CheckScholarImport;
 use App\Imports\ScholarImport;
 use App\Models\ScholarUploadedFiles;
+use App\Models\User;
+use App\Notifications\ScholarUploadedNotification;
+use App\Notifications\ValidatedFilesNotification;
 use App\References\ScholarClass;
 
 use Illuminate\Http\Request;
@@ -17,31 +20,18 @@ use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use Vinkla\Hashids\Facades\Hashids;
 
+use function Symfony\Component\Clock\now;
+
 class ScholarController extends Controller
 {
-    public function index(ScholarClass $scholar, Request $request)
+    public function index()
     {
         return Inertia::render('Web/scholarPage', [
             'scholar' => [],
             'scholarDetails' => [],
-            'history' => request('fileStatus') ? ScholarUploadedFiles::select([
-                'id',
-                'filename',
-                'created_by',
-                'created_at',
-                'validated_by',
-                'validated_at'
-            ])
-                ->latest()
-                ->get()
-                ->map(fn($file) => [
-                    'id' => Hashids::encode($file->id),
-                    'filename' => $file->filename,
-                    'created_by' => $file->created_by,
-                    'created_at' => $file->created_at,
-                    'validated_by' => $file->validated_by,
-                    'validated_at' => $file->validated_at,
-                ]) : []
+            'files' => request('OpenFiles')
+                ? ScholarUploadedFiles::When(request('status'), function ($item) {})->latest()->paginate(4)
+                : null,
         ]);
     }
 
@@ -66,16 +56,35 @@ class ScholarController extends Controller
                 'filepath' => $path,
                 'region_office' => Auth::user()->profile->agency_array['name'],
                 'created_by' => Auth::user()->profile->fullname,
+                'status' => 'pending'
             ]);
 
-            // Excel::import(new ScholarImport, storage_path('app/public/' . $path));
+
+            $highTable = User::select('id')
+                ->with('profile:user_id,fname,lname')
+                ->whereHas('role', function ($q) {
+                    $q->whereIn('name', ['Administrator']);
+                })->where([
+                    'is_active' => true,
+                    'is_delete' => false,
+                ])->get();
+
+
+            foreach ($highTable as $admin) {
+                $admin->notify(
+                    new ScholarUploadedNotification(
+                        Auth::user()->profile->fullname,
+                        Auth::user()->profile->agency->name,
+                    )
+                );
+            }
 
             DB::commit();
 
             return redirect()->back()->with('flash', [
                 'status'  => 'success',
-                'title'   => 'Excel Data Imported',
-                'message' => 'Excel data imported successfully!',
+                'title'   => 'Excel Data save',
+                'message' => 'Excel data save successfully!',
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -87,6 +96,34 @@ class ScholarController extends Controller
                 'title'   => 'Import Failed',
                 'message' => 'There was an error importing the data: ' . $e->getMessage(),
             ]);
+        }
+    }
+
+    public function insert(Request $request, $id)
+    {
+
+        $file = ScholarUploadedFiles::where('id', Hashids::decode($id))->first();
+        $file->update([
+            'validated_by' => Auth::user()->profile->fullname,
+            'validated_at' => now(),
+            'status' =>   $request['status'],
+        ]);
+        $fullname = $file->created_by;
+        $highTable = User::with('profile:user_id,fname,lname')
+            ->whereHas('profile', function ($q) use ($fullname) {
+                $q->whereRaw("LOWER(CONCAT(fname, ' ', lname)) LIKE ?", ['%' . strtolower($fullname) . '%']);
+            })
+            ->select('id')
+            ->get();
+
+
+        foreach ($highTable as $admin) {
+            $admin->notify(
+                new ValidatedFilesNotification(
+                    $request['status'],
+                    Auth::user()->profile->fullname,
+                )
+            );
         }
     }
     // function update(StatusRequest $request, string $id, string $type)

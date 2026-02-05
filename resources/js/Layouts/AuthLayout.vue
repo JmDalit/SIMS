@@ -82,13 +82,219 @@
                             :un-check-icon="IconSun"
                             :check-icon="IconMoon"
                         />
+
+                        <OverlayBadge
+                            severity="danger"
+                            class="inline-flex"
+                            v-if="
+                                page.props?.notif.filter((e) => !e.read_at)
+                                    .length != 0
+                            "
+                        >
+                            <DefaultButton
+                                variant="text"
+                                class="!text-white hover:!bg-transparent"
+                                :icon="IconBell"
+                                size="lg"
+                                :icon-size="20"
+                                class-name="!w-6 !h-6"
+                                @click="toggleNotif"
+                                rounded
+                            />
+                        </OverlayBadge>
                         <DefaultButton
+                            v-else
                             variant="text"
                             class="!text-white hover:!bg-transparent"
                             :icon="IconBell"
                             size="lg"
+                            :icon-size="20"
+                            class-name="!w-6 !h-6"
+                            @click="toggleNotif"
                             rounded
                         />
+                        <Popover
+                            ref="popNotif"
+                            :pt="{
+                                root: 'popover-notification !ml-5 !rounded-xl',
+                            }"
+                        >
+                            <div class="w-[25rem] max-h-[20rem] flex flex-col">
+                                <div class="flex items-center justify-between">
+                                    <div class="font-semibold text-sm">
+                                        Notifications
+                                        <span
+                                            class="font-bold text-xs"
+                                            v-show="
+                                                page.props?.notif.length != 0
+                                            "
+                                            >({{
+                                                page.props?.notif.filter(
+                                                    (e) => !e.read_at,
+                                                ).length
+                                            }})</span
+                                        >
+                                    </div>
+                                </div>
+                                <Divider class="!my-3"></Divider>
+                                <div
+                                    class="flex-1 overflow-auto"
+                                    v-if="page.props?.notif.length != 0"
+                                >
+                                    <div
+                                        v-for="(item, index) in page.props
+                                            ?.notif"
+                                        :key="index"
+                                        class="flex flex-col"
+                                    >
+                                        <div
+                                            class="flex items-start justify-between"
+                                        >
+                                            <div
+                                                class="flex flex-1 items-start gap-2"
+                                            >
+                                                <div
+                                                    class="p-1"
+                                                    v-if="
+                                                        item.data.type ==
+                                                        'scholar_upload'
+                                                    "
+                                                >
+                                                    <OverlayBadge
+                                                        severity="danger"
+                                                        v-if="!item.read_at"
+                                                    >
+                                                        <Avatar
+                                                            class="rounded-2xl"
+                                                            style="
+                                                                background-color: #dee9fc;
+                                                                color: #1a2551;
+                                                            "
+                                                        >
+                                                            <IconFileDownload
+                                                                class="text-slate-600"
+                                                            />
+                                                        </Avatar>
+                                                    </OverlayBadge>
+                                                    <Avatar
+                                                        v-else
+                                                        class="rounded-2xl"
+                                                        style="
+                                                            background-color: #dee9fc;
+                                                            color: #1a2551;
+                                                        "
+                                                    >
+                                                        <IconFileDownload
+                                                            class="text-slate-600"
+                                                        />
+                                                    </Avatar>
+                                                </div>
+                                                <div
+                                                    class="p-1"
+                                                    v-if="
+                                                        item.data.type ==
+                                                        'upload_accept'
+                                                    "
+                                                >
+                                                    <OverlayBadge
+                                                        severity="danger"
+                                                        v-if="!item.read_at"
+                                                    >
+                                                        <Avatar
+                                                            class="rounded-2xl !bg-green-100 !text-green-700"
+                                                        >
+                                                            <IconCircleCheck />
+                                                        </Avatar>
+                                                    </OverlayBadge>
+                                                    <Avatar
+                                                        v-else
+                                                        class="rounded-2xl !bg-green-100 !text-green-700"
+                                                    >
+                                                        <IconCircleCheck />
+                                                    </Avatar>
+                                                </div>
+
+                                                <div
+                                                    class="p-1"
+                                                    v-if="
+                                                        item.data.type ==
+                                                        'upload_reject'
+                                                    "
+                                                >
+                                                    <OverlayBadge
+                                                        severity="danger"
+                                                        v-if="!item.read_at"
+                                                    >
+                                                        <Avatar
+                                                            class="rounded-2xl !bg-red-100 !text-red-700"
+                                                        >
+                                                            <IconCircleX />
+                                                        </Avatar>
+                                                    </OverlayBadge>
+                                                    <Avatar
+                                                        v-else
+                                                        class="rounded-2xl !bg-red-100 !text-red-700"
+                                                    >
+                                                        <IconCircleX />
+                                                    </Avatar>
+                                                </div>
+                                                <div class="flex flex-col">
+                                                    <div
+                                                        class="text-xs font-semibold"
+                                                    >
+                                                        {{ item.data.title }}
+                                                    </div>
+                                                    <div
+                                                        class="text-xs text-gray-500"
+                                                    >
+                                                        {{ item.data.message }}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div
+                                                class="flex flex-col items-end"
+                                            >
+                                                <div
+                                                    class="text-xs font-medium"
+                                                >
+                                                    {{ item.diff_time }}
+                                                </div>
+
+                                                <DefaultButton
+                                                    size="small"
+                                                    severity="secondary"
+                                                    rounded
+                                                    tooltip="Mark as read"
+                                                    text
+                                                    v-if="!item.read_at"
+                                                    @click="markAsRead(item.id)"
+                                                    :icon="IconCheck"
+                                                    :icon-size="15"
+                                                />
+                                                <div v-else class="p-2">
+                                                    <IconCheckbox size="15" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <Divider
+                                            class="!my-2"
+                                            type="dashed"
+                                        ></Divider>
+                                    </div>
+                                </div>
+                                <div v-else>
+                                    <div class="flex justify-center py-10">
+                                        <div
+                                            class="flex flex-col gap-1 items-center text-gray-500"
+                                        >
+                                            <IconBellFilled />
+                                            <div>No notifications</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </Popover>
                         <HeadBarButtonMenu />
                     </div>
                 </div>
@@ -121,114 +327,40 @@ import {
     IconSun,
     IconMoon,
     IconBell,
+    IconFileDownload,
+    IconBellFilled,
+    IconChecks,
+    IconCheck,
+    IconCheckbox,
+    IconCircle,
+    IconCircleCheck,
+    IconCircleX,
 } from "@tabler/icons-vue";
 import { ref, onMounted, Transition } from "vue";
 import SidebarLabelMenu from "../Components/menus/SidebarLabelMenu.vue";
 import DefaultToggle from "../Components/toggleswitches/DefaultToggle.vue";
-import { usePage } from "@inertiajs/vue3";
+import { router, usePage } from "@inertiajs/vue3";
 
 const page = usePage();
 const isDark = ref(false);
 const sidebar = ref(false);
-const menuList = [
-    {
-        label: "Dashboard",
-        slug: "dashboard",
-        icons: IconDashboard,
-        route: "/dashboard",
-    },
-    {
-        label: "Academic Data",
-        slug: "academic-data",
-        active: "acadamic-data",
-        key: "Records",
-        icons: IconSchool,
-        items: [
-            {
-                label: "Universities",
-                icons: IconBuildings,
-                route: "/records/schools",
-                subItem: true,
-                component: "records/schools",
-            },
-            {
-                label: "Courses",
-                icons: IconBooks,
-                route: "/records/courses",
-                subItem: true,
-                component: "records/courses",
-            },
-            {
-                label: "Settings",
-                icons: IconListDetails,
-                route: "/records/dropdown",
-                subItem: true,
-                component: "records/dropdowns",
-            },
-        ],
-    },
-    {
-        label: "Places",
-        slug: "places",
-        icons: IconMap,
-        active: "places",
-        items: [
-            {
-                label: "Regions",
-                icons: IconCornerDownRight,
-                route: "/places/regions",
+const popNotif = ref(null);
 
-                subItem: true,
-            },
-            {
-                label: "Provinces",
-                icons: IconCornerDownRight,
-                route: "/places/provinces",
+const toggleNotif = (e) => {
+    popNotif.value.toggle(e);
+};
 
-                subItem: true,
-            },
-            {
-                label: "Cities",
-                icons: IconCornerDownRight,
-                route: "/places/municipalities",
+const markAsRead = (id) => {
+    router.patch(
+        route("notif.read", id),
+        {},
+        {
+            preserveScroll: true,
+            preserveState: true,
+        },
+    );
+};
 
-                subItem: true,
-            },
-            {
-                label: "Barangay",
-                icons: IconCornerDownRight,
-                route: "/places/barangay",
-
-                subItem: true,
-            },
-        ],
-    },
-
-    {
-        label: "Role Management",
-        slug: "role-management",
-        icons: IconUserShield,
-        route: "/roles",
-    },
-    {
-        label: "Menu Management",
-        slug: "Routes",
-        icons: IconCategory,
-        route: "/routes",
-    },
-    {
-        label: "User Management",
-        slug: "user-management",
-        icons: IconUsers,
-        route: "/scholars",
-    },
-    {
-        label: "Backup & Restore",
-        slug: "user-management",
-        icons: IconServerSpark,
-        route: "/scholars",
-    },
-];
 function toggleDark() {
     localStorage.setItem("theme", isDark.value ? "dark" : "light");
     applyTheme();
@@ -253,7 +385,7 @@ onMounted(() => {
     sidebar.value = localStorage.getItem("sidebar") === "true";
 });
 </script>
-<style scoped>
+<style>
 .slide-fade {
     transition:
         transform 0.3s ease,
@@ -263,5 +395,8 @@ onMounted(() => {
 .slide-fade-hide {
     transform: translateX(-100%);
     opacity: 1;
+}
+.popover-notification {
+    --p-popover-arrow-left: 23.4rem !important;
 }
 </style>

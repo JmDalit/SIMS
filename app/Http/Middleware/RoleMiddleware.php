@@ -17,20 +17,19 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next): Response
     {
 
-
         $check = ListRoutes::where('is_delete', false)
             ->where('is_active', true)
             ->whereRaw("
         EXISTS (
-            SELECT 1 
-            FROM json_array_elements(roles) elem 
+            SELECT 1
+            FROM json_array_elements(roles) elem
             WHERE (elem->>'id')::int = ?
         )
     ", [$request->user()->role_id ?? null])
             ->where('route', $request->getPathInfo())
             ->exists();
 
-        if (! $check) { // if route is NOT allowed
+        if (! $check) {
             abort(403, 'Unauthorized');
         }
 

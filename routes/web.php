@@ -16,6 +16,7 @@ use App\Http\Controllers\Web\LocationBarangayController;
 use App\Http\Controllers\Web\LocationCityController;
 use App\Http\Controllers\Web\LocationProvinceController;
 use App\Http\Controllers\Web\LocationRegionController;
+use App\Http\Controllers\Web\NotificationController;
 use App\Http\Controllers\Web\programController;
 use App\Http\Controllers\Web\ReferenceController;
 use App\Http\Controllers\Web\RoleController;
@@ -43,12 +44,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/activate/{id}', [ActivationController::class, 'update'])->name('activation.update');
 });
 
-Route::middleware('auth', 'web')->group(function () {
+Route::middleware(['auth', 'web'])->group(function () {
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
     Route::post('roles', [RoleController::class, 'store'])->name('roles.store');
     Route::put('roles/{id}/{type}', [RoleController::class, 'update'])->name('roles.update');
     Route::delete('roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy');
-
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notif.read');
     Route::post('user/changePassword', [ChangePasswordController::class, 'update'])->name('user.changePassword');
 
 
@@ -125,10 +126,10 @@ Route::middleware('auth', 'web')->group(function () {
     Route::delete('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'destroyCurriculum'])->name('campus.curriculum.destroyCurriculum');
 
     Route::post('scholar', [ScholarController::class, 'store'])->name('scholar.store');
-    Route::put('scholar/{id}/{type}', [ScholarController::class, 'update'])->name('scholar.update');
+    Route::post('scholar/{id}/validated', [ScholarController::class, 'insert'])->name('scholar.insert');
     Route::delete('scholar/{id}/{type}', [ScholarController::class, 'destroy'])->name('scholar.destroy');
 });
-Route::middleware('auth', 'web', 'role')->group(function () {
+Route::middleware(['auth', 'web', 'role'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('roles', [RoleController::class, 'index'])->name('roles');
     Route::get('routes', [RouteController::class, 'index'])->name('routes');
