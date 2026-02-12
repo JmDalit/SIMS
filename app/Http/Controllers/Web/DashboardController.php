@@ -18,7 +18,7 @@ class DashboardController extends Controller
             'campus_cnt' => SchoolCampuses::when(Auth::check() && Auth::user()->role_array['name'] != 'Administrator', function ($q) {
                 $q->where('agency_id', Auth::user()->profile->agency_id);
             })->count(),
-            'campuses_details' => SchoolCampuses::select('id', 'generated_name', 'school_id', 'name')->where(['agency_id' => Auth::user()->profile->agency_id, 'is_delete' => false])
+            'campuses_details' => Auth::user()->role_array['name'] != 'Administrator' ? SchoolCampuses::select('id', 'generated_name', 'school_id', 'name')->where(['agency_id' => Auth::user()->profile->agency_id, 'is_delete' => false])
                 ->with([
                     'school' => fn($q) => $q
                         ->select('id', 'shortcut')
@@ -47,7 +47,7 @@ class DashboardController extends Controller
                             ]
                             : [],
                     ];
-                })
+                }) : null
         ]);
     }
 }
