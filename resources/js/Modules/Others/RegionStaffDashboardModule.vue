@@ -248,7 +248,7 @@
                     ></div>
                 </div>
             </div>
-            <div
+            <!-- <div
                 class="bg-green-200 rounded-lg shadow-md flex items-center justify-center md:col-span-2 lg:col-span-2 lg:row-span-2"
             >
                 <p>Edamame</p>
@@ -264,7 +264,7 @@
                 class="bg-gray-200 rounded-lg shadow-md flex items-center justify-center md:col-span-2 lg:col-span-3 lg:row-span-2"
             >
                 <p>Tofu</p>
-            </div>
+            </div> -->
         </div>
     </div>
 </template>
