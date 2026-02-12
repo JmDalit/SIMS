@@ -42,6 +42,9 @@
             rowGroupHeader: {
                 class: 'dark:!bg-transparent !bg-gray-50 dark:!text-gray-300',
             },
+            loadingIcon: {
+                class: 'text-blue-300 ',
+            },
         }"
     >
         <template #groupheader="slotProps">
@@ -149,7 +152,10 @@ function onPageChange(event) {
         color: #d1d1d1;
     }
 }
-
+::v-deep(.p-datatable-mask.p-overlay-mask) {
+    background-color: #ffffff71 !important;
+    border-radius: 1rem !important;
+}
 /* ::v-deep(.p-datatable-tbody) {
     background-color: transparent !important;
 } */

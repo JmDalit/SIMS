@@ -4,8 +4,8 @@
         <div class="flex flex-col w-full h-full gap-10">
             <div class="flex">
                 <HeaderModule
-                    title="List of Courses"
-                    description="Course information and management"
+                    title="Course Management"
+                    description="Manage the complete list of courses, update course information, track availability, and maintain accurate records."
                 />
             </div>
             <div class="flex-1 flex flex-col gap-2">
@@ -14,8 +14,10 @@
                     @deleteSearch="clearSearch"
                     @saveForm="submitForm"
                     button-label="Create"
-                    :dialog-title="!courseForm.id ? 'Create Role' : 'Edit Role'"
-                    dialog-description="Define a new role and configure its access permissions."
+                    :dialog-title="
+                        !courseForm.id ? 'Create Course' : 'Edit Course'
+                    "
+                    dialog-description="Define a new course and manage its information, content, and availability."
                     :dialog-button-loading="courseForm.processing"
                     :dialog-icon="IconUserCog"
                     dialog-button-label="Save"
@@ -128,7 +130,6 @@
                                             v-ripple
                                             class="flex items-center"
                                             v-bind="props.action"
-                                            @click="item.command"
                                         >
                                             <div>
                                                 <component
@@ -238,6 +239,15 @@ const toggleModal = (res) => {
 };
 
 const deleteRow = (id) => {
+    if (page.props.user?.role_array["name"] != "Administrator") {
+        toastRef.value.show({
+            status: "warn",
+            title: "Access Denied",
+            message:
+                "You are not authorized to view or delete course information.",
+        });
+        return;
+    }
     confirmRef.value.popupDialog(() => {
         courseForm.delete(
             route("academic.courses.destroy", { id: id, type: "delete" }),
@@ -246,7 +256,7 @@ const deleteRow = (id) => {
                     courseForm.resetAndClearErrors();
                     toastRef.value.show(page.props.flash);
                 },
-            }
+            },
         );
     });
 };
@@ -271,7 +281,7 @@ const submitForm = () => {
                     courseForm.resetAndClearErrors();
                     toastRef.value.show(page.props.flash);
                 },
-            }
+            },
         );
     }
 };
@@ -283,7 +293,7 @@ const updateStatus = (result) => {
             onSuccess: () => {
                 toastRef.value.show(page.props.flash);
             },
-        }
+        },
     );
 };
 
@@ -313,7 +323,7 @@ const loadPage = (page) => {
         {
             preserveState: true,
             preserveScroll: true,
-        }
+        },
     );
 };
 
@@ -324,6 +334,6 @@ watch(
         timerBounce.value = setTimeout(() => {
             loadPage(1);
         }, 300);
-    }
+    },
 );
 </script>

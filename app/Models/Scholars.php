@@ -36,4 +36,19 @@ class Scholars extends Model
     {
         return $this->belongsTo(ListReferences::class, 'type_id');
     }
+
+    public function profile()
+    {
+        return $this->hasOne(ScholarProfiles::class, 'scholar_id');
+    }
+
+    public function address()
+    {
+        return $this->hasOne(ScholarAddresses::class, 'scholar_id');
+    }
+
+    public function parent()
+    {
+        return $this->hasOne(ScholarParentDetails::class, 'scholar_id');
+    }
 }

@@ -56,7 +56,7 @@ class SchoolRequest extends FormRequest
     public function messages()
     {
         return [
-            'campuses.*.semester.required' => 'The semester field is required.',
+            'campuses.*.semester.required' => 'The academic term field is required.',
             'campuses.*.grading.required'  => 'The grading field is required.',
             'campuses.*.agency.required'   => 'The agency field is required.',
             'campuses.*.street.required'   => 'The street field is required.',

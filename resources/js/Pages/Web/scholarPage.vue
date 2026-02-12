@@ -50,10 +50,6 @@
                                 @single-remove-file="removeFile"
                                 accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                             ></UploadInput>
-                            <span class="text-gray-400 text-xs"
-                                >**Please upload a CSV or Excel file containing
-                                scholar</span
-                            >
                         </div>
                         <Divider type="dashed" align="left">
                             <span class="text-xs font-bold"
@@ -76,6 +72,7 @@
                                 perPage: page.props.files.per_page,
                                 currentPage: page.props.files.current_page,
                             }"
+                            :loading="filesLoadingTable"
                             @paginate="loadFilePage"
                         >
                             <Column header="Files">
@@ -127,7 +124,9 @@
                                         class="flex justify-center items-center"
                                     >
                                         <div
-                                            v-if="!props.data.validated_by"
+                                            v-if="
+                                                props.data.status == 'pending'
+                                            "
                                             class="bg-amber-50 px-3 py-1 rounded-2xl antialiased text-amber-600 flex gap-2 items-center"
                                         >
                                             <IconDotsCircleHorizontal
@@ -138,11 +137,42 @@
                                                 Pending
                                             </div>
                                         </div>
+                                        <div
+                                            v-else-if="
+                                                props.data.status == 'accept'
+                                            "
+                                            class="bg-green-50 px-3 py-1 rounded-2xl antialiased text-green-600 flex gap-2 items-center"
+                                        >
+                                            <IconCircleCheck
+                                                size="15"
+                                                stroke-width="3"
+                                            />
+                                            <div class="text-xs uppercase">
+                                                Accept
+                                            </div>
+                                        </div>
+                                        <div
+                                            v-else
+                                            class="bg-red-50 px-3 py-1 rounded-2xl antialiased text-red-600 flex gap-2 items-center"
+                                        >
+                                            <IconCircleX
+                                                size="15"
+                                                stroke-width="3"
+                                            />
+                                            <div class="text-xs uppercase">
+                                                reject
+                                            </div>
+                                        </div>
                                     </div>
                                 </template>
                             </Column>
 
-                            <Column>
+                            <Column
+                                v-if="
+                                    filterFileStatus == 'Pending' ||
+                                    filterFileStatus == null
+                                "
+                            >
                                 <template #header>
                                     <div
                                         class="flex justify-end w-full text-xs font-semibold"
@@ -302,6 +332,8 @@ import {
     IconFileText,
     IconDotsCircleHorizontal,
     IconSettings,
+    IconCircleX,
+    IconCircleCheck,
 } from "@tabler/icons-vue";
 
 const page = usePage();
@@ -310,6 +342,7 @@ const timerBounce = ref(null);
 const selectedRow = ref(null);
 const toolbarRef = ref(null);
 const toastRef = ref(null);
+const filesLoadingTable = ref(false);
 const confirmRef = ref(null);
 const menu = ref(null);
 const filterFileStatus = ref("Pending");
@@ -370,7 +403,7 @@ const toggleModal = () => {
         filesUploadForm.resetAndClearErrors();
     }
     router.reload({
-        data: { OpenFiles: true },
+        data: { OpenFiles: true, status: "Pending", page: 1 },
         only: ["files"],
         onSuccess: () => {
             toolbarRef.value.openModal();
@@ -467,9 +500,11 @@ const loadPage = (page) => {
 };
 
 const loadFilePage = (page) => {
+    filesLoadingTable.value = true;
     router.reload({
         data: { OpenFiles: true, page, status: filterFileStatus.value },
         only: ["files"],
+        onFinish: () => (filesLoadingTable.value = false),
     });
 };
 

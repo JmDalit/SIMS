@@ -29,7 +29,7 @@ class SchoolCampuses extends Model
         'term'
     ];
 
-    protected $appends = ['fullname_campus', 'term_array', 'grading_array', 'agency_array'];
+    protected $appends = ['term_array', 'grading_array', 'agency_array'];
 
     public function school()
     {
@@ -77,10 +77,10 @@ class SchoolCampuses extends Model
     }
 
 
-    public function getFullnameCampusAttribute()
-    {
-        return $this->school->name . ' - ' . $this->address->municipality->name;
-    }
+    // public function getFullnameCampusAttribute()
+    // {
+    //     return $this->school ? $this->school->name . ' - ' . $this->address->municipality->name : null;
+    // }
 
     public function getTermArrayAttribute()
     {

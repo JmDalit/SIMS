@@ -165,8 +165,7 @@ class LocationClass
                         });
                 });
             })
-
-            ->limit(200)
+            ->limit(1000)
             ->get()
             ->map(function ($row) {
                 return [

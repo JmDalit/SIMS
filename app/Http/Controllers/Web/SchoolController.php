@@ -27,6 +27,7 @@ class SchoolController extends Controller
                 'grades' => fn($q) => $q->where('is_delete', false)->orderBy('grade', 'asc'),
                 'info' => fn($q) => $q->select(['id', 'campus_id', 'dean', 'registrar', 'contact', 'email'])->where('is_delete', false),
                 'semesters' => fn($q) => $q->where('is_delete', false),
+                'address'
             ])->find($id);
 
             // Convert entire object recursively to plain arrays
@@ -52,7 +53,6 @@ class SchoolController extends Controller
                 ? ($location->getFullAddress(request('autosuggest')) ?? [])
                 : [],
             'schoolDetail' => $schoolDetail,
-
             'subjectDetail' => request('campusCourseId')
                 ? SchoolCampusCourseCurriculums::with([
                     'subjects' => fn($q) =>

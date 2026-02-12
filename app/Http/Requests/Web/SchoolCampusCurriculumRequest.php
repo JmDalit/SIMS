@@ -57,11 +57,12 @@ class SchoolCampusCurriculumRequest extends FormRequest
     public function messages()
     {
         return [
-            'multi.*.subjects'                 => 'Please make sure to include subjects before proceeding.',
+            'multi.*.subjects'                 => 'Please make sure to add subjects before proceeding.',
             'multi.*.subjects.*.name'          => 'Please provide the subject name.',
             'multi.*.subjects.*.class_array'   => 'Please select a subject class. ',
             'multi.*.subjects.*.subjectCode'   => 'Please enter the subject code.',
             'multi.*.subjects.*.unit'          => 'Please specify the number of units.',
+            'multi.*.yearLevel'                => 'Please enter curriculum year.'
         ];
     }
 }

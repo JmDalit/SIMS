@@ -5,6 +5,11 @@ namespace App\Imports;
 use App\Models\ListPrograms;
 use App\Models\ListReferences;
 use App\Models\ListStatuses;
+use App\Models\LocationBarangays;
+use App\Models\LocationCity;
+use App\Models\LocationProvinces;
+use App\Models\LocationRegions;
+use App\Models\ScholarProfiles;
 use App\Models\Scholars;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +24,7 @@ use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Row;
 use Maatwebsite\Excel\Concerns\OnEachRow;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class ScholarImport implements OnEachRow, WithHeadingRow, WithStartRow, SkipsEmptyRows, WithMultipleSheets
 {
@@ -47,49 +53,57 @@ class ScholarImport implements OnEachRow, WithHeadingRow, WithStartRow, SkipsEmp
     public function onRow(Row $row)
     {
         $data = $row->toArray();
-        Log::info('Import row', ['row' => $row->getRowIndex(), 'data' => $data]);
 
         DB::transaction(function () use ($data, $row) {
 
-            // $scholarshipTypeId = ListReferences::where('name', trim($data['scholarship_type']))
-            //     ->where('is_active', true)
-            //     ->where('is_delete', false)
-            //     ->value('id');
+            $scholars = Scholars::create([
+                'spas_no'     => trim($data['spas_no']),
+                'type_id'     =>  ListReferences::where('name', trim($data['scholarship_type']))->value('id'),
+                'program_id'  => ListPrograms::where('name', trim($data['scholarship_subprogram']))->value('id'),
+                'category_id' =>  ListReferences::where('name', trim($data['scholarship_program']))->value('id'),
+                'status_id'   => ListStatuses::where('name', trim($data['status']))->value('id'),
+                'created_by'  => Auth::user()->profile->fullname,
+            ]);
 
-            // $programId = ListPrograms::where('name', trim($data['scholarship_subprogram']))
-            //     ->where('is_active', true)
-            //     ->where('is_delete', false)
-            //     ->value('id');
+            $scholars->profile()->create([
+                'fname' => $data['firstname'],
+                'lname' => $data['lastname'],
+                'mname' => $data['middlename'],
+                'suffix' => $data['suffix'],
+                'contact_no' => $data['contact'],
+                'birthdate' => Date::excelToDateTimeObject($data['birthdate'])->format('Y-m-d'),
+                'birthplace' => $data['birth_place'],
+                'email' => $data['email'],
+                'sex' => $data['sex'],
+                'religion' => $data['religion'],
+                'civil_status' => $data['civil_status']
+            ]);
 
-            // $categoryId = ListReferences::where('name', trim($data['scholarship_program']))
-            //     ->where('is_active', true)
-            //     ->where('is_delete', false)
-            //     ->value('id');
-
-            // $statusId = ListStatuses::where('name', trim($data['status']))
-            //     ->where('is_active', true)
-            //     ->where('is_delete', false)
-            //     ->value('id');
+            $scholars->parent()->create([
+                'fname' => $data['parent_fulname'],
+                'id_no' => $data['id_no'],
+                'id_date' => Date::excelToDateTimeObject($data['id_place'])->format('Y-m-d'),
+                'id_place' => $data['id_place'],
+                'companion' => ['companion']
+            ]);
 
 
-            // Scholars::create([
-            //     'spas_no'     => trim($data['spas_no']),
-            //     'type_id'     => $scholarshipTypeId,
-            //     'program_id'  => $programId,
-            //     'category_id' => $categoryId,
-            //     'status_id'   => $statusId,
-            //     'created_by'  => Auth::user()->profile->fullname,
-            // ]);
+
+
+            $sliceName = explode(',', $data['barangay_municipality_province_region']);
+
+            $scholars->address()->create([
+                'address' => $data['address'],
+                'barangay_code'   => LocationBarangays::where('name', trim($sliceName[0]))->value('code'),
+                'municipality_code' => LocationCity::where('name', trim($sliceName[1]))->value('code'),
+                'province_code'   => LocationProvinces::where('name', trim($sliceName[2]))->value('code'),
+                'region_code'     => LocationRegions::where('name', trim($sliceName[3]))->value('code'),
+            ]);
+            DB::commit();
         });
     }
 
-    // public function model(array $row)
-    // {
-
-    // }
-
-
-
+    public function rules() {}
 }
  // '*.fname' => ['required'],
             // '*.mname' => ['required'],

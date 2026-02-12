@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name', 150);
             $table->string('old_name')->nullable();
             $table->string('district')->nullable();
+
             $table->string('municipality_code')->nullable()->constrained();
             $table->foreign('municipality_code')->references('code')->on('location_cities')->onDelete('cascade');
             $table->boolean('is_active')->default(true);

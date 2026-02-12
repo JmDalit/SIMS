@@ -4,8 +4,8 @@
 
         <DatePicker
             v-model="modelValue"
-            view="month"
-            dateFormat="mm/yy"
+            :view="view"
+            :dateFormat="formatDate"
             fluid
             :pt="{
                 pcInputText: {
@@ -15,7 +15,7 @@
                     ],
                 },
                 panel: {
-                    class: '!w-64 !text-sm',
+                    class: ' !text-sm',
                 },
             }"
         />
@@ -47,6 +47,14 @@ defineProps({
     message: {
         type: String,
         default: null,
+    },
+    view: {
+        type: String,
+        default: "date",
+    },
+    formatDate: {
+        type: String,
+        default: "mm/dd/yy",
     },
 });
 const modelValue = defineModel({

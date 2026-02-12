@@ -11,11 +11,12 @@ use App\Models\User;
 use App\Notifications\ScholarUploadedNotification;
 use App\Notifications\ValidatedFilesNotification;
 use App\References\ScholarClass;
-
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use Vinkla\Hashids\Facades\Hashids;
@@ -26,11 +27,21 @@ class ScholarController extends Controller
 {
     public function index()
     {
+
         return Inertia::render('Web/scholarPage', [
             'scholar' => [],
             'scholarDetails' => [],
             'files' => request('OpenFiles')
-                ? ScholarUploadedFiles::When(request('status'), function ($item) {})->latest()->paginate(4)
+                ? ScholarUploadedFiles::when(
+                    Auth::check() && Auth::user()->role_array['name'] == 'regional staff',
+                    function ($query) {
+                        $query->where('region_office', Auth::user()->profile->agency_array['name']);
+                    }
+                )->When(request('status'), function ($q) {
+                    $q->where('status', Str::lower(request('status')));
+                })
+                ->latest()
+                ->paginate(4)
                 : null,
         ]);
     }
@@ -91,6 +102,7 @@ class ScholarController extends Controller
             if ($path && Storage::disk('public')->exists($path)) {
                 Storage::disk('public')->delete($path);
             }
+
             return redirect()->back()->with('flash', [
                 'status'  => 'error',
                 'title'   => 'Import Failed',
@@ -101,29 +113,38 @@ class ScholarController extends Controller
 
     public function insert(Request $request, $id)
     {
+        DB::beginTransaction();
+        try {
+            $file = ScholarUploadedFiles::where('id', Hashids::decode($id))->first();
+            $file->update([
+                'validated_by' => Auth::user()->profile->fullname,
+                'validated_at' => now(),
+                'status' =>   $request['status'],
+            ]);
+            $fullname = $file->created_by;
+            $highTable = User::with('profile:user_id,fname,lname')
+                ->whereHas('profile', function ($q) use ($fullname) {
+                    $q->whereRaw("LOWER(CONCAT(fname, ' ', lname)) LIKE ?", ['%' . strtolower($fullname) . '%']);
+                })
+                ->select('id')
+                ->get();
 
-        $file = ScholarUploadedFiles::where('id', Hashids::decode($id))->first();
-        $file->update([
-            'validated_by' => Auth::user()->profile->fullname,
-            'validated_at' => now(),
-            'status' =>   $request['status'],
-        ]);
-        $fullname = $file->created_by;
-        $highTable = User::with('profile:user_id,fname,lname')
-            ->whereHas('profile', function ($q) use ($fullname) {
-                $q->whereRaw("LOWER(CONCAT(fname, ' ', lname)) LIKE ?", ['%' . strtolower($fullname) . '%']);
-            })
-            ->select('id')
-            ->get();
+
+            foreach ($highTable as $admin) {
+                $admin->notify(
+                    new ValidatedFilesNotification(
+                        $request['status'],
+                        Auth::user()->profile->fullname,
+                    )
+                );
+            }
 
 
-        foreach ($highTable as $admin) {
-            $admin->notify(
-                new ValidatedFilesNotification(
-                    $request['status'],
-                    Auth::user()->profile->fullname,
-                )
-            );
+            Excel::import(new ScholarImport, storage_path('app/public/' . $file->filepath));
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollBack();
+            dd($e);
         }
     }
     // function update(StatusRequest $request, string $id, string $type)

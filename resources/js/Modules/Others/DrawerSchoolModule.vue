@@ -4,9 +4,8 @@
             <div class="flex items-center gap-2 !sticky !top-0">
                 <div class="">
                     <Avatar
-                        v-if="page.props?.schoolDetail.school.photo == null"
                         :label="
-                            page.props?.schoolDetail.school.name
+                            page.props?.schoolDetail.generated_name
                                 .charAt(0)
                                 .toUpperCase()
                         "
@@ -14,29 +13,14 @@
                         shape="circle"
                         class="!w-[50px] !h-[50px] font-extrabold !text-2xl"
                     />
-
-                    <Avatar
-                        v-else
-                        style="background-color: #dee9fc; color: #1a2551"
-                        shape="circle"
-                        :image="page.props?.schoolDetail.school.photo"
-                        class="!w-[50px] !h-[50px]"
-                    />
                 </div>
 
                 <div class="flex flex-col">
                     <div class="font-bold flex items-center gap-1 capitalize">
                         <div>
                             <span>{{
-                                page.props?.schoolDetail.school.name
+                                page.props?.schoolDetail.generated_name
                             }}</span>
-                            -
-
-                            {{
-                                page.props?.schoolDetail.name ??
-                                page.props?.schoolDetail.address
-                                    .municipality_array.name
-                            }}
                         </div>
 
                         <DefaultButton
@@ -129,7 +113,7 @@
                                 >
                                     <div>PRESIDENT:</div>
                                 </div>
-                                <div class="text-sm font-light">
+                                <div class="text-sm font-light capitalize">
                                     {{
                                         page.props?.schoolDetail?.info?.dean ??
                                         "Not yet provided"
@@ -139,7 +123,8 @@
                             <TextInput
                                 v-else
                                 v-model="detailsForm.dean"
-                                placeholder="Dean's name"
+                                capitalize
+                                placeholder="President's name"
                             ></TextInput>
                         </div>
                         <div class="w-[50%] flex items-center gap-2">
@@ -173,6 +158,7 @@
                             <TextInput
                                 v-else
                                 v-model="detailsForm.registrar"
+                                capitalize
                                 placeholder="Registrar's name"
                             >
                             </TextInput>
@@ -246,7 +232,7 @@
                         @saveForm="submitForm('courses')"
                         button-label="Create"
                         :dialog-title="
-                            !courseForm.id ? 'Create Course' : 'Edit Course'
+                            !courseForm.id ? 'Create Programs' : 'Edit Programs'
                         "
                         :dialog-description="
                             !courseForm.id
@@ -290,7 +276,7 @@
                             <div class="flex flex-col gap-3 mt-5 mb-2">
                                 <SelectInput
                                     v-model="courseForm.course"
-                                    label="Course"
+                                    label="Program"
                                     :options="courseOption"
                                     clearable
                                     filter
@@ -655,12 +641,23 @@
                         <DatePickerInput
                             label="Start Date"
                             v-model="semesterForm.semester[index].startDate"
+                            view="month"
+                            format-date="M yy"
                         >
                         </DatePickerInput>
 
                         <DatePickerInput
                             label="End Date"
                             v-model="semesterForm.semester[index].endDate"
+                            view="month"
+                            format-date="M yy"
+                        >
+                        </DatePickerInput>
+                        <DatePickerInput
+                            label="Submission Date"
+                            v-model="
+                                semesterForm.semester[index].submissionDate
+                            "
                         >
                         </DatePickerInput>
                     </div>
@@ -1250,14 +1247,7 @@ import DefaultToggle from "../../Components/toggleswitches/DefaultToggle.vue";
 import DefaultMessages from "../../Components/messages/DefaultMessages.vue";
 import ToolbarModule from "./ToolbarModule.vue";
 import { router, useForm, usePage } from "@inertiajs/vue3";
-import {
-    computed,
-    onBeforeUnmount,
-    onMounted,
-    onUnmounted,
-    ref,
-    watch,
-} from "vue";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps({
     id: [Number, String],
@@ -1307,8 +1297,6 @@ const countSubject = (res) => {
 };
 
 const totalYearSubject = (res) => {
-    console.log(curriculumForm.multi[res.curriculumKey].subjects);
-
     const count = curriculumForm.multi[res.curriculumKey].subjects.filter(
         (s) => s.year == res.year,
     ).length;
@@ -1317,8 +1305,6 @@ const totalYearSubject = (res) => {
 };
 
 const totalYearUnit = (res) => {
-    console.log(curriculumForm.multi[res.curriculumKey].subjects);
-
     const count = curriculumForm.multi[res.curriculumKey].subjects
         .filter((s) => s.year == res.year)
         .reduce((sum, s) => sum + parseInt(s.unit), 0);
@@ -1669,12 +1655,12 @@ const gradeMenuItems = computed(() => {
 const openUpdateSchool = () => {
     updateSchool.value = true;
     detailsForm.campusId = props.id;
-    if (props.value.info) {
-        detailsForm.id = props.value.info.id;
-        detailsForm.dean = props.value.info.dean;
-        detailsForm.registrar = props.value.info.registrar;
-        detailsForm.contact = props.value.info.contact;
-        detailsForm.email = props.value.info.email;
+    if (page.props.schoolDetail.info.length != 0) {
+        detailsForm.id = page.props.schoolDetail.info.id;
+        detailsForm.dean = page.props.schoolDetail.info.dean;
+        detailsForm.registrar = page.props.schoolDetail.info.registrar;
+        detailsForm.contact = page.props.schoolDetail.info.contact;
+        detailsForm.email = page.props.schoolDetail.info.email;
     }
 };
 
@@ -1767,6 +1753,13 @@ const submitForm = (res) => {
                     const month2 = String(d2.getMonth() + 1).padStart(2, "0");
                     element.endDateFormatted = `${year2}-${month2}-01`;
                 }
+
+                if (element.submissionDate) {
+                    const d2 = new Date(element.submissionDate);
+                    const year2 = d2.getFullYear();
+                    const month2 = String(d2.getMonth() + 1).padStart(2, "0");
+                    element.submissionDateFormatted = `${year2}-${month2}-01`;
+                }
             });
             semesterForm.put(
                 route("campus.semester.update", {
@@ -1794,6 +1787,13 @@ const submitForm = (res) => {
                     const year2 = d2.getFullYear();
                     const month2 = String(d2.getMonth() + 1).padStart(2, "0");
                     element.endDateFormatted = `${year2}-${month2}-01`;
+                }
+
+                if (element.submissionDate) {
+                    const d2 = new Date(element.submissionDate);
+                    const year2 = d2.getFullYear();
+                    const month2 = String(d2.getMonth() + 1).padStart(2, "0");
+                    element.submissionDateFormatted = `${year2}-${month2}-01`;
                 }
             });
 
@@ -1956,6 +1956,8 @@ watch(
                     startDateFormatted: new Date(element.start_date),
                     endDate: new Date(element.end_date),
                     endDateFormatted: new Date(element.end_date),
+                    submissionDate: new Date(element.submission_date),
+                    submissionDateFormatted: new Date(element.submission_date),
                 });
             });
             semesterForm.semester.sort((a, b) => a.name.localeCompare(b.name));
@@ -1970,6 +1972,8 @@ watch(
                     startDateFormatted: null,
                     endDate: null,
                     endDateFormatted: null,
+                    submissionDate: null,
+                    submissionDateFormatted: null,
                 });
             });
         }

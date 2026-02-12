@@ -2,6 +2,7 @@
     <div class="flex h-screen overflow-hidden dark:bg-gray-800 dark:text-white">
         <Transition name="slide-fade">
             <aside
+                v-if="!isMobile"
                 :class="[
                     'z-30 fixed md:block md:relative md:flex-shrink-0 flex flex-col transition-all duration-300 bg-slate-100 dark:bg-gray-700 m-3 h-min-screen rounded-[15px] shadow-sm py-4 ',
                     sidebar ? 'w-60 ' : 'w-20 ',
@@ -58,6 +59,35 @@
                     ></div>
                 </div>
             </aside>
+            <Drawer v-model:visible="drawerMobile" v-else header="Drawer">
+                <template #header>
+                    <div class="flex gap-2 items-center top-0 sticky">
+                        <div class="flex items-center gap-2">
+                            <!-- <Image src="/images/seilogo.png" alt="Logo" v-show="sidebar" width="39" height="39" /> -->
+                            <Image
+                                src="/images/dostlogo.svg"
+                                alt="Logo"
+                                width="39"
+                                height="39"
+                            />
+                        </div>
+
+                        <div
+                            class="font-semibold flex-1 text-blue-600 dark:!text-blue-400 leading-none"
+                        >
+                            SIMS
+                            <span
+                                class="block text-xs text-gray-500 uppercase"
+                                >{{ page.props.user.profile.agency.slug }}</span
+                            >
+                        </div>
+                    </div>
+                </template>
+                <Divider class="!m-0" align="right">
+                    <p class="text-xs font-semibold">Menu</p>
+                </Divider>
+                <SidebarLabelMenu :list="page.props.menu" />
+            </Drawer>
         </Transition>
 
         <div class="flex-1 flex flex-col w-full md:py-3 md:pr-3">
@@ -68,10 +98,20 @@
                     <div class="flex-1">
                         <DefaultButton
                             size="small"
+                            v-if="!isMobile"
                             variant="text"
                             class="!text-white hover:!bg-transparent"
                             @click="toggleSidebar"
                             :icon="sidebar ? IconChevronLeft : IconChevronRight"
+                            rounded
+                        />
+                        <DefaultButton
+                            size="small"
+                            v-else
+                            variant="text"
+                            class="!text-white hover:!bg-transparent"
+                            @click="drawerMobile = !drawerMobile"
+                            :icon="IconMenu2"
                             rounded
                         />
                     </div>
@@ -116,7 +156,7 @@
                         <Popover
                             ref="popNotif"
                             :pt="{
-                                root: 'popover-notification !ml-5 !rounded-xl',
+                                root: 'lg:popover-notification !ml-5 !rounded-xl',
                             }"
                         >
                             <div class="w-[25rem] max-h-[20rem] flex flex-col">
@@ -335,8 +375,9 @@ import {
     IconCircle,
     IconCircleCheck,
     IconCircleX,
+    IconMenu,
 } from "@tabler/icons-vue";
-import { ref, onMounted, Transition } from "vue";
+import { ref, onMounted, Transition, onUnmounted } from "vue";
 import SidebarLabelMenu from "../Components/menus/SidebarLabelMenu.vue";
 import DefaultToggle from "../Components/toggleswitches/DefaultToggle.vue";
 import { router, usePage } from "@inertiajs/vue3";
@@ -345,6 +386,8 @@ const page = usePage();
 const isDark = ref(false);
 const sidebar = ref(false);
 const popNotif = ref(null);
+const isMobile = ref(false);
+const drawerMobile = ref(false);
 
 const toggleNotif = (e) => {
     popNotif.value.toggle(e);
@@ -361,6 +404,14 @@ const markAsRead = (id) => {
     );
 };
 
+const checkIfMobile = () => {
+    isMobile.value = window.innerWidth < 768;
+
+    if (isMobile.value) {
+        sidebar.value = false;
+    }
+};
+
 function toggleDark() {
     localStorage.setItem("theme", isDark.value ? "dark" : "light");
     applyTheme();
@@ -375,14 +426,18 @@ function applyTheme() {
     document.documentElement.classList.toggle("dark", isDark.value);
 }
 
-const toggleMobileSidebar = () => {
-    isMobileSidebarOpen.value = !isMobileSidebarOpen.value;
-};
-
 onMounted(() => {
     isDark.value = localStorage.getItem("theme") === "dark";
     applyTheme();
     sidebar.value = localStorage.getItem("sidebar") === "true";
+});
+checkIfMobile();
+onMounted(() => {
+    window.addEventListener("resize", checkIfMobile);
+    checkIfMobile();
+});
+onUnmounted(() => {
+    window.removeEventListener("resize", checkIfMobile);
 });
 </script>
 <style>

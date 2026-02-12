@@ -61,7 +61,8 @@ class CampusCourseRequest extends FormRequest
     public function attributes()
     {
         return [
-            'course.id' => 'course'
+            'course.id' => 'course',
+            'course' => 'program'
         ];
     }
 }

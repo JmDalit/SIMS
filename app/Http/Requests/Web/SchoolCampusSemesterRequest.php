@@ -28,8 +28,10 @@ class SchoolCampusSemesterRequest extends FormRequest
             'semester.*.semesterId' => ['required'],
             'semester.*.startDate' => ['required', 'date'],
             'semester.*.endDate' => ['required', 'date'],
+            'semester.*.submissionDate' => ['required', 'date'],
             'semester.*.startDateFormatted' => ['nullable', 'string'],
             'semester.*.endDateFormatted' => ['nullable', 'string'],
+            'semester.*.submissionDateFormatted' => ['nullable', 'string'],
         ];
     }
 
@@ -38,6 +40,7 @@ class SchoolCampusSemesterRequest extends FormRequest
         return [
             'semesters.*.startDate.required' => 'Each semester must have a start date.',
             'semesters.*.endDate.required' => 'Each semester must have an end date.',
+            'semesters.*.submissionDate.required' => 'Each semester must have an suubmission date.',
         ];
     }
 
@@ -48,6 +51,7 @@ class SchoolCampusSemesterRequest extends FormRequest
             'semester.*.semesterId' => 'semester',
             'semester.*.startDate' =>  'start date',
             'semester.*.endDate' => 'end date',
+            'semester.*.submissionDate' => 'submission date',
         ];
     }
 }

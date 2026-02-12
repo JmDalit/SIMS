@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('scholar_id')->constrained('scholars')->nullOnDelete();
             $table->text('address')->nullable();
+            $table->string('barangay_custom')->nullable();
             $table->string('barangay_code')->nullable();
             $table->foreign('barangay_code')->references('code')->on('location_barangays')->onDelete('set null');
             $table->string('municipality_code')->nullable();

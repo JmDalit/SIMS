@@ -18,6 +18,9 @@
                 <div class="flex flex-col items-center justify-center">
                     <IconFileUpload :size="40" stroke-width="1" />
                     <div>Drag and drop files to here to upload.</div>
+                    <div class="text-xs">
+                        Accepted formats: (.csv, .xls, .xlsx)
+                    </div>
                 </div>
             </div>
         </template>
@@ -32,12 +35,6 @@
             }"
         >
             <div class="'flex flex-col w-full">
-                <div class="" v-show="messages.length !== 0">
-                    <DefaultMessages
-                        message-type="error"
-                        :message="messages"
-                    ></DefaultMessages>
-                </div>
                 <div>
                     <div v-for="(item, key) in files" :key="key" class="w-full">
                         <div class="flex items-center gap-3 m-2">
@@ -85,8 +82,6 @@
 </template>
 <script setup>
 import { IconFileDescription, IconFileUpload, IconX } from "@tabler/icons-vue";
-import { ref } from "vue";
-import DefaultMessages from "../messages/DefaultMessages.vue";
 
 const emit = defineEmits(["select-files", "remove-file", "single-remove-file"]);
 
@@ -103,8 +98,8 @@ function formatFileSize(size) {
     const i = Math.floor(Math.log(size) / Math.log(1024));
     return (size / Math.pow(1024, i)).toFixed(2) + " " + units[i];
 }
-function onRemoveUploadedFile() {
-    emit("remove-file");
+function onRemoveUploadedFile(event) {
+    emit("remove-file", event);
 }
 
 const handleRemoveFile = (key, file, removeFileCallback) => {

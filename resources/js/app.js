@@ -1,6 +1,7 @@
 import "./bootstrap";
 import "../css/app.css";
 import "primeicons/primeicons.css";
+
 import { createApp, h } from "vue";
 import { createInertiaApp } from "@inertiajs/vue3";
 import { definePreset } from "@primeuix/themes";
@@ -11,7 +12,9 @@ import PrimeVue from "primevue/config";
 import Aura from "@primeuix/themes/aura";
 import ToastService from "primevue/toastservice";
 import ConfirmationService from "primevue/confirmationservice";
-const appName = import.meta.env.VITE_APP_NAME || "STSIMS";
+import VCalendar from "v-calendar";
+import "v-calendar/style.css";
+const appName = import.meta.env.VITE_APP_NAME || "SIMS";
 const MyPreset = definePreset(Aura, {
     semantic: {
         primary: {
@@ -58,7 +61,7 @@ createInertiaApp({
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.vue`,
-            import.meta.glob("./Pages/**/*.vue")
+            import.meta.glob("./Pages/**/*.vue"),
         ),
     setup({ el, App, props, plugin }) {
         createApp({ render: () => h(App, props) })
@@ -74,6 +77,7 @@ createInertiaApp({
             .use(plugin)
             .use(ToastService)
             .use(ConfirmationService)
+            .use(VCalendar, {})
             .use(ZiggyVue, Ziggy)
             .mount(el);
     },

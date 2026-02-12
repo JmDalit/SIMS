@@ -15,12 +15,14 @@ class SchoolCampusSemesters extends Model
         'end_date',
         'is_delete',
         'is_active',
+        'submission_date'
     ];
 
 
     protected $casts = [
         'start_date' => 'date:Y-m-d',
         'end_date' => 'date:Y-m-d',
+        'submission_date' => 'date:Y-m-d',
     ];
 
     protected $hidden = [

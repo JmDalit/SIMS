@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('scholar_parent_details', function (Blueprint $table) {
+        Schema::create('scholar_school_infos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('scholar_id')->nullable()->constrained('scholars')->cascadeOnDelete();
-            $table->string('fname')->nullable();
-            $table->string('id_no')->nullable();
-            $table->string('id_date')->nullable();
-            $table->string('id_place')->nullable();
-            $table->string('companion')->nullable();
+            $table->string('campus_id')->nullable()->constrained('school_campuses')->cascadeOnDelete();
+            $table->foreignId('campus_course_id')->nullable()->constrained('school_campus_courses')->cascadeOnDelete();
+            $table->string('award_year')->nullable();
+            $table->string('graduated_year')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('scholar_parent_details');
+        Schema::dropIfExists('scholar_school_infos');
     }
 };
