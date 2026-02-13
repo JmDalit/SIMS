@@ -279,6 +279,21 @@
                                 </div>
                             </div>
                             <div class="flex justify-end">
+                                <Button
+                                    text
+                                    v-tooltip.top="'Options'"
+                                    rounded
+                                    size="small"
+                                    severity="secondary"
+                                    icon="pi pi-ellipsis-v"
+                                    @click="
+                                        (e) => toggleOption(e, slotProps.data)
+                                    "
+                                    v-if="
+                                        page.props.user?.role_array.name ==
+                                        'Administrator'
+                                    "
+                                />
                                 <DefaultButton
                                     size="small"
                                     rounded
@@ -293,22 +308,9 @@
                                         })
                                     "
                                     outlined
+                                    v-else
                                 />
-                                <Button
-                                    text
-                                    v-tooltip.top="'Options'"
-                                    rounded
-                                    size="small"
-                                    severity="secondary"
-                                    icon="pi pi-ellipsis-v"
-                                    @click="
-                                        (e) => toggleOption(e, slotProps.data)
-                                    "
-                                    v-show="
-                                        page.props.user?.role_array.name ==
-                                        'Administrator'
-                                    "
-                                />
+
                                 <Menu
                                     ref="menu"
                                     :model="menuItems"
