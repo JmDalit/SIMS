@@ -226,9 +226,9 @@ class SchoolController extends Controller
         ]);
     }
 
-    function destroyCampus(int $id)
+    public function destroy($id)
     {
-        $find = SchoolCampuses::findOrFail($id);
+        $find = Schools::findOrFail($id);
         $find->update([
             'is_delete' => true,
         ]);

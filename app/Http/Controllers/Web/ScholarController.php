@@ -56,7 +56,7 @@ class ScholarController extends Controller
         try {
             $file = $data['files'][0];
 
-            $filename = Hashids::encode(time()) . '.' . $file->getClientOriginalExtension();
+            $filename = Str::random(12) . '.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('imports/scholars', $filename, 'public');
 
             Excel::import(new CheckScholarImport, storage_path('app/public/' . $path));

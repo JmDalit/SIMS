@@ -51,4 +51,9 @@ class Scholars extends Model
     {
         return $this->hasOne(ScholarParentDetails::class, 'scholar_id');
     }
+
+    public function schoolInfo()
+    {
+        return $this->hasMany(ScholarSchoolInfos::class, 'scholar_id');
+    }
 }

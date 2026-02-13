@@ -94,7 +94,7 @@ Route::middleware(['auth', 'web'])->group(function () {
 
     Route::post('academic/universities', [SchoolController::class, 'store'])->name('academic.universities.store');
     Route::put('academic/universities/{id}/{type}', [SchoolController::class, 'update'])->name('academic.universities.update');
-    Route::delete('academic/universities/{id}/{type}', [SchoolController::class, 'destroyCampus'])->name('academic.universities.campus');
+    Route::delete('academic/universities/{id}/{type}', [SchoolController::class, 'destroy'])->name('academic.universities.destroy');
 
     Route::post('academic/universities/course', [CampusCourseController::class, 'store'])->name('academic.universities.course.store');
     Route::put('academic/universities/course/{id}/{type}', [CampusCourseController::class, 'update'])->name('academic.universities.course.update');

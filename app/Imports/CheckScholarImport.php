@@ -58,7 +58,7 @@ class CheckScholarImport implements OnEachRow, WithHeadingRow, WithMultipleSheet
                 'id_date' => ['required'],
                 'companion' => ['required'],
                 'year_award' => ['required'],
-                'course' => ['required'],
+                'course' => ['required', Rule::exists('school_campus_course',)],
                 'school' => ['required', Rule::exists('school_campuses', 'generated_name')->where(fn($query) => $query->where('is_active', true)->where('is_delete', false))]
             ],
             [

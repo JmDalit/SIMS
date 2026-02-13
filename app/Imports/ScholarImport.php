@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Models\ListCourse;
 use App\Models\ListPrograms;
 use App\Models\ListReferences;
 use App\Models\ListStatuses;
@@ -11,6 +12,8 @@ use App\Models\LocationProvinces;
 use App\Models\LocationRegions;
 use App\Models\ScholarProfiles;
 use App\Models\Scholars;
+use App\Models\SchoolCampusCourses;
+use App\Models\SchoolCampuses;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -80,15 +83,12 @@ class ScholarImport implements OnEachRow, WithHeadingRow, WithStartRow, SkipsEmp
             ]);
 
             $scholars->parent()->create([
-                'fname' => $data['parent_fulname'],
+                'fname' => $data['parent_fullname'],
                 'id_no' => $data['id_no'],
-                'id_date' => Date::excelToDateTimeObject($data['id_place'])->format('Y-m-d'),
+                'id_date' => Date::excelToDateTimeObject($data['id_date'])->format('Y-m-d'),
                 'id_place' => $data['id_place'],
-                'companion' => ['companion']
+                'companion' => $data['companion']
             ]);
-
-
-
 
             $sliceName = explode(',', $data['barangay_municipality_province_region']);
 
@@ -99,6 +99,18 @@ class ScholarImport implements OnEachRow, WithHeadingRow, WithStartRow, SkipsEmp
                 'province_code'   => LocationProvinces::where('name', trim($sliceName[2]))->value('code'),
                 'region_code'     => LocationRegions::where('name', trim($sliceName[3]))->value('code'),
             ]);
+
+
+            $scholars->schoolInfo()->create([
+                'campus_id' => SchoolCampuses::where('generated_name', $data['school'])->value('id'),
+                'campus_course_id' => SchoolCampusCourses::whereHas('course', function ($q) use ($data) {
+                    $q->where('name', $data['course']);
+                })->value('id'),
+                'award_year' => $data['year_award']
+            ]);
+
+
+
             DB::commit();
         });
     }

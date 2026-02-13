@@ -195,8 +195,8 @@
                                         <div
                                             :class="[
                                                 item.grading_status
-                                                    ? 'bg-green-50 text-green-600 border border-green-600'
-                                                    : 'bg-red-50 text-red-600 border border-red-600',
+                                                    ? 'bg-green-50 text-green-400 border border-green-400'
+                                                    : 'bg-red-50 text-red-400 border border-red-400',
                                                 'px-3 rounded-2xl py-1 flex items-center  gap-1 ',
                                             ]"
                                         >

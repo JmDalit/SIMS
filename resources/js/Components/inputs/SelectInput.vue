@@ -1,6 +1,9 @@
 <template>
     <div class="w-full flex flex-col">
-        <span class="text-sm font-medium" v-show="label">{{ label }}</span>
+        <div class="text-sm font-medium" v-show="label">
+            {{ label }}
+            <span class="text-red-600 font-semibold" v-if="errorMark">*</span>
+        </div>
         <Select
             :placeholder="placeholder"
             v-model="modelValue"
@@ -71,6 +74,10 @@ defineProps({
     clearable: {
         type: [Boolean],
         default: false,
+    },
+    errorMark: {
+        type: String,
+        default: null,
     },
 });
 const modelValue = defineModel({

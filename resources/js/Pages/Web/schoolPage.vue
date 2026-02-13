@@ -34,17 +34,20 @@
                         <div class="flex flex-col gap-3 mb-2">
                             <TextInput
                                 v-model="universityForm.name"
+                                :error-mark="universityForm.errors.name"
                                 label="Name"
                                 capitalize
                             ></TextInput>
 
                             <TextInput
                                 v-model="universityForm.abbreviation"
+                                :error-mark="universityForm.errors.abbreviation"
                                 label="Abbreviation"
                             ></TextInput>
                             <SelectInput
                                 v-model="universityForm.class"
                                 :options="page.props.classOption"
+                                :error-mark="universityForm.errors.class"
                                 label="Class"
                                 clearable
                             >
@@ -105,6 +108,11 @@
                                                 universityForm.campuses[index]
                                                     .semester
                                             "
+                                            :error-mark="
+                                                universityForm.errors[
+                                                    `campuses.${index}.semester`
+                                                ]
+                                            "
                                             :options="
                                                 page.props.classificationOption
                                             "
@@ -117,6 +125,11 @@
                                                 universityForm.campuses[index]
                                                     .grading
                                             "
+                                            :error-mark="
+                                                universityForm.errors[
+                                                    `campuses.${index}.grading`
+                                                ]
+                                            "
                                             :options="page.props.gradingOption"
                                             label="Grading System"
                                             clearable
@@ -127,6 +140,11 @@
                                         v-model="
                                             universityForm.campuses[index]
                                                 .agency
+                                        "
+                                        :error-mark="
+                                            universityForm.errors[
+                                                `campuses.${index}.agency`
+                                            ]
                                         "
                                         :options="page.props.agencyOption"
                                         label="Regional Office"
@@ -147,6 +165,11 @@
                                         v-model="
                                             universityForm.campuses[index]
                                                 .address
+                                        "
+                                        :error-mark="
+                                            universityForm.errors[
+                                                `campuses.${index}.address`
+                                            ]
                                         "
                                         :options="page.props.resultSearch"
                                         placeholder="Find by Barangay, City, Province, or Region"
@@ -256,6 +279,21 @@
                                 </div>
                             </div>
                             <div class="flex justify-end">
+                                <DefaultButton
+                                    size="small"
+                                    rounded
+                                    class-name="!p-0 !m-0"
+                                    :icon="IconEdit"
+                                    tooltip="Edit Campuses"
+                                    :icon-size="18"
+                                    @click="
+                                        toggleModal({
+                                            type: 'edit',
+                                            data: slotProps.data,
+                                        })
+                                    "
+                                    outlined
+                                />
                                 <Button
                                     text
                                     v-tooltip.top="'Options'"
@@ -265,6 +303,10 @@
                                     icon="pi pi-ellipsis-v"
                                     @click="
                                         (e) => toggleOption(e, slotProps.data)
+                                    "
+                                    v-show="
+                                        page.props.user?.role_array.name ==
+                                        'Administrator'
                                     "
                                 />
                                 <Menu
@@ -435,6 +477,7 @@ import {
     IconCheck,
     IconX,
     IconSchool,
+    IconEdit,
 } from "@tabler/icons-vue";
 
 const page = usePage();
@@ -600,8 +643,8 @@ const toggleModal = (res) => {
 
 const deleteRow = (id) => {
     confirmRef.value.popupDialog(() => {
-        universityForm.delete(
-            route("academic.courses.destroy", { id: id, type: "delete" }),
+        router.delete(
+            route("academic.universities.destroy", { id: id, type: "delete" }),
             {
                 onSuccess: () => {
                     universityForm.resetAndClearErrors();
