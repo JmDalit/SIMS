@@ -35,7 +35,13 @@ class DashboardController extends Controller
                     return [
                         'id' => $campus->id,
                         'generated_name' => $campus->generated_name,
-                        'school_shortcut' => $campus->name ? $campus->school?->shortcut . '-' . $campus->name : $campus->school?->shortcut . '-' . $campus->municipality_array->name,
+                        'school_shortcut' => $campus->school
+                            ? (
+                                $campus->name
+                                ? $campus->school->shortcut . '-' . $campus->name
+                                : $campus->school->shortcut . '-' . $campus->address?->municipality_array['name']
+                            )
+                            : null,
                         'program_cnt' => $campus->courses_count,
                         'grading_status' => $campus->grades()->exists(),
                         'semesters' => $campus->semesters->isNotEmpty()
@@ -43,9 +49,10 @@ class DashboardController extends Controller
                                 'start_date' => Carbon::parse($campus->semesters[0]->start_date)->format('M Y'),
                                 'end_date'   => Carbon::parse($campus->semesters[0]->end_date)->format('M Y'),
                                 'type'   => $campus->semesters[0]->semester_array,
-                                'summision'   => Carbon::parse($campus->semesters[0]->summision_date)->format('M d, Y'),
+                                'submission_date'   => Carbon::parse($campus->semesters[0]->submission_date)->format('M d, Y'),
                             ]
                             : [],
+                        'tset' => $campus->address?->municipality_array['name']
                     ];
                 }) : null
         ]);

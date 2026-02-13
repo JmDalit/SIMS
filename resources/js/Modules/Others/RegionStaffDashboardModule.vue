@@ -184,7 +184,7 @@
                                 <td
                                     class="!py-[0.2rem] text-xs font-semibold text-center text-gray-700"
                                 >
-                                    {{ item.semesters.summision }}
+                                    {{ item.semesters.submission_date }}
                                 </td>
                                 <td
                                     class="!py-[0.2rem] font-normal flex h-full items-center w-full"
