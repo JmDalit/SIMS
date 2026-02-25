@@ -1,6 +1,6 @@
 <template>
     <DataTable
-        v-model:expandedRows="expandedRows"
+        v-model:selection="expandedRows"
         :value="items"
         paginator
         :rows="pagination.perPage"
@@ -8,10 +8,10 @@
         removableSort
         :lazy="true"
         dataKey="id"
-        :rowGroupMode="rowGroupMode"
-        :groupRowsBy="groupRowsBy"
-        sortMode="single"
+        selectionMode="single"
+        :metaKeySelection="true"
         :size="size"
+        @rowSelect="onRowSelected"
         :first="(pagination.currentPage - 1) * pagination.perPage"
         :loading="loading"
         @page="onPageChange"
@@ -25,7 +25,7 @@
                 class: '!text-xs !font-bold !text-blue-300',
             },
             pcPaginator: {
-                root: 'dark:!bg-transparent ',
+                root: 'dark:!bg-transparent dark:!text-gray-100',
             },
             tableContainer: {
                 class: ' border-t border-x rounded-xl !border-gray-200 dark:!border-gray-700 ',
@@ -37,10 +37,10 @@
                 root: { class: 'dark:!border-gray-700 dark:text-gray-300' },
             },
             bodyRow: {
-                class: '!bg-transparent dark:!border-gray-700',
+                class: 'dark:!bg-transparent dark:!border-gray-700',
             },
             rowGroupHeader: {
-                class: 'dark:!bg-transparent !bg-slate-50 dark:!text-gray-300',
+                class: 'dark: !bg-gray-50 dark:!text-gray-300',
             },
             loadingIcon: {
                 class: 'text-blue-300 ',
@@ -110,11 +110,14 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(["paginate"]);
+const emit = defineEmits(["paginate", "selected"]);
 
 function onPageChange(event) {
     const page = event.page + 1;
     emit("paginate", page);
+}
+function onRowSelected(event) {
+    emit("selected", event.data);
 }
 </script>
 
@@ -155,6 +158,9 @@ function onPageChange(event) {
 ::v-deep(.p-datatable-mask.p-overlay-mask) {
     background-color: #ffffff71 !important;
     border-radius: 1rem !important;
+}
+::v-deep(datatable.row.hover.background) {
+    background-color: aqua !important;
 }
 /* ::v-deep(.p-datatable-tbody) {
     background-color: transparent !important;

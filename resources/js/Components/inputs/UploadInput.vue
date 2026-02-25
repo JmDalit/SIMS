@@ -1,15 +1,15 @@
 <template>
     <FileUpload
-        name="demo[]"
+        name="excelfiles"
         :show-upload-button="false"
         :pt="{
             root: { class: '!rounded-[15px] !m-0 !border-dashed' },
         }"
-        :accept="accept"
-        customUpload
-        showCancelButton
-        @remove="onRemoveUploadedFile"
+        @uploader="onUpload($event)"
         @select="(files) => emit('select-files', files)"
+        mode="advanced"
+        ref="fileupload"
+        :accept="accept"
     >
         <template #empty>
             <div
@@ -30,7 +30,6 @@
                 uploadedFiles,
                 removeUploadedFileCallback,
                 removeFileCallback,
-                progress,
                 messages,
             }"
         >
@@ -42,7 +41,7 @@
                                 <IconFileDescription size="24" />
                             </Avatar>
 
-                            <div class="flex flex-col gap-2 w-full">
+                            <div class="flex flex-col gap-1 w-full">
                                 <div class="flex justify-between">
                                     <div
                                         class="text-sm text-gray-700 flex items-end gap-2"
@@ -69,9 +68,18 @@
                                 </div>
 
                                 <ProgressBar
+                                    v-if="progress < 100"
                                     class="!h-[10px] !rounded-[5px]"
                                     :pt="{ label: { class: '!text-[8px]' } }"
+                                    :value="progress"
                                 ></ProgressBar>
+                                <div v-else class="text-xs text-gray-400">
+                                    {{
+                                        page.props.flash?.status == "error"
+                                            ? "Error"
+                                            : "Completed"
+                                    }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -81,14 +89,20 @@
     </FileUpload>
 </template>
 <script setup>
+import { usePage } from "@inertiajs/vue3";
 import { IconFileDescription, IconFileUpload, IconX } from "@tabler/icons-vue";
-
-const emit = defineEmits(["select-files", "remove-file", "single-remove-file"]);
-
+import { ref } from "vue";
+const emit = defineEmits(["select-files", "remove-file"]);
+const page = usePage();
+const fileupload = ref(null);
 defineProps({
     accept: {
         type: String,
         default: "",
+    },
+    progress: {
+        type: Number,
+        default: 0,
     },
 });
 
@@ -98,14 +112,41 @@ function formatFileSize(size) {
     const i = Math.floor(Math.log(size) / Math.log(1024));
     return (size / Math.pow(1024, i)).toFixed(2) + " " + units[i];
 }
-function onRemoveUploadedFile(event) {
-    emit("remove-file", event);
-}
 
 const handleRemoveFile = (key, file, removeFileCallback) => {
+    // Remove file from FileUpload internal list
     removeFileCallback(key);
+
     emit("remove-file", file);
 };
+
+const onUpload = (event) => {
+    const files = event.files;
+};
+
+const upload = () => {
+    fileupload.value.upload();
+};
+
+const clear = () => {
+    fileupload.value.clear();
+};
+
+// const onClearTemplatingUpload = (clear) => {
+//     clear();
+//     totalSize.value = 0;
+//     totalSizePercent.value = 0;
+// };
+
+// const uploadEvent = (callback) => {
+//     totalSizePercent.value = totalSize.value / 10;
+//     callback();
+// };
+
+defineExpose({
+    upload,
+    clear,
+});
 </script>
 
 <style>

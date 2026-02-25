@@ -272,8 +272,9 @@
                                         }}</span>
                                         | Classification:
                                         <span class="font-semibold">{{
-                                            slotProps.data.school
-                                                .reference_array.name
+                                            slotProps.data.school.reference[
+                                                "name"
+                                            ]
                                         }}</span>
                                     </div>
                                 </div>
@@ -289,26 +290,6 @@
                                     @click="
                                         (e) => toggleOption(e, slotProps.data)
                                     "
-                                    v-if="
-                                        page.props.user?.role_array.name ==
-                                        'Administrator'
-                                    "
-                                />
-                                <DefaultButton
-                                    size="small"
-                                    rounded
-                                    class-name="!p-0 !m-0"
-                                    :icon="IconEdit"
-                                    tooltip="Edit Campuses"
-                                    :icon-size="18"
-                                    @click="
-                                        toggleModal({
-                                            type: 'edit',
-                                            data: slotProps.data,
-                                        })
-                                    "
-                                    outlined
-                                    v-else
                                 />
 
                                 <Menu
@@ -349,8 +330,7 @@
                                 <div class="capitalize">
                                     {{
                                         prop.data.name ??
-                                        prop.data.address.municipality_array
-                                            .name
+                                        prop.data.address.municipality.name
                                     }}
                                 </div>
 
@@ -366,14 +346,14 @@
                     <Column header="Term">
                         <template #body="prop">
                             <div class="text-xs">
-                                {{ prop.data.term_array.name }}
+                                {{ prop.data.term }}
                             </div>
                         </template>
                     </Column>
                     <Column header="Grading">
                         <template #body="prop">
                             <div class="text-xs">
-                                {{ prop.data.grading_array.name }}
+                                {{ prop.data.grading }}
                             </div>
                         </template>
                     </Column>
@@ -382,7 +362,7 @@
                             <div
                                 :class="[
                                     'text-xs',
-                                    prop.data.agency_array.name ==
+                                    prop.data.agency ==
                                         page.props.user.profile.agency_array
                                             .name &&
                                     page.props.user.role_array['name'] ==
@@ -391,34 +371,57 @@
                                         : 'text-gray-400',
                                 ]"
                             >
-                                {{ prop.data.agency_array.name }}
+                                {{ prop.data.agency }}
                             </div>
                         </template>
                     </Column>
-                    <Column field="courses_count">
+                    <Column>
                         <template #header>
                             <div
                                 class="flex justify-center font-semibold w-full"
                             >
-                                <div>Program Status</div>
+                                <div>Active Semester</div>
                             </div>
                         </template>
-                        <template #body="{ data }">
-                            <div class="flex justify-center">
-                                <span
-                                    class="text-xs bg-slate-100 text-slate-400 px-2 py-1 rounded-lg"
-                                    v-if="data.courses_count === 0"
-                                >
-                                    No program assigned
-                                </span>
-                                <span
-                                    class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-lg"
-                                    v-else
-                                >
-                                    <span class="font-semibold">
-                                        {{ data.courses_count }}
-                                    </span>
-                                    Registered
+                        <template #body="prop">
+                            <div
+                                v-if="prop.data.semester"
+                                class="flex justify-center"
+                                v-tooltip.top="
+                                    prop.data.semester.acad_term.name
+                                "
+                            >
+                                <div class="flex items-center gap-1 text-xs">
+                                    <IconPointFilled class="text-green-600" />
+                                    <span class="font-medium">{{
+                                        prop.data.semester.start_date
+                                    }}</span>
+
+                                    <IconArrowNarrowRight
+                                        class="text-gray-400"
+                                    />
+                                    <span class="font-medium">{{
+                                        prop.data.semester.end_date
+                                    }}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </Column>
+                    <Column>
+                        <template #header>
+                            <div
+                                class="flex justify-center font-semibold w-full"
+                            >
+                                <div>Submission Date</div>
+                            </div>
+                        </template>
+                        <template #body="prop">
+                            <div
+                                v-if="prop.data.semester"
+                                class="flex justify-center"
+                            >
+                                <span class="text-xs font-medium">
+                                    {{ prop.data.semester.submission_date }}
                                 </span>
                             </div>
                         </template>
@@ -480,6 +483,8 @@ import {
     IconX,
     IconSchool,
     IconEdit,
+    IconArrowNarrowRight,
+    IconPointFilled,
 } from "@tabler/icons-vue";
 
 const page = usePage();
@@ -546,7 +551,7 @@ const openDrawer = (res) => {
     dataDrawer.value = res.data;
     drawerId.value = res.data.id;
     const id = Number(res.data.id);
-    const semesterType = res.data?.term_array?.name ?? null;
+    const semesterType = res.data?.term ?? null;
 
     router.reload({
         data: JSON.parse(JSON.stringify({ id, semesterType })),
@@ -643,17 +648,12 @@ const toggleModal = (res) => {
     }
 };
 
-const deleteRow = (id) => {
-    confirmRef.value.popupDialog(() => {
-        router.delete(
-            route("academic.universities.destroy", { id: id, type: "delete" }),
-            {
-                onSuccess: () => {
-                    universityForm.resetAndClearErrors();
-                    toastRef.value.show(page.props.flash);
-                },
-            },
-        );
+const deleteRow = () => {
+    toastRef.value.show({
+        status: "info",
+        title: "Unable to delete school",
+        message:
+            "You don’t have permission to access or modify campuses outside your assigned region.",
     });
 };
 

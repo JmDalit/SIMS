@@ -23,7 +23,7 @@ class ScholarSchoolInfos extends Model
         return $this->belongsTo(SchoolCampuses::class, 'campus_id');
     }
 
-    public function campusCourse()
+    public function course()
     {
         return $this->belongsTo(SchoolCampusCourses::class, 'campus_course_id');
     }

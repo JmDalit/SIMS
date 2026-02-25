@@ -11,6 +11,7 @@ use App\References\ListClass;
 use App\References\LocationClass;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -226,19 +227,38 @@ class SchoolController extends Controller
         ]);
     }
 
-    public function destroy($id)
+    public function destroy($id, $type)
     {
-        $find = Schools::findOrFail($id);
-        $find->update([
-            'is_delete' => true,
-        ]);
+        try {
+            $university = SchoolCampuses::findOrFail($id);
+            $university->is_delete = true;
+            $university->save();
 
 
+            $school = Schools::withCount(['campuses' => fn($q) => $q->where('is_delete', false)])
+                ->where('id', $university->school_id)
+                ->first();
 
-        return redirect()->back()->with('flash', [
-            'status' => 'success',
-            'title'  => 'School Campus Deleted',
-            'message' => 'School campus successfully deleted.',
-        ]);
+            if ($school && $school->campuses_count === 0) {
+                $school->is_delete = true;
+                $school->save();
+            }
+
+            return redirect()->back()->with('flash', [
+                'status' => 'success',
+                'title'  => 'School Campus Deleted',
+                'message' => 'School campus successfully deleted.',
+            ]);
+        } catch (\Throwable $e) {
+
+            Log::channel('errortracer')->error('Deleting campus', [
+                'error' => $e->getMessage(),
+            ]);
+            return redirect()->back()->with('flash', [
+                'status' => 'error',
+                'title'  => 'Something went wrong',
+                'message' => 'Please report this to Administrator.',
+            ]);
+        }
     }
 }

@@ -1756,9 +1756,12 @@ const submitForm = (res) => {
 
                 if (element.submissionDate) {
                     const d2 = new Date(element.submissionDate);
-                    const year2 = d2.getFullYear();
-                    const month2 = String(d2.getMonth() + 1).padStart(2, "0");
-                    element.submissionDateFormatted = `${year2}-${month2}-01`;
+
+                    const year = d2.getFullYear();
+                    const month = String(d2.getMonth() + 1).padStart(2, "0");
+                    const day = String(d2.getDate()).padStart(2, "0");
+                    console.log(`${year}-${month}-${day}`);
+                    element.submissionDateFormatted = `${year}-${month}-${day}`;
                 }
             });
             semesterForm.put(
@@ -1778,7 +1781,7 @@ const submitForm = (res) => {
                 if (element.startDate) {
                     const d = new Date(element.startDate);
                     const year = d.getFullYear();
-                    const month = String(d.getMonth() + 1).padStart(2, "0"); // +1 because JS months start at 0
+                    const month = String(d.getMonth() + 1).padStart(2, "0");
                     element.startDateFormatted = `${year}-${month}-01`;
                 }
 
@@ -1862,7 +1865,7 @@ const deleteRow = (res) => {
         case "campus":
             props.confirmRef.popupDialog(() => {
                 router.delete(
-                    route("academic.universities.campus", {
+                    route("academic.universities.destroy", {
                         id: res.id,
                         type: "delete",
                     }),

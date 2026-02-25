@@ -1,0 +1,500 @@
+<template>
+    <Drawer
+        v-model:visible="modelValue"
+        position="full"
+        :pt="{ header: 'border-b-1 border-gray-300 border-dashed' }"
+    >
+        <template #header>
+            <div
+                class="bg-slate-100 px-5 py-1 shadow rounded-lg flex items-center gap-2"
+            >
+                <IconId :size="25" />
+                <div class="text-lg uppercase font-medium">
+                    Scholar Information
+                </div>
+            </div>
+        </template>
+        <template #default>
+            <div class="w-full h-full pt-5 gap-5 flex flex-col lg:flex-row">
+                <div class="lg:w-5/12 flex flex-col gap-5">
+                    <div
+                        class="border border-slate-300 rounded-xl p-2 flex flex-col lg:flex-row gap-2"
+                    >
+                        <div
+                            class="bg-slate-50 lg:w-1/2 rounded-lg p-3 flex flex-col justify-between"
+                        >
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <Avatar
+                                        v-if="details.photo == null"
+                                        class="!w-[8rem] !h-[8rem] !rounded-xl !text-5xl !bg-slate-300"
+                                    >
+                                        <IconUserFilled :size="80" />
+                                    </Avatar>
+
+                                    <Avatar
+                                        v-else
+                                        style="
+                                            background-color: #dee9fc;
+                                            color: #1a2551;
+                                        "
+                                        :image="details.photo"
+                                        class="!w-[7rem] !h-[7rem] !rounded-xl"
+                                    />
+                                </div>
+                                <div class="">
+                                    <DefaultButton
+                                        label="Change Photo"
+                                        size="small"
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col">
+                                <div class="text-sm flex items-center gap-2">
+                                    <div>{{ details.spas_no }}</div>
+                                    <div v-tooltip.right="'Copy'">
+                                        <IconCopy
+                                            :size="15"
+                                            class="cursor-pointer"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="font-medium text-lg">
+                                    {{ details.fullname }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div
+                                class="grid h-full w-full gap-2 grid-cols-4 grid-rows-5 rounded-lg"
+                            >
+                                <div
+                                    class="col-span-4 row-span-1 flex items-start justify-end"
+                                >
+                                    <div
+                                        :class="[
+                                            ' flex items-center uppercase text-sm  rounded-xl py-1 px-5 gap-1',
+                                            details.status.bcolor,
+                                            details.status.tcolor,
+                                        ]"
+                                    >
+                                        <component
+                                            :is="
+                                                TablerIcons[details.status.icon]
+                                            "
+                                            :size="20"
+                                            :stroke="2"
+                                        />
+                                        <div class="">
+                                            {{ details.status.name }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="col-span-1 row-span-1 flex items-start gap-1 text-gray-500 text-sm"
+                                >
+                                    <IconBook2 :size="20" />
+                                    <div>Course</div>
+                                </div>
+                                <div
+                                    class="col-span-3 row-span-1 flex items-start justify-start"
+                                >
+                                    <p class="text-sm">{{ details.course }}</p>
+                                </div>
+
+                                <div
+                                    class="col-span-1 row-span-1 flex items-start gap-1 text-gray-500 text-sm"
+                                >
+                                    <IconPennant :size="20" />
+                                    <div>School</div>
+                                </div>
+
+                                <div
+                                    class="col-span-3 row-span-1 flex items-start justify-start"
+                                >
+                                    <p class="text-sm">
+                                        {{ details.school }}
+                                    </p>
+                                </div>
+
+                                <div
+                                    class="col-span-1 row-span-1 flex items-start gap-1 text-gray-500 text-sm"
+                                >
+                                    <IconMap2 :size="20" />
+                                    <div>Region</div>
+                                </div>
+
+                                <div
+                                    class="col-span-3 row-span-1 flex items-start justify-start"
+                                >
+                                    <p class="text-sm">
+                                        {{ details.region.name }}
+                                    </p>
+                                </div>
+                                <div
+                                    class="col-span-1 row-span-1 flex items-start gap-1 text-gray-500 text-sm"
+                                >
+                                    <IconBuildingEstate :size="20" />
+                                    <div>Agency</div>
+                                </div>
+
+                                <div
+                                    class="col-span-3 row-span-1 flex items-start justify-start"
+                                >
+                                    <p class="text-sm uppercase">
+                                        {{ details.agency }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="text-sm font-medium">
+                            Scholarship Details
+                        </div>
+                        <div
+                            class="grid h-full w-full grid-cols-3 grid-rows-1 rounded-lg border border-slate-300"
+                        >
+                            <div
+                                class="col-span-1 row-span-1 rounded-lg flex p-1"
+                            >
+                                <div class="flex flex-col w-full gap-3">
+                                    <div
+                                        class="text-gray-500 flex gap-1 items-center"
+                                    >
+                                        <IconSchool
+                                            :size="20"
+                                            class="text-blue-500"
+                                            :stroke-width="2"
+                                        />
+                                        <div>Award Year</div>
+                                    </div>
+                                    <div class="text-center text-lg">
+                                        {{ details.type }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="col-span-1 row-span-1 border-x border-slate-300"
+                            >
+                                <div
+                                    class="col-span-1 row-span-1 rounded-lg flex p-1"
+                                >
+                                    <div class="flex flex-col w-full gap-3">
+                                        <div
+                                            class="text-gray-500 flex gap-1 items-center"
+                                        >
+                                            <IconCertificate
+                                                :size="20"
+                                                class="text-blue-500"
+                                                :stroke-width="2"
+                                            />
+                                            <div>Program</div>
+                                        </div>
+                                        <div class="text-center text-lg">
+                                            {{ details.program }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-span-1 row-span-1 rounded-lg">
+                                <div
+                                    class="col-span-1 row-span-1 rounded-lg p-1"
+                                >
+                                    <div class="flex flex-col w-full gap-3">
+                                        <div
+                                            class="text-gray-500 flex gap-1 items-center"
+                                        >
+                                            <IconCalendar
+                                                :size="20"
+                                                class="text-blue-500"
+                                                :stroke-width="2"
+                                            />
+                                            <div>Award Year</div>
+                                        </div>
+                                        <div
+                                            class="flex items-center justify-center gap-1 text-lg"
+                                        >
+                                            {{ details.awardyear }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <div class="text-sm font-medium">Contact Details</div>
+                        <div
+                            class="grid h-full w-full grid-cols-2 grid-rows-1 rounded-lg border border-slate-300"
+                        >
+                            <div
+                                class="col-span-1 row-span-1 rounded-lg flex p-1"
+                            >
+                                <div class="flex flex-col w-full gap-3">
+                                    <div
+                                        class="text-gray-500 flex gap-1 items-center"
+                                    >
+                                        <IconDeviceMobileMessage
+                                            :size="20"
+                                            class="text-blue-500"
+                                            :stroke-width="2"
+                                        />
+                                        <div>Contact Numbers</div>
+                                    </div>
+                                    <div class="text-center text-xs lg:text-lg">
+                                        {{ details.contact_no }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="col-span-1 row-span-1 border-l border-slate-300"
+                            >
+                                <div
+                                    class="col-span-1 row-span-1 rounded-lg flex p-1"
+                                >
+                                    <div class="flex flex-col w-full gap-3">
+                                        <div
+                                            class="text-gray-500 flex gap-1 items-center"
+                                        >
+                                            <IconSend
+                                                :size="20"
+                                                class="text-blue-500"
+                                                :stroke-width="2"
+                                            />
+                                            <div>Email Address</div>
+                                        </div>
+                                        <div
+                                            class="text-center text-xs lg:text-lg"
+                                        >
+                                            {{ details.email }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-1 bg-blue-50 flex flex-col">
+                        <div
+                            class="flex items-center justify-center w-full h-full"
+                        >
+                            Activity logs
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <Tabs value="0" class="w-full">
+                        <TabList>
+                            <Tab value="0" class="!px-3 !py-1">
+                                <div class="flex items-center gap-2">
+                                    <IconUserSearch :size="20" />
+                                    <div class="text-sm font-light">
+                                        Personal Information
+                                    </div>
+                                </div>
+                            </Tab>
+                            <Tab value="1" class="!px-3 !py-1">
+                                <div class="flex items-center gap-2">
+                                    <IconSchool :size="20" />
+                                    <div class="text-sm font-light">
+                                        Scholarship Info
+                                    </div>
+                                </div>
+                            </Tab>
+                            <Tab value="2" class="!px-3 !py-1">
+                                <div class="flex items-center gap-2">
+                                    <IconFileInvoice :size="20" />
+                                    <div class="text-sm font-light">
+                                        Academic Records
+                                    </div>
+                                </div>
+                            </Tab>
+                        </TabList>
+                        <TabPanels>
+                            <TabPanel value="0">
+                                <div
+                                    class="flex w-full flex-col gap-4 items-center justify-center"
+                                >
+                                    <div class="flex w-full justify-end">
+                                        <DefaultButton
+                                            :icon="TablerIcons.IconUserEdit"
+                                            label="Edit Details"
+                                            size="small"
+                                            v-if="!editBtn"
+                                            @click="editBtn = true"
+                                            class-name="!rounded-xl !px-5"
+                                        />
+                                        <div
+                                            class="flex items-center gap-2"
+                                            v-else
+                                        >
+                                            <DefaultButton
+                                                :icon="TablerIcons.IconUserEdit"
+                                                label="Cancel Edit"
+                                                size="small"
+                                                severity="danger"
+                                                @click="editBtn = false"
+                                                outlined
+                                                class-name="!rounded-xl !px-5"
+                                            />
+                                            <DefaultButton
+                                                :icon="TablerIcons.IconUserEdit"
+                                                label="Update Details"
+                                                size="small"
+                                                class-name="!rounded-xl !px-5"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="flex flex-col gap-4 mb-2 lg:w-7/12 overflow-auto"
+                                    >
+                                        <TextInput
+                                            v-model="dasd"
+                                            label="SPAS ID"
+                                            capitalize
+                                            :disabled="!editBtn"
+                                        ></TextInput>
+                                        <div class="flex items-center gap-2">
+                                            <TextInput
+                                                v-model="dsad"
+                                                label="Last Name"
+                                                :disabled="!editBtn"
+                                            ></TextInput>
+                                            <TextInput
+                                                v-model="dsad"
+                                                label="First Name"
+                                                :disabled="!editBtn"
+                                            ></TextInput>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <TextInput
+                                                v-model="dsad"
+                                                label="Middle Name"
+                                                :disabled="!editBtn"
+                                            ></TextInput>
+                                            <TextInput
+                                                v-model="dsad"
+                                                label="Suffix"
+                                                :disabled="!editBtn"
+                                            ></TextInput>
+                                        </div>
+                                        <TextInput
+                                            v-model="dasd"
+                                            label="Email"
+                                            capitalize
+                                            :disabled="!editBtn"
+                                        ></TextInput>
+                                        <TextInput
+                                            v-model="dasd"
+                                            label="Contact No"
+                                            capitalize
+                                            :disabled="!editBtn"
+                                        ></TextInput>
+                                        <Divider />
+                                        <div class="flex items-center gap-2">
+                                            <TextInput
+                                                v-model="dsad"
+                                                label="Birth Date"
+                                                :disabled="!editBtn"
+                                            ></TextInput>
+                                            <TextInput
+                                                v-model="dsad"
+                                                label="Birth Place"
+                                                :disabled="!editBtn"
+                                            ></TextInput>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <TextInput
+                                                v-model="dsad"
+                                                label="Religion"
+                                                :disabled="!editBtn"
+                                            ></TextInput>
+                                            <TextInput
+                                                v-model="dsad"
+                                                label="Civil Status"
+                                                :disabled="!editBtn"
+                                            ></TextInput>
+                                        </div>
+                                        <TextInput
+                                            v-model="dsad"
+                                            label="Address"
+                                            :disabled="!editBtn"
+                                            placeholder="Street, "
+                                        ></TextInput>
+                                    </div>
+                                </div>
+                            </TabPanel>
+                            <TabPanel value="1">
+                                <p class="m-0">
+                                    Sed ut perspiciatis unde omnis iste natus
+                                    error sit voluptatem accusantium doloremque
+                                    laudantium, totam rem aperiam, eaque ipsa
+                                    quae ab illo inventore veritatis et quasi
+                                    architecto beatae vitae dicta sunt
+                                    explicabo. Nemo enim ipsam voluptatem quia
+                                    voluptas sit aspernatur aut odit aut fugit,
+                                    sed quia consequuntur magni dolores eos qui
+                                    ratione voluptatem sequi nesciunt.
+                                    Consectetur, adipisci velit, sed quia non
+                                    numquam eius modi.
+                                </p>
+                            </TabPanel>
+                            <TabPanel value="2">
+                                <p class="m-0">
+                                    At vero eos et accusamus et iusto odio
+                                    dignissimos ducimus qui blanditiis
+                                    praesentium voluptatum deleniti atque
+                                    corrupti quos dolores et quas molestias
+                                    excepturi sint occaecati cupiditate non
+                                    provident, similique sunt in culpa qui
+                                    officia deserunt mollitia animi, id est
+                                    laborum et dolorum fuga. Et harum quidem
+                                    rerum facilis est et expedita distinctio.
+                                    Nam libero tempore, cum soluta nobis est
+                                    eligendi optio cumque nihil impedit quo
+                                    minus.
+                                </p>
+                            </TabPanel>
+                        </TabPanels>
+                    </Tabs>
+                </div>
+            </div>
+        </template>
+    </Drawer>
+</template>
+<script setup>
+import {
+    IconSchool,
+    IconCalendar,
+    IconCertificate,
+    IconCopy,
+    IconId,
+    IconBook2,
+    IconMap2,
+    IconPennant,
+    IconBuildingEstate,
+    IconDeviceMobileMessage,
+    IconSend,
+    IconUserSearch,
+    IconUserFilled,
+    IconFileInvoice,
+} from "@tabler/icons-vue";
+import * as TablerIcons from "@tabler/icons-vue";
+import { ref } from "vue";
+import DefaultButton from "../../Components/buttons/DefaultButton.vue";
+import TextInput from "../../Components/inputs/TextInput.vue";
+
+const modelValue = defineModel("modelValue");
+const editBtn = ref(false);
+
+defineProps({
+    details: {
+        type: [Array, Object],
+        default: [],
+    },
+});
+</script>

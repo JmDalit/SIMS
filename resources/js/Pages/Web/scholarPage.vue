@@ -1,12 +1,56 @@
 <template>
     <Head title="Scholars" />
     <AuthLayout>
-        <div class="flex flex-col w-full h-full gap-10">
-            <div class="flex">
+        <div class="flex flex-col w-full h-full gap-5">
+            <div class="flex flex-col lg:flex-row items-center space-x-0 gap-4">
                 <HeaderModule
-                    title="Scholar Records"
-                    description="Access all scholar profiles, programs, and status updates in one place."
+                    title="Scholar Management"
+                    description="Comprehensive records of all scholars, including profile details, program assignments, and status monitoring."
                 />
+                <div class="flex">
+                    <div
+                        class="flex rounded-xl overflow-hidden border border-gray-200 shadow-sm"
+                    >
+                        <div
+                            v-for="(item, index) in page.props?.statuses"
+                            :key="index"
+                            :class="[
+                                'flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50',
+                                {
+                                    'border-r border-gray-200':
+                                        index !==
+                                        page.props.statuses.length - 1,
+                                },
+                            ]"
+                            v-tooltip.bottom="item.status"
+                        >
+                            <div
+                                :class="[
+                                    'p-1.5 rounded-lg',
+                                    item.color_array.bgColor,
+                                ]"
+                            >
+                                <component
+                                    :is="TablerIcons[item.icon]"
+                                    :class="[
+                                        'w-4 h-4',
+                                        item.color_array.textColor,
+                                    ]"
+                                />
+                            </div>
+                            <div class="flex flex-col">
+                                <span
+                                    class="text-xs text-gray-400 leading-none"
+                                    >{{ item.status?.name }}</span
+                                >
+                                <span
+                                    class="text-md font-semibold text-gray-700"
+                                    >{{ item.total }}</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="flex-1 flex flex-col gap-2">
                 <ToolbarModule
@@ -45,9 +89,10 @@
                                 </div>
                             </div>
                             <UploadInput
-                                @remove-file="removeFile"
+                                ref="uploadRef"
                                 @select-files="handleFiles"
-                                @single-remove-file="removeFile"
+                                @remove-file="clearForm"
+                                :progress="progressUpload"
                                 accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                             ></UploadInput>
                         </div>
@@ -167,12 +212,7 @@
                                 </template>
                             </Column>
 
-                            <Column
-                                v-if="
-                                    filterFileStatus == 'Pending' ||
-                                    filterFileStatus == null
-                                "
-                            >
+                            <Column v-if="filterFileStatus == 'Pending'">
                                 <template #header>
                                     <div
                                         class="flex justify-end w-full text-xs font-semibold"
@@ -218,86 +258,159 @@
                         </DefaultTable>
                     </template>
                 </ToolbarModule>
-                <DefaultTable
+                <DefaultSelectionTable
                     :items="page.props.scholar.data"
                     :pagination="{
                         total: page.props.scholar.total,
                         perPage: page.props.scholar.per_page,
                         currentPage: page.props.scholar.current_page,
                     }"
+                    @selected="openModal"
+                    :loading="scholarLoadingTable"
                     @paginate="loadPage"
                 >
-                    <Column header="Name">
+                    <Column header="Scholars">
                         <template #body="props">
-                            <div class="flex flex-col">
-                                <div class="text-xs">
-                                    {{ props.data.spas_no }}
+                            <div class="flex items-center gap-2">
+                                <div>
+                                    <Avatar
+                                        v-if="props.data.photo == null"
+                                        :label="
+                                            props.data.fullname
+                                                .charAt(0)
+                                                .toUpperCase()
+                                        "
+                                        class="!w-[40px] !h-[40px] !rounded-xl"
+                                    />
+
+                                    <Avatar
+                                        v-else
+                                        style="
+                                            background-color: #dee9fc;
+                                            color: #1a2551;
+                                        "
+                                        :image="page.props.user.avatar"
+                                    />
                                 </div>
-                                <div class="font-bold">
-                                    {{ props.data.lname }},
-                                    {{ props.data.fname }}
-                                    {{ props.data.mname }}
+                                <div class="flex flex-col">
+                                    <div
+                                        :class="[
+                                            'text-xs flex items-center',
+                                            props.data.sex == 'M'
+                                                ? '!text-blue-600'
+                                                : '!text-rose-600',
+                                        ]"
+                                    >
+                                        <div>{{ props.data.spas_no }}</div>
+                                    </div>
+                                    <div class="font-medium">
+                                        {{ props.data.fullname }}
+                                    </div>
                                 </div>
                             </div>
                         </template>
                     </Column>
-                    <Column header="School">
+                    <Column header="School/Course">
                         <template #body="props">
                             <div class="flex flex-col">
-                                <div class="text-xs">
+                                <div class="text-xs text-gray-400 font-light">
                                     {{ props.data.course }}
                                 </div>
-                                <div class="font-bold">
+                                <div class="">
                                     {{ props.data.school }}
                                 </div>
                             </div>
                         </template>
                     </Column>
-                    <Column header="Program" field="program"> </Column>
 
-                    <Column field="options" class="w-[5%]">
-                        <template #body="prop">
-                            <div class="flex w-full justify-end">
-                                <Button
-                                    text
-                                    v-tooltip.top="'Options'"
-                                    rounded
-                                    size="small"
-                                    severity="secondary"
-                                    icon="pi pi-ellipsis-v"
-                                    @click="(e) => toggleOption(e, prop.data)"
-                                />
-                                <Menu
-                                    ref="menu"
-                                    :model="menuItems"
-                                    :popup="true"
+                    <Column header="Type">
+                        <template #body="props">
+                            <div class="flex items-center">
+                                <p
+                                    :class="[
+                                        props.data.type == 'JLSS'
+                                            ? 'text-amber-400'
+                                            : 'text-green-400',
+                                    ]"
                                 >
-                                    <template #item="{ item, props }">
-                                        <a
-                                            v-ripple
-                                            class="flex items-center"
-                                            v-bind="props.action"
-                                        >
-                                            <div>
-                                                <component
-                                                    :is="item.icon"
-                                                    :class="item.class"
-                                                    size="20"
-                                                    stroke-width="1.5"
-                                                ></component>
-                                            </div>
-                                            <span class="ml-2 text-xs">{{
-                                                item.label
-                                            }}</span>
-                                        </a>
-                                    </template>
-                                </Menu>
+                                    ●
+                                </p>
+                                &nbsp;
+                                {{ props.data.type }}
                             </div>
                         </template>
                     </Column>
-                </DefaultTable>
+                    <Column header="Program">
+                        <template #body="props">
+                            <div class="flex items-center">
+                                <p
+                                    :class="[
+                                        props.data.program == 'MERIT'
+                                            ? 'text-indigo-400'
+                                            : props.data.program == 'RA 10612'
+                                              ? 'text-lime-400'
+                                              : 'text-pink-400',
+                                    ]"
+                                >
+                                    ●
+                                </p>
+                                &nbsp;
+                                {{ props.data.program }}
+                            </div>
+                        </template>
+                    </Column>
+                    <Column>
+                        <template #header>
+                            <div
+                                class="flex justify-center w-full font-semibold"
+                            >
+                                <div class="font-semibold">Award Year</div>
+                            </div>
+                        </template>
+                        <template #body="props">
+                            <div class="text-center font-medium">
+                                {{ props.data.awardyear }}
+                            </div>
+                        </template>
+                    </Column>
+                    <Column>
+                        <template #header>
+                            <div
+                                class="flex justify-center w-full font-semibold"
+                            >
+                                <div class="font-semibold">Status</div>
+                            </div>
+                        </template>
+                        <template #body="props">
+                            <div class="flex justify-center">
+                                <div
+                                    :class="[
+                                        ' flex items-center capitalize  rounded-2xl py-1 px-3 gap-1',
+                                        props.data.status.bcolor,
+                                        props.data.status.tcolor,
+                                    ]"
+                                >
+                                    <component
+                                        :is="
+                                            TablerIcons[props.data.status.icon]
+                                        "
+                                        :size="20"
+                                        :stroke="2"
+                                    />
+                                    <div class="">
+                                        {{ props.data.status.name }}
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </Column>
+                </DefaultSelectionTable>
             </div>
         </div>
+        <DrawerScholarModule
+            v-model:visible="scholarDrawer"
+            :details="selectedRow"
+        />
         <DefaultToast ref="toastRef" />
         <DefaultConfirmDialog ref="confirmRef" />
     </AuthLayout>
@@ -306,13 +419,15 @@
 import AuthLayout from "../../Layouts/AuthLayout.vue";
 import HeaderModule from "../../Modules/Others/HeaderModule.vue";
 import DefaultTable from "../../Components/tables/DefaultTable.vue";
+import DefaultSelectionTable from "../../Components/tables/DefaultSelectionTable.vue";
 import ToolbarModule from "../../Modules/Others/ToolbarModule.vue";
 import DefaultToast from "../../Components/messages/DefaultToast.vue";
 import DefaultConfirmDialog from "../../Components/dialogs/DefaultConfirmDialog.vue";
 import DefaultDialog from "../../Components/dialogs/DefaultDialog.vue";
+import DrawerScholarModule from "../../Modules/Others/DrawerScholarModule.vue";
 import UploadInput from "../../Components/inputs/UploadInput.vue";
 import DefaultButton from "../../Components/buttons/DefaultButton.vue";
-
+import * as TablerIcons from "@tabler/icons-vue";
 import { computed, ref, watch } from "vue";
 import { Head, router, useForm, usePage } from "@inertiajs/vue3";
 import {
@@ -334,6 +449,8 @@ import {
     IconSettings,
     IconCircleX,
     IconCircleCheck,
+    IconGenderMale,
+    IconGenderFemale,
 } from "@tabler/icons-vue";
 
 const page = usePage();
@@ -342,60 +459,27 @@ const timerBounce = ref(null);
 const selectedRow = ref(null);
 const toolbarRef = ref(null);
 const toastRef = ref(null);
+const scholarLoadingTable = ref(false);
 const filesLoadingTable = ref(false);
+const scholarDrawer = ref(false);
 const confirmRef = ref(null);
-const menu = ref(null);
+const uploadRef = ref(null);
+const progressUpload = ref(0);
 const filterFileStatus = ref("Pending");
-
 const filterFileOption = ref(["Pending", "Accept", "Reject"]);
-const suggestions = ref(null);
 const filesUploadForm = useForm({
     files: [],
 });
-
-const toggleOption = (event, rowData) => {
-    selectedRow.value = rowData;
-    menu.value.toggle(event);
-};
 
 const handleFiles = (e) => {
     filesUploadForm.files = Array.from(e.files);
 };
 
-const menuItems = computed(() => {
-    if (!selectedRow.value) return [];
-
-    return [
-        {
-            label: "View Subjects",
-            icon: IconBooks,
-            class: "text-gray-600",
-            command: () => {
-                openGradeScholar();
-            },
-        },
-        {
-            label: "Edit",
-            icon: IconPencilCog,
-            class: "text-blue-500",
-            command: () => {
-                toggleModal({
-                    type: "edit",
-                    data: selectedRow.value,
-                });
-            },
-        },
-        {
-            label: "Delete",
-            icon: IconTrash,
-            class: "text-red-500",
-            command: () => {
-                deleteRow(selectedRow.value.id);
-            },
-        },
-    ];
-});
-const openHistoryFiles = () => {};
+const clearForm = () => {
+    filesUploadForm.files = [];
+    filesUploadForm.resetAndClearErrors();
+    progressUpload.value = 0;
+};
 
 const toggleModal = () => {
     if (filesUploadForm.files.length != 0) {
@@ -425,18 +509,23 @@ const deleteRow = (id) => {
     });
 };
 
-const removeFile = (e) => {
-    filesUploadForm.files = [];
-    filesUploadForm.resetAndClearErrors();
-};
-
 const submitForm = () => {
+    uploadRef.value.upload();
     filesUploadForm.post(route("scholar.store"), {
         forceFormData: true,
+        onBefore: () => {
+            progressUpload.value = 0;
+        },
+        onProgress: (e) => {
+            progressUpload.value = Math.round(e.loaded / e.total) * 80;
+        },
         onSuccess: () => {
             toastRef.value.show(page.props.flash);
-            filesUploadForm.files = [];
-            filesUploadForm.resetAndClearErrors();
+            if (page.props.flash?.status == "success") {
+                filesUploadForm.resetAndClearErrors();
+                uploadRef.value.clear();
+            }
+            progressUpload.value = 100;
         },
     });
 };
@@ -455,6 +544,18 @@ const validateFiles = (res) => {
             },
         },
     );
+};
+
+const openModal = (event) => {
+    selectedRow.value = event;
+    router.reload({
+        data: { id: event.id },
+        only: ["scholarDetails"],
+
+        onSuccess: () => {
+            scholarDrawer.value = true;
+        },
+    });
 };
 
 // const updateStatus = (result) => {
@@ -487,14 +588,16 @@ const clearSearch = () => {
 
 const loadPage = (page) => {
     router.get(
-        route("academic.courses"),
+        route("scholars"),
         {
             page,
-            search: searchInput.value,
+            ...(searchInput.value ? { search: searchInput.value } : {}),
         },
         {
             preserveState: true,
             preserveScroll: true,
+            onBefore: () => (scholarLoadingTable.value = true),
+            onFinish: () => (scholarLoadingTable.value = false),
         },
     );
 };
@@ -508,13 +611,13 @@ const loadFilePage = (page) => {
     });
 };
 
-// watch(
-//     () => searchInput.value,
-//     () => {
-//         clearTimeout(timerBounce.value);
-//         timerBounce.value = setTimeout(() => {
-//             loadPage(1);
-//         }, 300);
-//     },
-// );
+watch(
+    () => searchInput.value ?? null,
+    () => {
+        clearTimeout(timerBounce.value);
+        timerBounce.value = setTimeout(() => {
+            loadPage(1);
+        }, 300);
+    },
+);
 </script>

@@ -90,14 +90,14 @@ class ScholarImport implements OnEachRow, WithHeadingRow, WithStartRow, SkipsEmp
                 'companion' => $data['companion']
             ]);
 
-            $sliceName = explode(',', $data['barangay_municipality_province_region']);
+            // $sliceName = explode(',', $data['barangay_municipality_province_region']);
 
             $scholars->address()->create([
                 'address' => $data['address'],
-                'barangay_code'   => LocationBarangays::where('name', trim($sliceName[0]))->value('code'),
-                'municipality_code' => LocationCity::where('name', trim($sliceName[1]))->value('code'),
-                'province_code'   => LocationProvinces::where('name', trim($sliceName[2]))->value('code'),
-                'region_code'     => LocationRegions::where('name', trim($sliceName[3]))->value('code'),
+                'barangay_code'   => LocationBarangays::where('name', trim($data['barangay']))->value('code'),
+                'municipality_code' => LocationCity::where('name', trim($data['municipality']))->value('code'),
+                'province_code'   => LocationProvinces::where('name', trim($data['province']))->value('code'),
+                'region_code'     => LocationRegions::where('name', trim($data['region']))->value('code'),
             ]);
 
 

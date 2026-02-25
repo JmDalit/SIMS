@@ -12,6 +12,7 @@ use App\Http\Controllers\Web\CourseController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\eventController;
+use App\Http\Controllers\Web\GeolocationController;
 use App\Http\Controllers\Web\LocationBarangayController;
 use App\Http\Controllers\Web\LocationCityController;
 use App\Http\Controllers\Web\LocationProvinceController;
@@ -128,6 +129,8 @@ Route::middleware(['auth', 'web'])->group(function () {
     Route::post('scholar', [ScholarController::class, 'store'])->name('scholar.store');
     Route::post('scholar/{id}/validated', [ScholarController::class, 'insert'])->name('scholar.insert');
     Route::delete('scholar/{id}/{type}', [ScholarController::class, 'destroy'])->name('scholar.destroy');
+
+    Route::post('geolocation', [GeolocationController::class, 'store'])->name('geolocation.store');
 });
 Route::middleware(['auth', 'web', 'role'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -145,4 +148,5 @@ Route::middleware(['auth', 'web', 'role'])->group(function () {
     Route::get('scholars', [ScholarController::class, 'index'])->name('scholars');
     Route::get('programs', [programController::class, 'index'])->name('programs');
     Route::get('events', [eventController::class, 'index'])->name('events');
+    Route::get('geolocation', [GeolocationController::class, 'index']);
 });

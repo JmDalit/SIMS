@@ -44,24 +44,31 @@ class CheckScholarImport implements OnEachRow, WithHeadingRow, WithMultipleSheet
                 'lastname' => ['required'],
                 'middlename' => ['nullable'],
                 'suffix' => ['nullable'],
-                'sex' => ['required', 'in:M,F'],
-                'email' => ['required', 'email'],
+                'sex' => ['required'],
+                'email' => ['required'],
                 'contact' => ['required'],
                 'birth_place' => ['required'],
                 'religion' => ['required'],
                 'civil_status' => ['required'],
                 'address' => ['required'],
-                'barangay_municipality_province_region' => ['required'],
-                'parent_fullname' => ['required'],
+                'barangay' => ['required'],
+                'municipality' => ['required'],
+                'province' => ['required'],
+                'province' => ['required'],
+                'region' => ['required'],
                 'id_no' => ['required'],
                 'id_place' => ['required'],
                 'id_date' => ['required'],
                 'companion' => ['required'],
                 'year_award' => ['required'],
-                'course' => ['required', Rule::exists('school_campus_course',)],
+                'course' => [
+                    'required',
+                    Rule::exists('list_courses', 'name'),
+                ],
                 'school' => ['required', Rule::exists('school_campuses', 'generated_name')->where(fn($query) => $query->where('is_active', true)->where('is_delete', false))]
             ],
             [
+                'email.email' =>  "Row {$row->getRowIndex()}: must be valid email address.",
                 'spas_no.required' =>
                 "Row {$row->getRowIndex()}: The SPAS No field is required.",
                 'spas_no.unique' =>
@@ -77,8 +84,9 @@ class CheckScholarImport implements OnEachRow, WithHeadingRow, WithMultipleSheet
                 'scholarship_type.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update scholarship option.",
                 'scholarship_subprogram.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update subprogram option.",
                 'scholarship_program.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update program option.",
-                'barangay_municipality_province_region.required' => "Row {$row->getRowIndex()}: Please contact admin support to update geolocation option.",
                 'school.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update school option.",
+                'course.required' => "Row {$row->getRowIndex()}: Please contact admin support to update school option.",
+                'course.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update school option.",
             ]
         )->validate();
     }

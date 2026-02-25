@@ -112,10 +112,8 @@
                         <Avatar
                             class="!bg-indigo-100 !text-indigo-600 !rounded-2xl border border-indigo-600"
                             size="large"
-                            ><IconDeviceDesktopAnalytics
-                                size="30"
-                            ></IconDeviceDesktopAnalytics
-                        ></Avatar>
+                            ><IconDeviceDesktopAnalytics size="30" />
+                        </Avatar>
                     </div>
                 </div>
 

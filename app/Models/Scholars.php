@@ -13,7 +13,6 @@ class Scholars extends Model
         'program_id',
         'type_id',
         'category_id',
-        'status_id',
         'is_active',
         'is_delete',
         'created_by',

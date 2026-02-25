@@ -11,7 +11,9 @@ use App\Models\ListRoutes;
 use App\Models\ListStatuses;
 use App\Models\SchoolCampuses;
 use App\Models\Schools;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Vinkla\Hashids\Facades\Hashids;
 
 class ListClass
 {
@@ -220,7 +222,7 @@ class ListClass
 
 
                 return
-                    SchoolCampuses::where([
+                    SchoolCampuses::select('id', 'school_id', 'term_id', 'grading_id', 'agency_id', 'name', 'generated_name', 'is_main')->where([
                         'is_delete' => false,
                         'is_active' => true,
                     ])->when($search, function ($query) {
@@ -230,6 +232,7 @@ class ListClass
                                 ->orWhereRaw('LOWER(shortcut) LIKE ?', ["%{$search}%"]);
                         });
                     })
+                    ->orderBy('id', 'desc')
                     ->orderBy('school_id', 'asc')
                     ->orderBy('is_main', 'desc')
                     ->orderBy('agency_id', 'asc')
@@ -239,11 +242,39 @@ class ListClass
                         'term',
                         'grading',
                         'agency',
-
+                        'semesters' => fn($q) => $q
+                            ->select('id', 'semester_id', 'campus_id', 'start_date', 'end_date', 'submission_date')
+                            ->whereDate('start_date', '<=', now())
+                            ->whereDate('end_date', '>=', now()),
                     ])
-
-                    ->withCount('courses')
-                    ->paginate(10);
+                    ->paginate(10)
+                    ->through(fn($q) => [
+                        'id'             => $q->id,
+                        'name'           => $q->name,
+                        'generated_name' => $q->generated_name,
+                        'is_main'        => $q->is_main,
+                        'school'         => [
+                            'id'           => $q->school?->id,
+                            'name'         => $q->school?->name,
+                            'shortcut'     => $q->school?->shortcut,
+                            'photo'        => $q->school?->photo,
+                            'reference'    => $q->school?->reference_array,
+                        ],
+                        'address'        => [
+                            'region'       => $q->address?->region_array,
+                            'municipality' => $q->address?->municipality_array,
+                            'barangay'     => $q->address?->barangay_array,
+                        ],
+                        'term'           => $q->term?->name,
+                        'grading'        => $q->grading?->name,
+                        'agency'         => $q->agency?->name,
+                        'semester'       => $q->semesters->first() ? [
+                            'acad_term'      =>  $q->semesters->first()->semester_array,
+                            'start_date'      =>  Carbon::parse($q->semesters->first()->start_date)->format('M Y'),
+                            'end_date'        => Carbon::parse($q->semesters->first()->end_date)->format('M Y'),
+                            'submission_date' => Carbon::parse($q->semesters->first()->submission_date)->format('M d, Y'),
+                        ] : null,
+                    ]);
                 break;
                 // if (Auth::user()->role_array['name'] == 'regional staff') {
                 //     return

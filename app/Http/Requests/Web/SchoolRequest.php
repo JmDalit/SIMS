@@ -35,7 +35,7 @@ class SchoolRequest extends FormRequest
                 break;
             default:
                 return [
-                    'name' => ['required', 'string', Rule::unique('schools')->ignore($this->id)],
+                    'name' => ['required', 'string', Rule::unique('schools')->where(fn($q) => $q->where('is_delete', false))->ignore($this->id)],
                     'abbreviation' => ['required', 'string'],
                     'class' => ['required', 'array'],
                     'campuses.*.id' => ['nullable', 'integer'],
