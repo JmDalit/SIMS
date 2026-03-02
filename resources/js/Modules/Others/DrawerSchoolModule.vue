@@ -1692,7 +1692,7 @@ const UpdateDetailsForm = () => {
 const submitCurriculum = () => {
     curriculumForm.post(route("campus.curriculum.store"), {
         onSuccess: () => {
-            curriculumForm.multi = [];
+            curriculumForm.multi.length = 0;
             curriculumForm.resetAndClearErrors();
             if (page.props?.subjectDetail.length != 0) {
                 for (
