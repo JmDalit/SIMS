@@ -67,14 +67,13 @@ const props = defineProps({
 const getActiveRoute = () => {
     for (const child of props.list) {
         const match = child.items.some(
-            (sub) => sub.component === page.component
+            (sub) => sub.component == page.component,
         );
 
         if (match) {
             const active = child.items.find(
-                (sub) => sub.component === page.component
+                (sub) => sub.component == page.component,
             );
-
             activeMenu.value = active.parent_id;
         }
     }

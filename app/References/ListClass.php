@@ -375,7 +375,8 @@ class ListClass
                                         'key'     => "{$route->id}-{$index}",
                                         'icon'    => $child->icon,
                                         'label'   => $child->label,
-                                        'roleId'  => $roles ?? [], // always an array
+                                        'roleId'  => $roles ?? [],
+                                        'parent_id' => $child->main_id,
                                         'slug'    => $child->slug,
                                         'route'   => $child->route,
                                         'subItem' => $child->is_submenu,

@@ -14,7 +14,7 @@
                 class: '!text-sm ',
             },
             headerRow: {
-                class: '!text-xs !font-bold !text-blue-300',
+                class: '!text-xs !font-bold ',
             },
             pcPaginator: {
                 root: 'dark:!bg-transparent ',

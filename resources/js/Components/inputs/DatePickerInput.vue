@@ -7,6 +7,7 @@
             :view="view"
             :dateFormat="formatDate"
             fluid
+            :disabled="disabled"
             :pt="{
                 pcInputText: {
                     root: [
@@ -47,6 +48,10 @@ defineProps({
     message: {
         type: String,
         default: null,
+    },
+    disabled: {
+        type: Boolean,
+        default: false,
     },
     view: {
         type: String,

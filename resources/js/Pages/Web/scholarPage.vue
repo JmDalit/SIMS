@@ -323,7 +323,7 @@
                         </template>
                     </Column>
 
-                    <Column header="Type">
+                    <Column header="Sub Program">
                         <template #body="props">
                             <div class="flex items-center">
                                 <p

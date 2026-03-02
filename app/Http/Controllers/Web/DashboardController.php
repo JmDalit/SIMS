@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Scholars;
 use App\Models\SchoolCampuses;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -13,6 +14,80 @@ class DashboardController extends Controller
 {
     public function index()
     {
+
+        $regionCode = Auth::user()->profile->agency->region_code;
+        $currentYear = Carbon::now()->year;
+
+        $scholars = Scholars::with([
+            'program:id,name',
+            'profile:sex,scholar_id'
+        ])
+            ->whereHas(
+                'address',
+                fn($q) => $q->where(
+                    'region_code',
+                    $regionCode
+                )
+            )
+            ->get();
+
+        $categories = $scholars
+            ->pluck('award_year')
+            ->flatten()
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+
+
+
+        $series = $scholars
+            ->groupBy(fn($s) => $s->program->name)
+            ->map(function ($rows, $program) use ($categories) {
+                $data = collect($categories)->map(function ($year) use ($rows) {
+                    return $rows->filter(
+                        fn($s) => $s->award_year == $year
+                    )->count();
+                })->toArray();
+
+                return [
+                    'name' => $program,
+                    'data' => $data,
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        $timelineTotal = $scholars
+            ->groupBy(fn($s) => $s->program->name)
+            ->map(function ($rows, $program) {
+
+                return [
+                    'name' => $program,
+                    'data' => $rows->count(),
+                ];
+            })
+            ->values()
+            ->toArray();
+        $campuses = SchoolCampuses::select('id', 'generated_name', 'school_id', 'name')
+            ->where([
+                'agency_id' => Auth::user()->profile->agency_id,
+                'is_delete' => false
+            ])
+            ->with([
+                'school' => fn($q) => $q
+                    ->select('id', 'shortcut')
+                    ->where('is_delete', false),
+                'address',
+                'semesters' => fn($q) => $q
+                    ->select('id', 'semester_id', 'campus_id', 'start_date', 'end_date', 'submission_date')
+                    ->whereDate('start_date', '<=', now())
+                    ->whereDate('end_date', '>=', now()),
+            ])
+            ->get();
+
+        // Duplicate for testing
+        $campuses = $campuses->merge($campuses);
 
         return Inertia::render('Web/dashboardPage', [
             'campus_cnt' => SchoolCampuses::when(Auth::check() && Auth::user()->role_array['name'] != 'Administrator', function ($q) {
@@ -52,9 +127,40 @@ class DashboardController extends Controller
                                 'submission_date'   => Carbon::parse($campus->semesters[0]->submission_date)->format('M d, Y'),
                             ]
                             : [],
-                        'tset' => $campus->address?->municipality_array['name']
+
                     ];
-                }) : null
+                }) : null,
+            'card' => [
+                'Ucnt'      =>  $scholars->where('type_id', 28)->count(),
+                'UTotalcnt' => $scholars
+                    ->where('type_id', 28)
+                    ->where('award_year', $currentYear)
+                    ->count(),
+                'JTotalcnt' => $scholars->where('type_id', 29)
+                    ->where('award_year', $currentYear)
+                    ->count(),
+
+                'Jcnt'      => $scholars->where('type_id', 29)->count(),
+                'totalyear' => $scholars
+                    ->where('award_year', $currentYear)
+                    ->count(),
+                'total'     => $scholars->count(),
+            ],
+            'timeline' => [
+                'categories' => $categories,
+                'series'    => $series,
+                'timelineTotal' => $timelineTotal,
+            ],
+            'gender' =>  [
+                'series' => $scholars
+                    ->groupBy(fn($s) => $s->profile->sex)
+                    ->map(fn($rows) => $rows->count())
+                    ->values()
+                    ->toArray(),
+                'result' => $scholars->groupBy(fn($s) => $s->profile->sex)->map(function ($rows, $gender) {
+                    return  ['sex' => $gender, 'total' => $rows->count()];
+                })->values()->toArray()
+            ]
         ]);
     }
 }

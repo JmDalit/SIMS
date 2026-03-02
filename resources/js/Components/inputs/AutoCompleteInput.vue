@@ -9,6 +9,7 @@
             :placeholder="placeholder"
             :force-selection="selection"
             @complete="onComplete"
+            :loading="loading"
             :min-length="4"
             fluid
             :pt="{
@@ -47,6 +48,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    loading: {
+        type: Boolean,
+        default: false,
+    },
 });
 const modelValue = defineModel({
     type: [String, Date, Object, null, Number],
@@ -63,6 +68,6 @@ watch(
     () => props.modelValue,
     (value) => {
         emit("update:modelValue", value);
-    }
+    },
 );
 </script>

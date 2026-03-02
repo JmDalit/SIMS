@@ -585,7 +585,6 @@
                                             v-ripple
                                             class="flex items-center"
                                             v-bind="props.action"
-                                            @click="item.command"
                                         >
                                             <div>
                                                 <component
@@ -1814,6 +1813,7 @@ const submitForm = (res) => {
                 onSuccess: () => {
                     gradeForm.resetAndClearErrors();
                     toastRef.value.show(page.props.flash);
+                    toolbarGradeRef.value.closeModal();
                 },
             });
         } else {
@@ -1824,8 +1824,9 @@ const submitForm = (res) => {
                 }),
                 {
                     onSuccess: () => {
-                        gradeForm.clearErrors();
+                        toolbarGradeRef.value.closeModal();
                         toastRef.value.show(page.props.flash);
+                        gradeForm.resetAndClearErrors();
                     },
                 },
             );

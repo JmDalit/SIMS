@@ -122,7 +122,7 @@ class LocationClass
         }
     }
 
-    public function getFullAddress($search  = '')
+    public function getFullAddress($search  = '', $filterRegion = true)
     {
 
         return LocationBarangays::where('is_active', true)
@@ -131,7 +131,7 @@ class LocationClass
             ->when(
                 Auth::check() &&
                     Auth::user()->role_array['name'] == 'regional staff' &&
-                    Auth::user()->is_verified,
+                    Auth::user()->is_verified && $filterRegion,
                 function ($query) {
                     $region = Auth::user()->profile->agency->region_code;
 

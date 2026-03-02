@@ -353,78 +353,98 @@
                                         class="flex flex-col gap-4 mb-2 lg:w-7/12 overflow-auto"
                                     >
                                         <TextInput
-                                            v-model="dasd"
+                                            v-model="personalInfo.spas_no"
                                             label="SPAS ID"
                                             capitalize
                                             :disabled="!editBtn"
                                         ></TextInput>
                                         <div class="flex items-center gap-2">
                                             <TextInput
-                                                v-model="dsad"
-                                                label="Last Name"
+                                                v-model="
+                                                    personalInfo.first_name
+                                                "
+                                                label="First Name"
                                                 :disabled="!editBtn"
                                             ></TextInput>
+
                                             <TextInput
-                                                v-model="dsad"
-                                                label="First Name"
+                                                v-model="
+                                                    personalInfo.middle_name
+                                                "
+                                                label="Middle Name"
                                                 :disabled="!editBtn"
                                             ></TextInput>
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <TextInput
-                                                v-model="dsad"
-                                                label="Middle Name"
+                                                v-model="personalInfo.last_name"
+                                                label="Last Name"
                                                 :disabled="!editBtn"
                                             ></TextInput>
                                             <TextInput
-                                                v-model="dsad"
+                                                v-model="personalInfo.suffix"
                                                 label="Suffix"
                                                 :disabled="!editBtn"
                                             ></TextInput>
                                         </div>
                                         <TextInput
-                                            v-model="dasd"
+                                            v-model="personalInfo.email"
                                             label="Email"
-                                            capitalize
                                             :disabled="!editBtn"
                                         ></TextInput>
                                         <TextInput
-                                            v-model="dasd"
+                                            v-model="personalInfo.contact_no"
                                             label="Contact No"
-                                            capitalize
                                             :disabled="!editBtn"
                                         ></TextInput>
                                         <Divider />
                                         <div class="flex items-center gap-2">
-                                            <TextInput
-                                                v-model="dsad"
+                                            <DatePickerInput
+                                                v-model="
+                                                    personalInfo.birth_date
+                                                "
                                                 label="Birth Date"
                                                 :disabled="!editBtn"
-                                            ></TextInput>
+                                            ></DatePickerInput>
                                             <TextInput
-                                                v-model="dsad"
+                                                v-model="
+                                                    personalInfo.birth_place
+                                                "
                                                 label="Birth Place"
                                                 :disabled="!editBtn"
                                             ></TextInput>
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <TextInput
-                                                v-model="dsad"
+                                                v-model="personalInfo.religion"
                                                 label="Religion"
+                                                capitalize
                                                 :disabled="!editBtn"
                                             ></TextInput>
                                             <TextInput
-                                                v-model="dsad"
+                                                v-model="
+                                                    personalInfo.civil_status
+                                                "
+                                                capitalize
                                                 label="Civil Status"
                                                 :disabled="!editBtn"
                                             ></TextInput>
                                         </div>
                                         <TextInput
-                                            v-model="dsad"
+                                            v-model="personalInfo.address"
                                             label="Address"
                                             :disabled="!editBtn"
-                                            placeholder="Street, "
+                                            placeholder="Street, Subdivision, etc."
                                         ></TextInput>
+                                        <AutoCompleteInput
+                                            v-model="personalInfo.fulladdress"
+                                            :options="page.props.georesult"
+                                            :disabled="!editBtn"
+                                            :loading="loading.address"
+                                            placeholder="Find by Barangay, Municipality, Province, or Region"
+                                            @complete="autoSearch"
+                                            selection
+                                        ></AutoCompleteInput>
                                     </div>
                                 </div>
                             </TabPanel>
@@ -484,17 +504,78 @@ import {
     IconFileInvoice,
 } from "@tabler/icons-vue";
 import * as TablerIcons from "@tabler/icons-vue";
-import { ref } from "vue";
+import { ref, watch, reactive } from "vue";
 import DefaultButton from "../../Components/buttons/DefaultButton.vue";
 import TextInput from "../../Components/inputs/TextInput.vue";
-
+import AutoCompleteInput from "../../Components/inputs/AutoCompleteInput.vue";
+import DatePickerInput from "../../Components/inputs/DatePickerInput.vue";
+import { router } from "@inertiajs/vue3";
+import { route } from "ziggy-js";
+import { useForm, usePage } from "@inertiajs/vue3";
 const modelValue = defineModel("modelValue");
 const editBtn = ref(false);
 
-defineProps({
+const loading = reactive({
+    address: false,
+});
+const page = usePage();
+
+const props = defineProps({
     details: {
         type: [Array, Object],
         default: [],
     },
 });
+const personalInfo = useForm({
+    spas_no: "",
+    last_name: "",
+    first_name: "",
+    middle_name: "",
+    suffix: "",
+    email: "",
+    contact_no: "",
+    birth_date: "",
+    birth_place: "",
+    religion: "",
+    civil_status: "",
+    address: "",
+    fulladdress: "",
+});
+
+const autoSearch = (event) => {
+    loading.address = true;
+    router.get(
+        route("scholars"),
+        { geosearch: event },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ["georesult"],
+            onFinish: () => {
+                loading.address = false;
+            },
+        },
+    );
+};
+
+watch(
+    () => usePage().props?.scholarDetails,
+    (newVal) => {
+        console.log(newVal);
+        personalInfo.spas_no = newVal?.spas_no ?? null;
+        personalInfo.last_name = newVal.lname ?? null;
+        personalInfo.first_name = newVal.fname ?? null;
+        personalInfo.middle_name = newVal.mname ?? null;
+        personalInfo.suffix = newVal.suffix ?? null;
+        personalInfo.email = newVal.email ?? null;
+        personalInfo.contact_no = newVal.contact_no ?? null;
+        personalInfo.birth_date = newVal.birthdate
+            ? new Date(newVal.birthdate)
+            : null;
+        personalInfo.birth_place = newVal.birthplace ?? null;
+        personalInfo.religion = newVal.religion ?? null;
+        personalInfo.civil_status = newVal.civil_status ?? null;
+    },
+    { immediate: true },
+);
 </script>

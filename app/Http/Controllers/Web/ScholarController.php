@@ -11,7 +11,9 @@ use App\Models\ScholarUploadedFiles;
 use App\Models\User;
 use App\Notifications\ScholarUploadedNotification;
 use App\Notifications\ValidatedFilesNotification;
+use App\References\LocationClass;
 use App\References\ScholarClass;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,16 +28,39 @@ use function Symfony\Component\Clock\now;
 
 class ScholarController extends Controller
 {
-    public function index()
+    public function index(LocationClass $location)
     {
 
+
+        $scholars = Scholars::select('id', 'spas_no', 'status_id', 'program_id', 'type_id', 'award_year', 'verified_by', 'verified_at', 'validate_status');
+
+        $scholarDetails = request('id') ?  Scholars::select('id', 'spas_no', 'status_id', 'program_id', 'type_id', 'award_year', 'verified_by', 'verified_at', 'validate_status')
+            ->with([
+                'status:id,name,icon,color_id',
+                'status.color:id,background_color,text_color',
+                'program:id,name',
+                'type:id,name',
+                'profile:scholar_id,photo,sex,fname,lname,mname,suffix,email,contact_no,birthplace,birthdate,civil_status,religion',
+                'schoolInfo' => fn($q) => $q
+                    ->select('id', 'scholar_id', 'campus_id', 'campus_course_id')
+                    ->with([
+                        'campus:id,generated_name,agency_id',
+                        'campus.agency:id,name,slug',
+                        'campus.address:campus_id,region_code',
+                        'course' => fn($q) => $q
+                            ->select('id', 'course_id')
+                            ->with([
+                                'course:id,name'
+                            ])
+                    ])
+                    ->latest()
+                    ->limit(1)
+            ])
+            ->where('id', Hashids::decode(request('id'))[0] ?? 0)
+            ->first() : null;
+
         return Inertia::render('Web/scholarPage', [
-            'scholar' => Scholars::select('id', 'spas_no', 'status_id', 'program_id', 'type_id')
-                ->when(request('search'), fn($q) => $q->whereHas(
-                    'profile',
-                    fn($q) =>
-                    $q->whereRaw("CONCAT(lname, ' ', fname, ' ', COALESCE(mname, '')) ILIKE ?", ['%' . request('search') . '%'])
-                ))
+            'scholar' => $scholars
                 ->with([
                     'status:id,name,icon,color_id',
                     'status.color:id,background_color,text_color',
@@ -43,7 +68,7 @@ class ScholarController extends Controller
                     'type:id,name',
                     'profile:id,scholar_id,photo,sex,fname,lname,mname,suffix,email,contact_no',
                     'schoolInfo' => fn($q) => $q
-                        ->select('id', 'scholar_id', 'campus_id', 'campus_course_id', 'award_year')
+                        ->select('id', 'scholar_id', 'campus_id', 'campus_course_id')
                         ->with([
                             'campus:id,generated_name,agency_id',
                             'campus.agency:id,name,slug',
@@ -57,6 +82,11 @@ class ScholarController extends Controller
                         ->latest()
                         ->limit(1)
                 ])
+                ->when(request('search'), fn($q) => $q->whereHas(
+                    'profile',
+                    fn($q) =>
+                    $q->whereRaw("CONCAT(lname, ' ', fname, ' ', COALESCE(mname, '')) ILIKE ?", ['%' . request('search') . '%'])
+                ))
                 ->paginate(10)
                 ->through(fn($q) => [
                     'id' => Hashids::encode($q->id),
@@ -81,12 +111,29 @@ class ScholarController extends Controller
                     ],
                     'course' => $q->schoolInfo[0]?->course?->course?->name,
                     'school' => $q->schoolInfo[0]?->campus?->generated_name,
-                    'awardyear' => $q->schoolInfo[0]?->award_year,
+                    'awardyear' => $q->award_year,
                     'agency' => $q->schoolInfo[0]?->campus->agency?->slug,
-                    'region' => $q->schoolInfo[0]?->campus->address?->region_array
+                    'region' => $q->schoolInfo[0]?->campus->address?->region_array,
+                    'verified_by' => $q->verified_by,
+                    'verified_at' => $q->verified_at,
+                    'validate_status' => $q->validate_status,
                 ]),
-            'scholarDetails' => request('id') ?
-                [] : null,
+            'scholarDetails' =>
+            [
+                'spas_no' => $scholarDetails?->spas_no,
+                'photo' => $scholarDetails?->profile?->photo,
+                'sex' => $scholarDetails?->profile?->sex,
+                'fname' => $scholarDetails?->profile?->fname,
+                'mname' => $scholarDetails?->profile?->mname,
+                'lname' => $scholarDetails?->profile?->lname,
+                'suffix' => $scholarDetails?->profile?->suffix,
+                'email' => $scholarDetails?->profile?->email,
+                'contact_no' => $scholarDetails?->profile?->contact_no,
+                'birthplace' => $scholarDetails?->profile?->birthplace,
+                'birthdate' => Carbon::parse($scholarDetails?->profile?->birthdate)->format('Y-m-d'),
+                'religion' => $scholarDetails?->profile?->religion,
+                'civil_status' => $scholarDetails?->profile?->civil_status,
+            ],
             'files' => request('OpenFiles')
                 ? ScholarUploadedFiles::when(
                     Auth::check() && Auth::user()->role_array['name'] == 'regional staff',
@@ -108,7 +155,9 @@ class ScholarController extends Controller
                     'icon'          => $q->status->icon,
                     'color_array'   => $q->status->color_array,
                     'total'   => $q->total,
-                ])
+                ]),
+            'georesult' => request('geosearch') ? ($location->getFullAddress(request('geosearch'), false) ?? [])
+                : [],
 
         ]);
     }

@@ -17,9 +17,15 @@ class Scholars extends Model
         'is_delete',
         'created_by',
         'updated_by',
+        'award_year',
         'verified_by',
         'verified_at',
+        'validate_status',
     ];
+
+
+
+
 
     public function status()
     {
@@ -55,5 +61,10 @@ class Scholars extends Model
     public function schoolInfo()
     {
         return $this->hasMany(ScholarSchoolInfos::class, 'scholar_id');
+    }
+
+    public function getTypeArrayAttribute()
+    {
+        return $this->type_id ? $this->type->only('id', 'name') : null;
     }
 }

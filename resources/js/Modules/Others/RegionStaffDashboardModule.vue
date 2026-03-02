@@ -1,10 +1,10 @@
 <template>
     <div class="flex h-full w-full items-center justify-center">
         <div
-            class="grid h-full w-full gap-4 p-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:grid-rows-5"
+            class="grid h-min-screen w-full gap-3 p-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:grid-rows-5"
         >
             <div
-                class="bg-gray-50 rounded-2xl shadow-lg flex flex-col lg:col-span-1 lg:row-span-1 p-3"
+                class="bg-slate-50 rounded-2xl shadow-sm flex flex-col lg:col-span-1 lg:row-span-1 p-3"
             >
                 <div class="flex items-start">
                     <div class="flex-1 font-semibold text-gray-600 text-sm">
@@ -19,7 +19,9 @@
                     </div>
                 </div>
                 <div class="flex-1 flex items-center gap-2">
-                    <span class="text-3xl font-light text-gray-500">0</span>
+                    <span class="text-3xl font-light text-gray-500">{{
+                        card.UTotalcnt
+                    }}</span>
                     <div
                         class="flex items-center bg-green-100 rounded-2xl text-green-600 text-xs px-3 gap-1"
                     >
@@ -28,13 +30,13 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-1">
-                    <div class="text-xs text-gray-500">Total last year</div>
-                    <div>0</div>
+                    <div class="text-xs text-gray-500">Overall Total</div>
+                    <div>{{ card.Ucnt }}</div>
                 </div>
             </div>
 
             <div
-                class="bg-gray-50 rounded-2xl shadow-lg flex flex-col lg:col-span-1 lg:row-span-1 p-3"
+                class="bg-slate-50 rounded-2xl shadow-sm flex flex-col lg:col-span-1 lg:row-span-1 p-3"
             >
                 <div class="flex items-start">
                     <div class="flex-1 font-semibold text-gray-600 text-sm">
@@ -42,14 +44,16 @@
                     </div>
                     <div class="">
                         <Avatar
-                            class="!bg-purple-100 !text-purple-600 !rounded-2xl border border-purple-600"
+                            class="!bg-cyan-100 !text-cyan-600 !rounded-2xl border border-cyan-600"
                             size="large"
                             ><IconUserFilled size="30"></IconUserFilled
                         ></Avatar>
                     </div>
                 </div>
                 <div class="flex-1 flex items-center gap-2">
-                    <span class="text-3xl font-light text-gray-500">0</span>
+                    <span class="text-3xl font-light text-gray-500">{{
+                        card.JTotalcnt
+                    }}</span>
                     <div
                         class="flex items-center bg-green-100 rounded-2xl text-green-600 text-xs px-3 gap-1"
                     >
@@ -58,172 +62,46 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-1">
-                    <div class="text-xs text-gray-500">Total last year</div>
-                    <div>0</div>
+                    <div class="text-xs text-gray-500">Overall Total</div>
+                    <div>{{ card.Jcnt }}</div>
                 </div>
             </div>
 
-            <!-- <div
-                class="bg-gray-50 rounded-2xl shadow-lg flex flex-col lg:col-span-1 lg:row-span-1 p-3"
+            <div
+                class="bg-slate-50 rounded-2xl shadow-sm flex flex-col lg:col-span-1 lg:row-span-1 p-3"
             >
                 <div class="flex items-start">
                     <div class="flex-1 font-semibold text-gray-600 text-sm">
-                        Registered campuses
+                        Total Scholars in
+                        <span class="uppercase">{{
+                            user.profile.agency.slug
+                        }}</span>
                     </div>
                     <div class="">
                         <Avatar
                             class="!bg-indigo-100 !text-indigo-600 !rounded-2xl border border-indigo-600"
                             size="large"
-                            ><IconBuildingCommunity size="30" />
-                        </Avatar>
+                            ><IconUsersGroup size="30"></IconUsersGroup
+                        ></Avatar>
                     </div>
                 </div>
                 <div class="flex-1 flex items-center gap-2">
                     <span class="text-3xl font-light text-gray-500">{{
-                        campus_cnt
+                        card.totalyear
                     }}</span>
                     <div
-                        class="flex items-center bg-blue-100 rounded-2xl text-blue-600 text-xs px-3 gap-1"
+                        class="flex items-center bg-green-100 rounded-2xl text-green-600 text-xs px-3 gap-1"
                     >
-                        <div class="capitalize">total</div>
+                        <IconTrendingUp :size="20" />
+                        <div>This year</div>
                     </div>
                 </div>
                 <div class="flex items-center gap-1">
-                    <div class="text-xs text-gray-500 uppercase">
-                        {{ user.profile.agency.slug }}
-                    </div>
-                </div>
-            </div> -->
-
-            <div
-                class="rounded-2xl border border-slate-200 flex flex-col md:col-span-2 lg:col-span-2 lg:row-span-3"
-            >
-                <div class="flex items-start p-3">
-                    <div
-                        class="flex-11 font-semibold flex flex-col text-gray-600 text-sm"
-                    >
-                        <div>Campus status</div>
-                        <div class="text-sm text-gray-400 font-light">
-                            <span class="font-bold">{{ campus_cnt }}</span>
-                            in total
-                        </div>
-                    </div>
-                    <div class="flex-1">
-                        <Avatar
-                            class="!bg-indigo-100 !text-indigo-600 !rounded-2xl border border-indigo-600"
-                            size="large"
-                            ><IconDeviceDesktopAnalytics size="30" />
-                        </Avatar>
-                    </div>
-                </div>
-
-                <div class="flex-1 p-2 overflow-auto">
-                    <table class="w-full table-fixed table">
-                        <thead>
-                            <tr class="">
-                                <th
-                                    class="!w-[20%] text-start text-xs font-semibold text-gray-700"
-                                >
-                                    Campuses
-                                </th>
-                                <th
-                                    class="w-[20%] text-xs font-semibold text-gray-700 text-center"
-                                >
-                                    Semesters
-                                </th>
-                                <th
-                                    class="w-[20%] text-xs font-semibold text-gray-700 text-center"
-                                >
-                                    Deadlines
-                                </th>
-                                <th
-                                    class="w-[20%] text-xs font-semibold text-gray-700 text-center"
-                                >
-                                    Grading Status
-                                </th>
-                                <th
-                                    class="w-[10%] text-xs font-semibold text-gray-700 text-end"
-                                >
-                                    Programs No.
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr
-                                v-for="(item, index) in campuses_details"
-                                :key="index"
-                                :class="[
-                                    'border-b border-gray-300 w-full',
-                                    index == 0 ? 'border-t' : '',
-                                ]"
-                            >
-                                <td
-                                    class="!py-[0.2rem] text-xs items-center flex text-gray-700"
-                                >
-                                    <span v-tooltip.top="item.generated_name">{{
-                                        item.school_shortcut
-                                    }}</span>
-                                </td>
-
-                                <td class="!py-[0.2rem] text-xs text-gray-700">
-                                    <div
-                                        class="flex w-full items-center justify-center"
-                                    >
-                                        {{ item.semesters.type?.name }}
-                                    </div>
-                                    <div
-                                        class="flex w-full items-center justify-center text-blue-400"
-                                        v-show="item.semesters.length != 0"
-                                    >
-                                        {{ item.semesters.start_date }} -
-                                        {{ item.semesters.end_date }}
-                                    </div>
-                                </td>
-                                <td
-                                    class="!py-[0.2rem] text-xs font-semibold text-center text-gray-700"
-                                >
-                                    {{ item.semesters.submission_date }}
-                                </td>
-                                <td
-                                    class="!py-[0.2rem] font-normal flex h-full items-center w-full"
-                                >
-                                    <div
-                                        class="flex w-full h-full items-center justify-center"
-                                    >
-                                        <div
-                                            :class="[
-                                                item.grading_status
-                                                    ? 'bg-green-50 text-green-400 border border-green-400'
-                                                    : 'bg-red-50 text-red-400 border border-red-400',
-                                                'px-3 rounded-2xl py-1 flex items-center  gap-1 ',
-                                            ]"
-                                        >
-                                            <IconX
-                                                size="15"
-                                                v-if="!item.grading_status"
-                                            />
-                                            <IconCheck v-else size="15" />
-                                            <div class="text-xs">
-                                                {{
-                                                    item.grading_status
-                                                        ? "Grading Set"
-                                                        : "Not Set"
-                                                }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <td
-                                    class="!py-[0.2rem] text-sm font-bold text-end text-gray-700"
-                                >
-                                    {{ item.program_cnt }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="text-xs text-gray-500">Overall Total</div>
+                    <div>{{ card.total }}</div>
                 </div>
             </div>
+
             <div
                 class="rounded-2xl border border-slate-200 flex flex-col md:col-span-2 lg:col-span-1 lg:row-span-3"
             >
@@ -235,6 +113,7 @@
                         expanded
                         view="weekly"
                         :attributes="attrs"
+                        title-position="left"
                     ></VCalendar>
                     <Divider align="left">
                         <p class="text-xs font-medium">Event Scheduler</p>
@@ -246,23 +125,296 @@
                     ></div>
                 </div>
             </div>
-            <!-- <div
-                class="bg-green-200 rounded-lg shadow-md flex items-center justify-center md:col-span-2 lg:col-span-2 lg:row-span-2"
+            <div
+                class="rounded-2xl border border-slate-200 flex p-2 flex-col md:col-span-2 lg:col-span-2 lg:row-span-2"
             >
-                <p>Edamame</p>
+                <div class="flex space-x-0 items-center justify-between">
+                    <div class="flex items-center gap-2 flex-1 min-w-0">
+                        <div>
+                            <Avatar
+                                class="!bg-indigo-100 flex-1 !text-indigo-600 !rounded-2xl border border-indigo-600"
+                                size="large"
+                            >
+                                <IconDeviceDesktopAnalytics size="30" />
+                            </Avatar>
+                        </div>
+
+                        <div class="flex flex-col min-w-0">
+                            <div class="text-xs truncate lg:text-base">
+                                Scholarship Program Awarded Through the Years
+                            </div>
+                            <div class="text-gray-400 text-xs truncate">
+                                Tracking scholarships awarded each year in
+                                <span class="uppercase font-medium">{{
+                                    user.profile.agency.slug
+                                }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-fit">
+                        <SelectInput v-model="dasd"></SelectInput>
+                    </div>
+                </div>
+                <div
+                    class="flex flex-col lg:flex-row justify-between items-center"
+                >
+                    <div class="w-full lg:w-3/4">
+                        <ApexChart
+                            type="bar"
+                            :options="apexOptionsTimeline"
+                            :series="timeline.series"
+                        />
+                    </div>
+                    <div class="w-full lg:w-1/4 flex lg:flex-col">
+                        <table class="w-full h-fit">
+                            <tbody>
+                                <tr
+                                    v-for="(item, index) in overview"
+                                    :key="index"
+                                >
+                                    <td
+                                        class="p-2 text-[13px] font-medium text-gray-700"
+                                    >
+                                        <div class="flex justify-between">
+                                            <div
+                                                class="flex gap-2 items-center"
+                                            >
+                                                <div
+                                                    :class="[
+                                                        ' p-2 rounded-[11px]',
+                                                        item.iconColor,
+                                                    ]"
+                                                >
+                                                    <component
+                                                        :is="item.icon"
+                                                        size="20"
+                                                    />
+                                                </div>
+                                                <div class="leading-tight">
+                                                    <div>{{ item.name }}</div>
+                                                    <span
+                                                        class="text-gray-400 text-[11px]"
+                                                        >{{
+                                                            item.description
+                                                        }}</span
+                                                    >
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center p-2">
+                                                <div class="font-bold">
+                                                    {{ item.count }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             <div
-                class="bg-red-200 rounded-lg shadow-md flex items-center justify-center md:col-span-1 lg:col-span-2 lg:row-span-2"
+                class="rounded-2xl border border-slate-200 flex flex-col p-2 md:col-span-1 lg:col-span-1 lg:row-span-2"
             >
-                <p>Tomato</p>
-            </div>
+                <div class="flex space-x-0 items-center justify-between">
+                    <div class="flex items-center gap-2 flex-1 min-w-0">
+                        <div>
+                            <Avatar
+                                class="!bg-purple-100 flex-1 !text-purple-600 !rounded-2xl border border-purple-600"
+                                size="large"
+                            >
+                                <IconChartDonut size="30" />
+                            </Avatar>
+                        </div>
 
+                        <div class="flex flex-col min-w-0">
+                            <div class="text-xs truncate lg:text-base">
+                                Scholar Gender Chart
+                            </div>
+                            <div class="text-gray-400 text-xs truncate">
+                                Breakdown of all scholars in
+                                <span class="uppercase font-medium">{{
+                                    user.profile.agency.slug
+                                }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-3 p-1 items-center">
+                    <ApexChart
+                        height="180"
+                        type="donut"
+                        :options="apexOptionsGender"
+                        :series="gender.series"
+                    />
+                    <div class="flex justify-evenly w-full">
+                        <div class="flex flex-col justify-center items-end">
+                            <div class="flex items-center gap-1">
+                                <IconGenderMale class="text-blue-400" />
+                                <div class="text-gray-400">Male</div>
+                            </div>
+                            <div class="font-semibold text-[16px]">
+                                {{
+                                    formatNumber(
+                                        gender.result.find((s) => s.sex === "M")
+                                            ?.total,
+                                    )
+                                }}
+                            </div>
+                        </div>
+                        <div class="flex flex-col justify-center items-end">
+                            <div class="flex items-center gap-1">
+                                <IconGenderFemale class="text-pink-400" />
+                                <div class="text-gray-400">Female</div>
+                            </div>
+                            <div class="font-semibold text-[16px]">
+                                {{
+                                    formatNumber(
+                                        gender.result.find((s) => s.sex === "F")
+                                            ?.total,
+                                    )
+                                }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div
-                class="bg-gray-200 rounded-lg shadow-md flex items-center justify-center md:col-span-2 lg:col-span-3 lg:row-span-2"
+                class="rounded-2xl border border-slate-200 p-2 gap-3 flex flex-col md:col-span-2 lg:col-span-2 lg:row-span-10"
             >
-                <p>Tofu</p>
-            </div> -->
+                <div class="flex space-x-0 items-center justify-between">
+                    <div class="flex items-center gap-2 flex-1 min-w-0">
+                        <div>
+                            <Avatar
+                                class="!bg-rose-100 flex-1 !text-rose-600 !rounded-2xl border border-rose-600"
+                                size="large"
+                            >
+                                <IconBuildingEstate size="30" />
+                            </Avatar>
+                        </div>
+
+                        <div class="flex flex-col min-w-0">
+                            <div class="text-xs truncate lg:text-base">
+                                Campus Details
+                            </div>
+                            <div class="text-gray-400 text-xs truncate">
+                                Breakdown of all campus status in
+                                <span class="uppercase font-medium">{{
+                                    user.profile.agency.slug
+                                }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-auto max-h-[400px]">
+                    <DefaultScrollTable :items="campuses_details">
+                        <Column
+                            field="school_shortcut"
+                            header="Campus"
+                            :style="{ width: '30%' }"
+                        >
+                            <template #body="slotProps">
+                                <div
+                                    class="flex items-center gap-1 w-full"
+                                    v-tooltip.top="slotProps.data.school_name"
+                                >
+                                    <div class="truncate">
+                                        {{ slotProps.data.school_shortcut }}
+                                    </div>
+                                </div>
+                            </template>
+                        </Column>
+                        <Column field="semester">
+                            <template #header>
+                                <div class="flex justify-center w-full">
+                                    <div class="font-semibold">
+                                        Active Semester
+                                    </div>
+                                </div>
+                            </template>
+                            <template #body="slotProps">
+                                <div
+                                    v-if="slotProps.data.semesters.length != 0"
+                                    class="flex justify-center"
+                                    v-tooltip.top="
+                                        slotProps.data.semesters.generated_name
+                                    "
+                                >
+                                    <div
+                                        class="flex items-center gap-1 text-xs"
+                                    >
+                                        <IconPointFilled
+                                            class="text-green-600"
+                                        />
+                                        <span class="font-medium">{{
+                                            slotProps.data.semesters.start_date
+                                        }}</span>
+
+                                        <IconArrowNarrowRight
+                                            class="text-gray-400"
+                                        />
+                                        <span class="font-medium">{{
+                                            slotProps.data.semesters.end_date
+                                        }}</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </Column>
+                        <Column>
+                            <template #header>
+                                <div
+                                    class="flex justify-center font-semibold w-full"
+                                >
+                                    <div>Submission Date</div>
+                                </div>
+                            </template>
+                            <template #body="prop">
+                                <div
+                                    v-if="prop.data.semesters.submission_date"
+                                    class="flex items-center justify-center gap-1"
+                                >
+                                    <IconCalendarEvent class="text-rose-400" />
+                                    <span class="text-xs font-medium">
+                                        {{
+                                            prop.data.semesters.submission_date
+                                        }}
+                                    </span>
+                                </div>
+                            </template>
+                        </Column>
+                        <Column>
+                            <template #header>
+                                <div
+                                    class="flex justify-center font-semibold w-full"
+                                >
+                                    <div>Programs #</div>
+                                </div>
+                            </template>
+                            <template #body="prop">
+                                <div
+                                    v-if="prop.data.semesters"
+                                    class="flex justify-center"
+                                >
+                                    <span class="text-xs font-semibold">
+                                        {{ prop.data.program_cnt }}
+                                    </span>
+                                </div>
+                            </template>
+                        </Column>
+                    </DefaultScrollTable>
+                </div>
+            </div>
+            <div
+                class="bg-gray-200 rounded-lg shadow-md text-slate-500 flex gap-3 items-center justify-center md:col-span-2 lg:col-span-2 lg:row-span-10"
+            >
+                <IconBackhoe />
+                <p class="text-xs">
+                    Building something awesome. Check back shortly.
+                </p>
+                <IconBarrierBlockFilled />
+            </div>
         </div>
     </div>
 </template>
@@ -274,14 +426,30 @@ import {
     IconDeviceDesktopAnalytics,
     IconTrendingUp,
     IconUser,
+    IconRosetteDiscountCheck,
+    IconSchool,
     IconUserFilled,
     IconX,
+    IconUsersGroup,
+    IconChartDonut,
+    IconGenderMale,
+    IconGenderFemale,
+    IconBuildingEstate,
+    IconPointFilled,
+    IconArrowNarrowRight,
+    IconBackhoe,
+    IconBarrierBlockFilled,
+    IconCalendarExclamation,
+    IconCalendarEvent,
 } from "@tabler/icons-vue";
 
-import { ref } from "vue";
-import DefaultScrollTable from "../../Components/tables/DefaultScrollTable.vue";
+import { ref, computed } from "vue";
+import ApexChart from "vue3-apexcharts";
+import SelectInput from "../../Components/inputs/SelectInput.vue";
+import DefaultScrollTable from "../../Components/Tables/DefaultScrollTable.vue";
 
-const { campus_cnt, user, campuses_details } = usePage().props;
+const { campus_cnt, card, campuses_details, timeline, user, gender } =
+    usePage().props;
 const attrs = ref([
     {
         key: "today",
@@ -289,6 +457,171 @@ const attrs = ref([
         dates: new Date(),
     },
 ]);
+
+const overview = computed(() => [
+    {
+        name: "RA-10612",
+        details: "RA 10612",
+        description: "",
+        icon: IconSchool,
+        iconColor: "bg-red-50 text-red-600",
+        count: formatNumber(
+            timeline.timelineTotal.find((s) => s.name === "RA 10612")?.data,
+        ),
+    },
+    {
+        name: "RA-7687",
+        details: "RA 7687",
+        description: "",
+        icon: IconSchool,
+        iconColor: "bg-green-50 text-green-600",
+        count: formatNumber(
+            timeline.timelineTotal.find((s) => s.name === "RA 7687")?.data,
+        ),
+    },
+    {
+        name: "MERIT",
+        details: "MERIT",
+        description: "",
+        icon: IconSchool,
+        iconColor: "bg-blue-50 text-blue-600",
+        count: formatNumber(
+            timeline.timelineTotal.find((s) => s.name === "MERIT")?.data,
+        ),
+    },
+    {
+        name: "Total ",
+        description: "",
+        icon: IconRosetteDiscountCheck,
+        iconColor: "bg-cyan-50 text-cyan-600",
+        count: formatNumber(
+            timeline.timelineTotal.reduce((sum, item) => sum + item.data, 0),
+        ),
+    },
+]);
+
+const apexOptionsGender = ref({
+    chart: {
+        type: "donut",
+        fontFamily: "inherit",
+        foreColor: "#adb0bb",
+    },
+    colors: ["#F6339A", "#2B7FFF"],
+    labels: ["Female", "Male"],
+    plotOptions: {
+        pie: {
+            donut: {
+                size: "70%",
+                background: "transparent",
+                labels: {
+                    show: true,
+                    name: {
+                        show: true,
+                        offsetY: 7,
+                    },
+                    value: {
+                        show: false,
+                    },
+                },
+            },
+        },
+    },
+    stroke: {
+        show: false,
+    },
+    dataLabels: {
+        enabled: false,
+    },
+    legend: {
+        show: false,
+    },
+    tooltip: {
+        theme: "dark",
+        fillSeriesColor: false,
+    },
+});
+
+const apexOptionsTimeline = computed(() => ({
+    chart: {
+        type: "bar",
+        stacked: true,
+        height: 500,
+        toolbar: { show: false },
+        fontFamily: "inherit",
+        foreColor: "#adb0bb",
+    },
+    plotOptions: {
+        bar: {
+            horizontal: false,
+            borderRadius: 5,
+            columnWidth: "20%",
+        },
+    },
+    colors: ["#2563EB", "#22C55E", "#F43F5E"],
+    dataLabels: { enabled: false },
+    stroke: {
+        show: true,
+        width: 1,
+        colors: ["#fff"],
+    },
+    legend: { show: false },
+    grid: {
+        borderColor: "rgba(0,0,0,0.1)",
+        strokeDashArray: 3,
+        xaxis: { lines: { show: false } },
+        padding: { top: 0, right: 0, bottom: 0, left: 0 },
+    },
+    xaxis: {
+        categories: timeline.categories,
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+    },
+    yaxis: {
+        tickAmount: 5,
+    },
+    tooltip: { theme: "dark" },
+    responsive: [
+        {
+            breakpoint: 2600,
+            options: {
+                chart: { width: "100%", height: 250 },
+                legend: { position: "bottom" },
+            },
+        },
+        {
+            breakpoint: 1200,
+            options: {
+                chart: { width: "100%" },
+                legend: { position: "bottom" },
+            },
+        },
+        {
+            breakpoint: 992,
+            options: {
+                chart: { width: "100%" },
+                legend: { position: "bottom", fontSize: "12px" },
+            },
+        },
+        {
+            breakpoint: 768,
+            options: {
+                chart: { width: "100%" },
+                legend: { show: false },
+            },
+        },
+        {
+            breakpoint: 480,
+            options: {
+                chart: { width: "100%", height: 250 },
+                dataLabels: { enabled: false },
+            },
+        },
+    ],
+}));
+
+function formatNumber(num) {
+    return Number(num ?? 0).toLocaleString("en-US");
+}
 </script>
 <style>
 .vc-container .vc-weekday-1,
