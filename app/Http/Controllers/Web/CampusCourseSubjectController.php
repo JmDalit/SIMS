@@ -11,6 +11,15 @@ class CampusCourseSubjectController extends Controller
     function destroy(int $id)
     {
 
+        try {
+            $find = SchoolCampusCourseSubjects::findOrFail($id);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('flash', [
+                'status' => 'error',
+                'title'  => 'Subject Not Found',
+                'message' => 'The subject you are trying to delete does not exist.',
+            ]);
+        }
 
         $find = SchoolCampusCourseSubjects::findOrFail($id);
         $find->update([

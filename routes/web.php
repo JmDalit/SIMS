@@ -105,9 +105,9 @@ Route::middleware(['auth', 'web'])->group(function () {
     Route::put('academic/universities/grade/{id}/{type}', [CampusGradeController::class, 'update'])->name('academic.universities.grade.update');
     Route::delete('academic/universities/grade/{id}/{type}', [CampusGradeController::class, 'destroy'])->name('academic.universities.grade.destroy');
 
-    Route::post('subjects', [CampusCourseSubjectController::class, 'store'])->name('subject.store');
-    Route::put('subjects/{id}/{type}', [CampusCourseSubjectController::class, 'update'])->name('subject.update');
-    Route::delete('subjects/{id}/{type}', [CampusCourseSubjectController::class, 'destroy'])->name('subject.destroy');
+    // Route::post('subjects', [CampusCourseSubjectController::class, 'store'])->name('subject.store');
+    // Route::put('subjects/{id}/{type}', [CampusCourseSubjectController::class, 'update'])->name('subject.update');
+    //Route::delete('subjects/{id}/{type}', [CampusCourseSubjectController::class, 'destroy'])->name('campus.subject.destroy');
 
     Route::post('statuses', [StatusController::class, 'store'])->name('status.store');
     Route::put('statuses/{id}/{type}', [StatusController::class, 'update'])->name('status.update');
@@ -123,7 +123,7 @@ Route::middleware(['auth', 'web'])->group(function () {
 
     Route::post('campus/curriculum', [SchoolCampusCurriculumController::class, 'store'])->name('campus.curriculum.store');
     Route::put('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'update'])->name('campus.curriculum.update');
-    Route::delete('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'destroySubject'])->name('campus.curriculum.destroySubject');
+    Route::delete('campus/curriculum/{id}/{type}/subject', [SchoolCampusCurriculumController::class, 'destroySubject'])->name('campus.curriculum.destroysubject');
     Route::delete('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'destroyCurriculum'])->name('campus.curriculum.destroyCurriculum');
 
     Route::post('scholar', [ScholarController::class, 'store'])->name('scholar.store');

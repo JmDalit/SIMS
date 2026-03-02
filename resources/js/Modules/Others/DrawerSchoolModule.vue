@@ -1247,7 +1247,7 @@ import DefaultMessages from "../../Components/messages/DefaultMessages.vue";
 import ToolbarModule from "./ToolbarModule.vue";
 import { router, useForm, usePage } from "@inertiajs/vue3";
 import { computed, ref, watch } from "vue";
-
+import { route } from "ziggy-js";
 const props = defineProps({
     id: [Number, String],
     value: [Array, Object],
@@ -1583,7 +1583,7 @@ const deleteCurriculumAndSubject = (res) => {
         } else {
             props.confirmRef.popupDialog(() => {
                 curriculumForm.delete(
-                    route("campus.curriculum.destroySubject", {
+                    route("campus.curriculum.destroysubject", {
                         id: curriculumForm.multi[res.curriculum].subjects[
                             res.subject
                         ].id,
