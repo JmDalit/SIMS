@@ -121,12 +121,16 @@ class SchoolController extends Controller
                     'curriculum' => fn($q) => $q
                         ->select('id', 'campus_course_id', 'years', 'semester_type_id')
                         ->with([
-                            'course:id,course_id'
+                            'course' => fn($q) => $q
+                                ->select('id', 'campus_id', 'course_id')
+                                ->with([
+                                    'campus'
+                                ])
                         ])
                 ])
                 ->where('user_id', Auth::id())
-                ->whereHas('curriculum', function ($q) {
-                    $q->where('campus_course_id', request('campusCourseId'));
+                ->whereHas('curriculum.course.campus', function ($q) {
+                    $q->where('school_id', request('schoolId'));
                 })
                 ->get()
                 ->map(fn($q) => [

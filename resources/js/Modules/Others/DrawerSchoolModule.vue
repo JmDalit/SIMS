@@ -1533,6 +1533,7 @@ const menuItems = computed(() => {
                     data: {
                         campusCourseId: selectedRow.value.id,
                         semTypeId: page.props?.schoolDetail.term_array.id,
+                        schoolId: page.props?.schoolDetail.school_id,
                     },
                     only: ["subjectDetail", "templateOptions"],
                     preserveState: true,
@@ -1805,6 +1806,7 @@ const pasteTemplate = (curKey) => {
                     data: {
                         campusCourseId: selectedRow.value.id,
                         semTypeId: page.props?.schoolDetail.term_array.id,
+                        schoolId: page.props?.schoolDetail.school_id,
                     },
                     only: ["subjectDetail", "templateOptions"],
                     preserveState: true,
