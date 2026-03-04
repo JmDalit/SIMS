@@ -125,6 +125,8 @@ Route::middleware(['auth', 'web'])->group(function () {
     Route::put('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'update'])->name('campus.curriculum.update');
     Route::delete('campus/curriculum/{id}/{type}/subject', [SchoolCampusCurriculumController::class, 'destroySubject'])->name('campus.curriculum.destroysubject');
     Route::delete('campus/curriculum/{id}/{type}', [SchoolCampusCurriculumController::class, 'destroyCurriculum'])->name('campus.curriculum.destroyCurriculum');
+    Route::patch('campus/curriculum/{id}/copy', [SchoolCampusCurriculumController::class, 'copy'])->name('campus.curriculum.copy');
+    Route::patch('campus/curriculum/{id}/paste', [SchoolCampusCurriculumController::class, 'paste'])->name('campus.curriculum.paste');
 
     Route::post('scholar', [ScholarController::class, 'store'])->name('scholar.store');
     Route::post('scholar/{id}/validated', [ScholarController::class, 'insert'])->name('scholar.insert');

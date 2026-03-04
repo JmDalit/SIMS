@@ -17,8 +17,12 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('school_campus_course_curriculums')
                 ->nullOnDelete();
-            $table->string('created_by')->nullable();
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

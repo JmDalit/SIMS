@@ -780,13 +780,56 @@
                             ></DefaultButton>
                         </div>
                     </TabList>
-                    <TabPanels class="!p-0 !pt-10">
+                    <TabPanels class="!p-0 flex flex-col gap-3 mt-3">
                         <TabPanel
                             v-for="(curItem, curKey) in curriculumForm.multi"
                             :key="curKey"
                             :value="curKey"
                             class="flex flex-col w-full gap-4"
                         >
+                            <div class="flex items-center justify-between">
+                                <DefaultButton
+                                    label="Make this template"
+                                    size="small"
+                                    v-if="curItem.id"
+                                    :disabled="
+                                        curItem.has_replication ||
+                                        curItem.is_duplicated
+                                    "
+                                    :icon="
+                                        curItem.has_replication ||
+                                        curItem.is_duplicated
+                                            ? IconCheck
+                                            : IconDots
+                                    "
+                                    :icon-size="18"
+                                    @click="copyTemplate(curKey)"
+                                    :severity="
+                                        curItem.has_replication ||
+                                        curItem.is_duplicated
+                                            ? 'primary'
+                                            : 'secondary'
+                                    "
+                                    class="!px-4 !text-xs"
+                                />
+                                <div v-else class="flex items-center gap-2">
+                                    <SelectInput
+                                        v-model="templateForm.select"
+                                        :options="page.props?.templateOptions"
+                                        clearable
+                                    />
+                                    <DefaultButton
+                                        size="small"
+                                        raised
+                                        :disabled="loading.paste"
+                                        :loading="loading.paste"
+                                        label="Apply Template"
+                                        class="text-nowrap w-60"
+                                        @click="pasteTemplate(curKey)"
+                                    ></DefaultButton>
+                                </div>
+                            </div>
+
                             <div
                                 v-for="year in parseInt(selectedRow.years)"
                                 :key="year"
@@ -1191,6 +1234,7 @@
             </div>
         </template>
     </DefaultDialog>
+
     <DefaultToast ref="toastRef" />
 </template>
 <script setup>
@@ -1232,8 +1276,12 @@ import {
     IconNotebook,
     IconUser,
     IconUserSquareRounded,
+    IconInfoSmall,
+    IconInfoCircleFilled,
+    IconDots,
+    IconDotsVertical,
 } from "@tabler/icons-vue";
-
+import CurriculmDialog from "../../Components/dialogs/CurriculmDialog.vue";
 import DefaultScrollTable from "../../Components/tables/DefaultScrollTable.vue";
 import DefaultDrawer from "../../Components/dialogs/DefaultDrawer.vue";
 import DefaultDialog from "../../Components/dialogs/DefaultDialog.vue";
@@ -1246,8 +1294,28 @@ import DefaultToggle from "../../Components/toggleswitches/DefaultToggle.vue";
 import DefaultMessages from "../../Components/messages/DefaultMessages.vue";
 import ToolbarModule from "./ToolbarModule.vue";
 import { router, useForm, usePage } from "@inertiajs/vue3";
-import { computed, ref, watch } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import { route } from "ziggy-js";
+
+const page = usePage();
+const drawer = ref(false);
+const subjectDialog = ref(false);
+const updateSchool = ref(false);
+const gradeSystemDialog = ref(false);
+const semesterDialog = ref(false);
+const loading = reactive({
+    paste: false,
+});
+const searchInput = ref(null);
+const toastRef = ref(null);
+const typeDialog = ref(null);
+const toolbarCourseRef = ref(null);
+const toolbarGradeRef = ref(null);
+const selectedRow = ref(null);
+const menu = ref(null);
+const menuGrade = ref(null);
+const hideRemoveButton = ref("create");
+
 const props = defineProps({
     id: [Number, String],
     value: [Array, Object],
@@ -1346,24 +1414,6 @@ const recentUpdateSubject = (res) => {
     return stringRecent;
 };
 
-const page = usePage();
-
-const drawer = ref(false);
-
-const subjectDialog = ref(false);
-const updateSchool = ref(false);
-const typeDialog = ref(null);
-const semesterDialog = ref(false);
-const searchInput = ref(null);
-const toastRef = ref(null);
-const gradeSystemDialog = ref(false);
-const toolbarCourseRef = ref(null);
-const toolbarGradeRef = ref(null);
-const selectedRow = ref(null);
-const menu = ref(null);
-const menuGrade = ref(null);
-const hideRemoveButton = ref("create");
-
 const semesterForm = useForm({
     type: "create",
     campusId: null,
@@ -1379,6 +1429,16 @@ const courseForm = useForm({
     campusId: null,
     course: null,
     years: null,
+    curriculum: [
+        {
+            id: null,
+            course_id: null,
+            semester_id: null,
+            template: false,
+            templateDefault: [],
+            years: null,
+        },
+    ],
 });
 
 const detailsForm = useForm({
@@ -1399,6 +1459,10 @@ const gradeForm = useForm({
     fail: false,
     incomplete: false,
     drop: false,
+});
+
+const templateForm = useForm({
+    select: null,
 });
 
 const toggleCourseOption = (event, rowData) => {
@@ -1470,7 +1534,7 @@ const menuItems = computed(() => {
                         campusCourseId: selectedRow.value.id,
                         semTypeId: page.props?.schoolDetail.term_array.id,
                     },
-                    only: ["subjectDetail"],
+                    only: ["subjectDetail", "templateOptions"],
                     preserveState: true,
                     preserveScroll: true,
                     onSuccess: () => {
@@ -1489,7 +1553,9 @@ const menuItems = computed(() => {
                             addCurriculum();
                         }
 
+                        templateForm.reset();
                         subjectDialog.value = true;
+                        // curriculumDialog.value = true;
                     },
                 });
             },
@@ -1530,14 +1596,14 @@ const addCurriculum = () => {
     });
 
     curriculumForm.multi[curriculumForm.multi.length - 1].subjects.forEach(
-        (cur, tests) => {
+        (cur, curKey) => {
             for (
                 let indexYear = 0;
                 indexYear < parseInt(selectedRow.value.years);
                 indexYear++
             ) {
                 page.props?.semesterOption.forEach((sem, semKey) => {
-                    curriculumForm.multi[tests].subjects.push({
+                    curriculumForm.multi[curKey].subjects.push({
                         id: null,
                         curriculumId: null,
                         year: indexYear + 1,
@@ -1692,8 +1758,8 @@ const UpdateDetailsForm = () => {
 const submitCurriculum = () => {
     curriculumForm.post(route("campus.curriculum.store"), {
         onSuccess: () => {
-            curriculumForm.multi.length = 0;
             curriculumForm.resetAndClearErrors();
+            curriculumForm.multi.length = 0;
             if (page.props?.subjectDetail.length != 0) {
                 for (
                     let index = 0;
@@ -1708,6 +1774,64 @@ const submitCurriculum = () => {
             toastRef.value.show(page.props.flash);
         },
     });
+};
+
+const copyTemplate = (curKey) => {
+    router.patch(
+        route("campus.curriculum.copy", curriculumForm.multi[curKey].id),
+        {},
+        {
+            onSuccess: () => {
+                curriculumForm.multi[curKey].has_replication = true;
+                curriculumForm.multi[curKey].templateDetails =
+                    page.props.curriculumDetails;
+
+                toastRef.value.show(page.props.flash);
+            },
+        },
+    );
+};
+
+const pasteTemplate = (curKey) => {
+    loading.paste = true;
+    templateForm.patch(
+        route(
+            "campus.curriculum.paste",
+            curriculumForm.multi[curKey].campus_course_id,
+        ),
+        {
+            onSuccess: () => {
+                router.reload({
+                    data: {
+                        campusCourseId: selectedRow.value.id,
+                        semTypeId: page.props?.schoolDetail.term_array.id,
+                    },
+                    only: ["subjectDetail", "templateOptions"],
+                    preserveState: true,
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        curriculumForm.multi = [];
+                        if (page.props?.subjectDetail.length != 0) {
+                            for (
+                                let index = 0;
+                                index < page.props?.subjectDetail.length;
+                                index++
+                            ) {
+                                curriculumForm.multi.unshift(
+                                    page.props?.subjectDetail[index],
+                                );
+                            }
+                        }
+                        templateForm.resetAndClearErrors();
+                        toastRef.value.show(page.props.flash);
+                    },
+                    onFinish: () => {
+                        loading.paste = false;
+                    },
+                });
+            },
+        },
+    );
 };
 
 const submitForm = (res) => {
@@ -1728,6 +1852,7 @@ const submitForm = (res) => {
                 }),
                 {
                     onSuccess: () => {
+                        toolbarCourseRef.value.closeModal();
                         courseForm.resetAndClearErrors();
                         toastRef.value.show(page.props.flash);
                     },

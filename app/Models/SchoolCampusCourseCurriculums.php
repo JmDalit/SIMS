@@ -12,11 +12,11 @@ class SchoolCampusCourseCurriculums extends Model
     protected $fillable = [
         'campus_course_id',
         'semester_type_id',
-        'curriculum_id',
         'years',
         'total_year',
         'created_by',
         'updated_by',
+        'is_duplicated',
         'is_active',
         'is_delete',
     ];
@@ -37,5 +37,10 @@ class SchoolCampusCourseCurriculums extends Model
     public function course()
     {
         return $this->belongsTo(SchoolCampusCourses::class, 'campus_course_id');
+    }
+
+    public function replication()
+    {
+        return $this->hasOne(CurriculumReplication::class, 'curriculum_id');
     }
 }

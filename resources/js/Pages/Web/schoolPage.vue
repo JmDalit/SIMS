@@ -418,8 +418,9 @@
                         <template #body="prop">
                             <div
                                 v-if="prop.data.semester"
-                                class="flex justify-center"
+                                class="flex items-center gap-1 justify-center"
                             >
+                                <IconCalendar class="text-rose-500" />
                                 <span class="text-xs font-medium">
                                     {{ prop.data.semester.submission_date }}
                                 </span>
@@ -485,6 +486,7 @@ import {
     IconEdit,
     IconArrowNarrowRight,
     IconPointFilled,
+    IconCalendar,
 } from "@tabler/icons-vue";
 
 const page = usePage();

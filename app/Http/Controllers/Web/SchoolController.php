@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\SchoolRequest;
+use App\Models\CurriculumReplication;
 use App\Models\SchoolCampusCourseCurriculums;
 use App\Models\SchoolCampuses;
 use App\Models\Schools;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Vinkla\Hashids\Facades\Hashids;
 
 class SchoolController extends Controller
 {
@@ -45,7 +47,6 @@ class SchoolController extends Controller
             'gradingOption' => $ref->getRefs('option', null, null, 'Grading System'),
             'courseOption' => $ref->getCourses('option'),
             'subClassOption' => $ref->getRefs('option', null, 'Subject', null),
-
             'semesterOption' => request('semesterType')
                 ? $ref->getRefs('option', null, null, request('semesterType'))
                 : null,
@@ -70,14 +71,21 @@ class SchoolController extends Controller
                         'updated_at',
                         'updated_by',
                         'created_by',
-                    )->where('is_delete', false)
+                    )->where('is_delete', false),
+
                 ])
                 ->select([
                     'id',
                     'campus_course_id',
-
                     'years as yearLevel',
-                    'semester_type_id as semesterTypeId'
+                    'semester_type_id as semesterTypeId',
+                    'is_duplicated'
+                ])
+                ->withExists([
+                    'replication as has_replication' => function ($q) {
+                        $q->where('user_id', Auth::id())
+                            ->whereNull('deleted_at');
+                    }
                 ])
                 ->where('campus_course_id', request('campusCourseId'))
                 ->where('semester_type_id', request('semTypeId'))
@@ -97,7 +105,6 @@ class SchoolController extends Controller
             'schoolEdit' => request('school_id')
                 ? Schools::with(['campuses' => function ($query) {
                     if (Auth::user()->role_array['name'] != 'Administrator') {
-
                         $query->whereHas('agency', function ($q) {
                             $q->where('name',  Auth::user()->profile->agency->name);
                         });
@@ -107,7 +114,26 @@ class SchoolController extends Controller
                 }])
                 ->where('id', request('school_id'))
                 ->first()?->toArray()
-                : null
+                : null,
+            'templateOptions' => request('campusCourseId')
+                ? CurriculumReplication::select('id', 'curriculum_id')
+                ->with([
+                    'curriculum' => fn($q) => $q
+                        ->select('id', 'campus_course_id', 'years', 'semester_type_id')
+                        ->with([
+                            'course:id,course_id'
+                        ])
+                ])
+                ->where('user_id', Auth::id())
+                ->whereHas('curriculum', function ($q) {
+                    $q->where('campus_course_id', request('campusCourseId'));
+                })
+                ->get()
+                ->map(fn($q) => [
+                    'curriculum_id' => Hashids::encode($q->curriculum_id),
+                    'name' => $q->curriculum->course->course['name'] . ' - Curriculum ' . $q->curriculum->years,
+                ])
+                : null,
         ]);
     }
 
