@@ -28,6 +28,16 @@ class ListReferences extends Model
         return $this->hasMany(Schools::class, 'reference_id', 'id');
     }
 
+    public function campus()
+    {
+        return $this->hasMany(SchoolCampuses::class, 'term_id');
+    }
+
+    public function level()
+    {
+        return $this->hasMany(ScholarTerm::class, 'level_id');
+    }
+
     public function getClassificationArrayAttribute()
     {
         return $this->classification ? [

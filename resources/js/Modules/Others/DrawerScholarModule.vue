@@ -18,16 +18,16 @@
             <div class="w-full h-full pt-5 gap-5 flex flex-col lg:flex-row">
                 <div class="lg:w-5/12 flex flex-col gap-5">
                     <div
-                        class="border border-slate-300 rounded-xl p-2 flex flex-col lg:flex-row gap-2"
+                        class="border border-slate-300 rounded-2xl p-2 flex flex-col lg:flex-row gap-2"
                     >
                         <div
-                            class="bg-slate-50 lg:w-1/2 rounded-lg p-3 flex flex-col justify-between"
+                            class="bg-slate-50 lg:w-1/2 rounded-xl p-3 flex flex-col justify-between"
                         >
                             <div class="flex items-start justify-between">
                                 <div>
                                     <Avatar
                                         v-if="details.photo == null"
-                                        class="!w-[8rem] !h-[8rem] !rounded-xl !text-5xl !bg-slate-300"
+                                        class="!w-[9rem] !h-[9rem] !rounded-xl !text-5xl !bg-slate-300"
                                     >
                                         <IconUserFilled :size="80" />
                                     </Avatar>
@@ -39,13 +39,7 @@
                                             color: #1a2551;
                                         "
                                         :image="details.photo"
-                                        class="!w-[7rem] !h-[7rem] !rounded-xl"
-                                    />
-                                </div>
-                                <div class="">
-                                    <DefaultButton
-                                        label="Change Photo"
-                                        size="small"
+                                        class="!w-[9rem] !h-[9rem] !rounded-xl !text-5xl !bg-slate-300"
                                     />
                                 </div>
                             </div>
@@ -107,7 +101,7 @@
                                 <div
                                     class="col-span-1 row-span-1 flex items-start gap-1 text-gray-500 text-sm"
                                 >
-                                    <IconPennant :size="20" />
+                                    <IconBuilding :size="20" />
                                     <div>School</div>
                                 </div>
 
@@ -287,9 +281,13 @@
                     </div>
                 </div>
                 <div class="flex-1">
-                    <Tabs value="0" class="w-full">
+                    <Tabs
+                        value="info"
+                        class="w-full"
+                        @update:value="tabChangeGet"
+                    >
                         <TabList>
-                            <Tab value="0" class="!px-3 !py-1">
+                            <Tab value="info" class="!px-3 !py-1">
                                 <div class="flex items-center gap-2">
                                     <IconUserSearch :size="20" />
                                     <div class="text-sm font-light">
@@ -297,7 +295,7 @@
                                     </div>
                                 </div>
                             </Tab>
-                            <Tab value="1" class="!px-3 !py-1">
+                            <Tab value="scholarship" class="!px-3 !py-1">
                                 <div class="flex items-center gap-2">
                                     <IconSchool :size="20" />
                                     <div class="text-sm font-light">
@@ -305,7 +303,7 @@
                                     </div>
                                 </div>
                             </Tab>
-                            <Tab value="2" class="!px-3 !py-1">
+                            <Tab value="academic" class="!px-3 !py-1">
                                 <div class="flex items-center gap-2">
                                     <IconFileInvoice :size="20" />
                                     <div class="text-sm font-light">
@@ -314,8 +312,8 @@
                                 </div>
                             </Tab>
                         </TabList>
-                        <TabPanels>
-                            <TabPanel value="0">
+                        <TabPanels class="!pt-3 !px-0">
+                            <TabPanel value="info">
                                 <div
                                     class="flex w-full flex-col gap-4 items-center justify-center"
                                 >
@@ -448,7 +446,7 @@
                                     </div>
                                 </div>
                             </TabPanel>
-                            <TabPanel value="1">
+                            <TabPanel value="scholarship">
                                 <p class="m-0">
                                     Sed ut perspiciatis unde omnis iste natus
                                     error sit voluptatem accusantium doloremque
@@ -463,21 +461,146 @@
                                     numquam eius modi.
                                 </p>
                             </TabPanel>
-                            <TabPanel value="2">
-                                <p class="m-0">
-                                    At vero eos et accusamus et iusto odio
-                                    dignissimos ducimus qui blanditiis
-                                    praesentium voluptatum deleniti atque
-                                    corrupti quos dolores et quas molestias
-                                    excepturi sint occaecati cupiditate non
-                                    provident, similique sunt in culpa qui
-                                    officia deserunt mollitia animi, id est
-                                    laborum et dolorum fuga. Et harum quidem
-                                    rerum facilis est et expedita distinctio.
-                                    Nam libero tempore, cum soluta nobis est
-                                    eligendi optio cumque nihil impedit quo
-                                    minus.
-                                </p>
+                            <TabPanel value="academic">
+                                <div
+                                    class="w-full"
+                                    v-for="(item, index) in page.props
+                                        ?.academic"
+                                    :key="index"
+                                >
+                                    <panel
+                                        :pt="{
+                                            root: {
+                                                class: '!rounded-2xl',
+                                            },
+                                            header: {
+                                                class: '!p-3  !border-b',
+                                            },
+                                            content: {
+                                                class: '!p-3',
+                                            },
+                                        }"
+                                    >
+                                        <template #header>
+                                            <div
+                                                class="w-full flex items-center justify-between"
+                                            >
+                                                <div
+                                                    class="flex items-center gap-2"
+                                                >
+                                                    <div
+                                                        class="bg-blue-50 text-blue-500 border p-2 rounded-xl"
+                                                    >
+                                                        <IconBuilding />
+                                                    </div>
+                                                    <div
+                                                        class="flex-1 flex flex-col"
+                                                    >
+                                                        <div class="leading-5">
+                                                            {{ item.name }}
+                                                        </div>
+                                                        <div
+                                                            class="text-xs text-slate-500 font-light leading-3"
+                                                        >
+                                                            {{ item.course }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="flex gap-3">
+                                                    <div
+                                                        class="bg-slate-50 px-3 text-slate-500 rounded-lg shadow"
+                                                    >
+                                                        {{ item.term.name }}
+                                                    </div>
+                                                    <div
+                                                        class="bg-slate-50 px-3 text-slate-500 rounded-lg shadow"
+                                                    >
+                                                        {{ item.sy }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template #default>
+                                            <div class="flex w-full gap-3">
+                                                <div class="flex-1/4">
+                                                    <Menu :model="item.records">
+                                                        <template
+                                                            #item="{
+                                                                item,
+                                                                props,
+                                                            }"
+                                                        >
+                                                            <a
+                                                                v-bind="
+                                                                    props.action
+                                                                "
+                                                                @click="
+                                                                    getGrades(
+                                                                        item,
+                                                                    )
+                                                                "
+                                                                >{{
+                                                                    item.label
+                                                                }}</a
+                                                            >
+                                                        </template>
+                                                    </Menu>
+                                                </div>
+                                                <div class="flex-3/4">
+                                                    <panel
+                                                        v-if="selectTerm"
+                                                        :pt="{
+                                                            header: {
+                                                                class:
+                                                                    randomColor(
+                                                                        selectTerm.index,
+                                                                    ) +
+                                                                    ' !p-3 !rounded-t-lg',
+                                                            },
+                                                            root: borderColor(
+                                                                selectTerm.index,
+                                                            ),
+                                                        }"
+                                                        class=""
+                                                    >
+                                                        <template #header>
+                                                            <div
+                                                                class="flex justify-between items-center"
+                                                            >
+                                                                <div
+                                                                    class="flex gap-2 items-center"
+                                                                >
+                                                                    <IconGridDots
+                                                                        size="20"
+                                                                    />
+                                                                    <div>
+                                                                        {{
+                                                                            selectTerm.label
+                                                                        }}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                        <template #default>
+                                                            {{ selectTerm }}
+                                                        </template>
+                                                    </panel>
+                                                    <div
+                                                        v-else
+                                                        class="flex items-center justify-center h-full"
+                                                    >
+                                                        <p
+                                                            class="text-gray-400 font-light text-sm"
+                                                        >
+                                                            Please select
+                                                            semester to view
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </panel>
+                                </div>
                             </TabPanel>
                         </TabPanels>
                     </Tabs>
@@ -495,7 +618,8 @@ import {
     IconId,
     IconBook2,
     IconMap2,
-    IconPennant,
+    IconGridDots,
+    IconBuilding,
     IconBuildingEstate,
     IconDeviceMobileMessage,
     IconSend,
@@ -512,9 +636,10 @@ import DatePickerInput from "../../Components/inputs/DatePickerInput.vue";
 import { router } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
 import { useForm, usePage } from "@inertiajs/vue3";
+
 const modelValue = defineModel("modelValue");
 const editBtn = ref(false);
-
+const selectTerm = ref(null);
 const loading = reactive({
     address: false,
 });
@@ -526,6 +651,35 @@ const props = defineProps({
         default: [],
     },
 });
+
+const randomColor = (index) => {
+    const colors = [
+        "!text-sky-600 !bg-sky-50 !border-sky-600",
+        "!text-indigo-600 !bg-indigo-50 ",
+        "!text-rose-600 !bg-rose-50",
+        "!text-yellow-600 !bg-yellow-50",
+        "!text-purple-600 !bg-purple-50",
+        "!text-pink-600 !bg-pink-50",
+        "!text-cyan-600 !bg-cyan-50",
+        "!text-teal-600 !bg-teal-50",
+    ];
+    return colors[index % colors.length];
+};
+
+const borderColor = (index) => {
+    const borderColors = [
+        "!border-sky-600",
+        "!border-indigo-600",
+        "!border-rose-600",
+        "!border-yellow-600",
+        "!border-purple-600",
+        "!border-pink-600",
+        "!border-cyan-600",
+        "!border-teal-600",
+    ];
+    return borderColors[index % borderColors.length];
+};
+
 const personalInfo = useForm({
     spas_no: "",
     last_name: "",
@@ -558,8 +712,21 @@ const autoSearch = (event) => {
     );
 };
 
+const tabChangeGet = (el) => {
+    router.reload({
+        data: {
+            tab: el,
+        },
+        only: ["academic"],
+    });
+};
+
+const getGrades = (e) => {
+    selectTerm.value = e;
+};
+
 watch(
-    () => usePage().props?.scholarDetails,
+    () => page.props?.scholarDetails,
     (newVal) => {
         console.log(newVal);
         personalInfo.spas_no = newVal?.spas_no ?? null;

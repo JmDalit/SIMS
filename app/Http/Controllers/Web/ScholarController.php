@@ -7,6 +7,8 @@ use App\Http\Requests\Web\ScholarRequest;
 use App\Imports\CheckScholarImport;
 use App\Imports\ScholarImport;
 use App\Models\Scholars;
+use App\Models\ScholarSchoolInfos;
+use App\Models\ScholarTerm;
 use App\Models\ScholarUploadedFiles;
 use App\Models\User;
 use App\Notifications\ScholarUploadedNotification;
@@ -30,7 +32,6 @@ class ScholarController extends Controller
 {
     public function index(LocationClass $location)
     {
-
 
         $scholars = Scholars::select('id', 'spas_no', 'status_id', 'program_id', 'type_id', 'award_year', 'verified_by', 'verified_at', 'validate_status');
 
@@ -58,6 +59,7 @@ class ScholarController extends Controller
             ])
             ->where('id', Hashids::decode(request('id'))[0] ?? 0)
             ->first() : null;
+
 
         return Inertia::render('Web/scholarPage', [
             'scholar' => $scholars
@@ -134,6 +136,60 @@ class ScholarController extends Controller
                 'religion' => $scholarDetails?->profile?->religion,
                 'civil_status' => $scholarDetails?->profile?->civil_status,
             ],
+            'academic' => request('id') ?
+                ScholarSchoolInfos::select(
+                    'id',
+                    'campus_id',
+                    'curriculum_id',
+                    'campus_course_id',
+                    'school_year'
+                )
+                ->with([
+                    'campus' => fn($q) =>
+                    $q->select('id', 'generated_name', 'term_id')
+                        ->with(['term:id,name']),
+
+                    'course' => fn($q) =>
+                    $q->select('id', 'course_id'),
+
+                    'termRecords' => fn($q) =>
+                    $q->select('id', 'scholar_school_id', 'term_id', 'level_id')
+                        ->with([
+                            'term:id,name',
+                            'level:id,name',
+                            'subjects'
+                        ])
+                ])
+                ->where('scholar_id', Hashids::decode(request('id'))[0] ?? 0)
+                ->get()
+                ->map(function ($q) {
+
+                    $records = $q->termRecords
+                        ->groupBy(fn($r) => $r->level->name)
+                        ->map(function ($terms, $levelName) {
+
+                            return [
+                                'label' => $levelName . ' Year',
+                                'items' => $terms->map(function ($term, $termIndex) {
+                                    return [
+                                        'term_id' => Hashids::encode($term->id),
+                                        'index' => $termIndex,
+                                        'label' => $term->term->name,
+                                        'grades' => $term->subjects
+                                    ];
+                                })->values()
+                            ];
+                        })->values();
+
+                    return [
+                        'name' => $q->campus->generated_name,
+                        'course' => $q->course?->course?->name,
+                        'sy' => $q->school_year,
+                        'term' => $q->campus?->term_array,
+                        'records' => $records
+                    ];
+                })
+                : null,
             'files' => request('OpenFiles')
                 ? ScholarUploadedFiles::when(
                     Auth::check() && Auth::user()->role_array['name'] == 'regional staff',

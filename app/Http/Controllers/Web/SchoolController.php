@@ -27,6 +27,7 @@ class SchoolController extends Controller
         if ($id = request('id')) {
             $school = SchoolCampuses::with([
                 'courses.subjects' => fn($q) => $q->where('is_delete', false),
+                'courses' => fn($q) => $q->where('is_delete', false),
                 'grades' => fn($q) => $q->where('is_delete', false)->orderBy('grade', 'asc'),
                 'info' => fn($q) => $q->select(['id', 'campus_id', 'dean', 'registrar', 'contact', 'email'])->where('is_delete', false),
                 'semesters' => fn($q) => $q->where('is_delete', false),
