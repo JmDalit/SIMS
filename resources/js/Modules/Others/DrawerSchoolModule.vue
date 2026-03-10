@@ -51,7 +51,7 @@
             </div>
         </template>
         <template #body>
-            <div class="flex flex-col h-full !overflow-hidden">
+            <div class="flex flex-col h-full">
                 <div class="flex items-center justify-between px-5 py-1">
                     <div>
                         <DefaultMessages
@@ -225,7 +225,7 @@
                         >Curriculum Management</span
                     >
                 </Divider>
-                <div class="px-5 py-2 gap-5 flex flex-col">
+                <div class="px-5 py-2 gap-2 flex flex-col">
                     <ToolbarModule
                         v-model="searchInput"
                         @deleteSearch="clearSearch"
