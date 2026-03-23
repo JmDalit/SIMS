@@ -506,18 +506,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="flex gap-3">
-                                                    <div
-                                                        class="bg-slate-50 px-3 text-slate-500 rounded-lg shadow"
-                                                    >
-                                                        {{ item.term.name }}
-                                                    </div>
-                                                    <div
-                                                        class="bg-slate-50 px-3 text-slate-500 rounded-lg shadow"
-                                                    >
-                                                        {{ item.sy }}
-                                                    </div>
-                                                </div>
+                                                <div class="flex gap-3"></div>
                                             </div>
                                         </template>
                                         <template #default>

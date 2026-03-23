@@ -1,7 +1,7 @@
 <template>
     <div class="flex h-full w-full items-center justify-center">
         <div
-            class="grid h-min-screen w-full gap-3 p-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:grid-rows-5"
+            class="grid h-min-screen w-full gap-3 p-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:grid-rows-1"
         >
             <div
                 class="bg-slate-50 rounded-2xl shadow-sm flex flex-col lg:col-span-1 lg:row-span-1 p-3"

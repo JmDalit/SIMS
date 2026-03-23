@@ -66,6 +66,7 @@ class ScholarImport implements OnEachRow, WithHeadingRow, WithStartRow, SkipsEmp
                 'category_id' =>  ListReferences::where('name', trim($data['scholarship_program']))->value('id'),
                 'status_id'   => ListStatuses::where('name', trim($data['status']))->value('id'),
                 'created_by'  => Auth::user()->profile->fullname,
+                'award_year' => $data['year_award']
             ]);
 
             $scholars->profile()->create([
@@ -79,7 +80,8 @@ class ScholarImport implements OnEachRow, WithHeadingRow, WithStartRow, SkipsEmp
                 'email' => $data['email'],
                 'sex' => $data['sex'],
                 'religion' => $data['religion'],
-                'civil_status' => $data['civil_status']
+                'civil_status' => $data['civil_status'],
+
             ]);
 
             $scholars->parent()->create([
@@ -106,7 +108,7 @@ class ScholarImport implements OnEachRow, WithHeadingRow, WithStartRow, SkipsEmp
                 'campus_course_id' => SchoolCampusCourses::whereHas('course', function ($q) use ($data) {
                     $q->where('name', $data['course']);
                 })->value('id'),
-                'award_year' => $data['year_award']
+
             ]);
 
 

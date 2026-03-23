@@ -111,11 +111,11 @@ class ScholarController extends Controller
                         'tcolor' => $q->status?->color?->text_color,
                         'icon' => $q->status?->icon
                     ],
-                    'course' => $q->schoolInfo[0]?->course?->course?->name,
-                    'school' => $q->schoolInfo[0]?->campus?->generated_name,
+                    'course' => $q->schoolInfo->first()?->course?->course?->name,
+                    'school' => $q->schoolInfo->first()?->campus?->generated_name,
                     'awardyear' => $q->award_year,
-                    'agency' => $q->schoolInfo[0]?->campus->agency?->slug,
-                    'region' => $q->schoolInfo[0]?->campus->address?->region_array,
+                    'agency' => $q->schoolInfo->first()?->campus->agency?->slug,
+                    'region' => $q->schoolInfo->first()?->campus->address?->region_array,
                     'verified_by' => $q->verified_by,
                     'verified_at' => $q->verified_at,
                     'validate_status' => $q->validate_status,
@@ -285,9 +285,11 @@ class ScholarController extends Controller
 
     public function insert(Request $request, $id)
     {
+
         DB::beginTransaction();
         try {
             $file = ScholarUploadedFiles::where('id', Hashids::decode($id))->first();
+
             $file->update([
                 'validated_by' => Auth::user()->profile->fullname,
                 'validated_at' => now(),
@@ -310,14 +312,14 @@ class ScholarController extends Controller
                     )
                 );
             }
+
+            Excel::import(new ScholarImport, storage_path('app/public/' . $file->filepath));
+            DB::commit();
             return redirect()->back()->with('flash', [
                 'status'  => 'success',
                 'title'   => 'Scholar Information Saved!',
                 'message' => 'The scholar data has been successfully saved.',
             ]);
-
-            Excel::import(new ScholarImport, storage_path('app/public/' . $file->filepath));
-            DB::commit();
         } catch (Exception $e) {
             DB::rollBack();
 

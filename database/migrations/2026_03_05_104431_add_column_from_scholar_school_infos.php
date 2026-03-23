@@ -19,9 +19,9 @@ return new class extends Migration
                 ->after('campus_course_id');
             $table->dropColumn('graduated_year');
         });
-        Schema::table('scholars', function (Blueprint $table) {
-            $table->string('graduated_year')->nullable()->after('award_year');
-        });
+        // Schema::table('scholars', function (Blueprint $table) {
+        //     $table->string('graduated_year')->nullable()->after('award_year');
+        // });
     }
 
     /**

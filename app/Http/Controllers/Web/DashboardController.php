@@ -18,16 +18,15 @@ class DashboardController extends Controller
         $regionCode = Auth::user()->profile->agency->region_code;
         $currentYear = Carbon::now()->year;
 
+
+
         $scholars = Scholars::with([
             'program:id,name',
-            'profile:sex,scholar_id'
+            'profile:sex,scholar_id',
         ])
             ->whereHas(
-                'address',
-                fn($q) => $q->where(
-                    'region_code',
-                    $regionCode
-                )
+                'schoolInfo.campus.address',
+                fn($q) => $q->where('region_code', $regionCode)
             )
             ->get();
 
@@ -153,11 +152,11 @@ class DashboardController extends Controller
             ],
             'gender' =>  [
                 'series' => $scholars
-                    ->groupBy(fn($s) => $s->profile->sex)
+                    ->groupBy(fn($s) => $s->profile?->sex)
                     ->map(fn($rows) => $rows->count())
                     ->values()
                     ->toArray(),
-                'result' => $scholars->groupBy(fn($s) => $s->profile->sex)->map(function ($rows, $gender) {
+                'result' => $scholars->groupBy(fn($s) => $s->profile?->sex)->map(function ($rows, $gender) {
                     return  ['sex' => $gender, 'total' => $rows->count()];
                 })->values()->toArray()
             ]

@@ -11,7 +11,7 @@
             </p>
         </div>
         <div
-            class="mx-auto flex flex-col h-full w-full"
+            class="mx-auto flex flex-col"
             v-else-if="page.props.user?.role_array.name == 'regional staff'"
         >
             <div class="w-full flex items-center justify-between">
