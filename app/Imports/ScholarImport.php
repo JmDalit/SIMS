@@ -12,6 +12,7 @@ use App\Models\LocationProvinces;
 use App\Models\LocationRegions;
 use App\Models\ScholarProfiles;
 use App\Models\Scholars;
+use App\Models\ScholarSchoolGrades;
 use App\Models\SchoolCampusCourses;
 use App\Models\SchoolCampuses;
 use Illuminate\Support\Facades\Auth;
@@ -102,14 +103,50 @@ class ScholarImport implements OnEachRow, WithHeadingRow, WithStartRow, SkipsEmp
                 'region_code'     => LocationRegions::where('name', trim($data['region']))->value('code'),
             ]);
 
+            $campus = SchoolCampuses::with('term:id,name')
+                ->select('id', 'term_id')
+                ->where('generated_name', $data['school'])
+                ->where('is_delete', false)
+                ->first();
 
-            $scholars->schoolInfo()->create([
-                'campus_id' => SchoolCampuses::where('generated_name', $data['school'])->value('id'),
+            $schoolInfo = $scholars->schoolInfo()->create([
+                'campus_id' => $campus->id,
                 'campus_course_id' => SchoolCampusCourses::whereHas('course', function ($q) use ($data) {
-                    $q->where('name', $data['course']);
+                    $q->where('name', $data['course'])->where('is_delete', false);
                 })->value('id'),
-
             ]);
+
+            $yearLevel = SchoolCampusCourses::select('years')
+                ->whereHas('course', function ($q) use ($data) {
+                    $q->where('name', $data['course']);
+                })
+                ->first();
+
+
+
+            $academic_term = ListReferences::select('id', 'name')
+                ->where('classification', $campus->term?->name)
+                ->where('type', 'Term')
+                ->get();
+
+
+
+            $levels = ListReferences::whereIn('others', range(1, $yearLevel->years))
+                ->pluck('id', 'others');
+
+
+            for ($i = 1; $i <= (int) $yearLevel->years; $i++) {
+                foreach ($academic_term as $value) {
+                    $termRecords = $scholars->termRecords()->create([
+                        'scholar_school_id' => $schoolInfo->id,
+                        'term_id'           => $campus->term_id,
+                        'level_id'          => $levels[(string) $i] ?? null,
+                        'term_type_id'      => $value->id
+                    ]);
+                }
+            }
+
+
 
 
 

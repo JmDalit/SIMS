@@ -140,7 +140,6 @@ class ScholarController extends Controller
                 ScholarSchoolInfos::select(
                     'id',
                     'campus_id',
-                    'curriculum_id',
                     'campus_course_id',
                     'school_year'
                 )
@@ -149,16 +148,26 @@ class ScholarController extends Controller
                     $q->select('id', 'generated_name', 'term_id')
                         ->with(['term:id,name']),
 
-                    'course' => fn($q) =>
-                    $q->select('id', 'course_id'),
+                    'course' => fn($q) => $q
+                        ->select('id', 'course_id')
+                        ->with([
+                            'curriculum' => fn($q) => $q
+                                ->with([
+                                    'subjects:id,curriculum_id,name,year,subject_code,unit,subject_class,semester_id'
+                                ])
+                                ->where('is_delete', false)
+                                ->orderBy('id', 'desc')
+                        ]),
 
                     'termRecords' => fn($q) =>
-                    $q->select('id', 'scholar_school_id', 'term_id', 'level_id')
+                    $q->select('id', 'scholar_school_id', 'term_id', 'level_id', 'term_type_id')
                         ->with([
                             'term:id,name',
-                            'level:id,name',
-                            'subjects'
-                        ])
+                            'level:id,name,others',
+                            'subjects',
+                            'termType:id,name'
+                        ]),
+
                 ])
                 ->where('scholar_id', Hashids::decode(request('id'))[0] ?? 0)
                 ->get()
@@ -166,16 +175,18 @@ class ScholarController extends Controller
 
                     $records = $q->termRecords
                         ->groupBy(fn($r) => $r->level->name)
-                        ->map(function ($terms, $levelName) {
+                        ->map(function ($terms, $levelName) use ($q) {
 
                             return [
-                                'label' => $levelName . ' Year',
-                                'items' => $terms->map(function ($term, $termIndex) {
+                                'label' => $levelName,
+                                'items' => $terms->map(function ($term, $termIndex) use ($q) {
                                     return [
                                         'term_id' => Hashids::encode($term->id),
                                         'index' => $termIndex,
-                                        'label' => $term->term->name,
-                                        'grades' => $term->subjects
+                                        'label' => $term->termType->name,
+                                        'grades' => optional($term->subjects)->isNotEmpty()
+                                            ? $term->subjects
+                                            : $q->course?->curriculum?->first()?->subjects->where('semester_id', $term->term_type_id)->where('year', $term->level?->others)
                                     ];
                                 })->values()
                             ];
@@ -186,7 +197,10 @@ class ScholarController extends Controller
                         'course' => $q->course?->course?->name,
                         'sy' => $q->school_year,
                         'term' => $q->campus?->term_array,
-                        'records' => $records
+                        'records' => $records,
+                        'optionSubject' =>
+                        $q->course?->curriculum?->first()?->subjects
+
                     ];
                 })
                 : null,

@@ -13,7 +13,8 @@ class ScholarTerm extends Model
         'scholar_id',
         'level_id',
         'academic_year',
-        'scholar_school_id'
+        'scholar_school_id',
+        'term_type_id'
     ];
 
     public function term()

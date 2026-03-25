@@ -16,7 +16,7 @@
         </template>
         <template #default>
             <div class="w-full h-full pt-5 gap-5 flex flex-col lg:flex-row">
-                <div class="lg:w-5/12 flex flex-col gap-5">
+                <div class="lg:w-4/12 flex flex-col gap-5">
                     <div
                         class="border border-slate-300 rounded-2xl p-2 flex flex-col lg:flex-row gap-2"
                     >
@@ -131,7 +131,8 @@
                                     class="col-span-1 row-span-1 flex items-start gap-1 text-gray-500 text-sm"
                                 >
                                     <IconBuildingEstate :size="20" />
-                                    <div>Agency</div>
+
+                                    <div>Office</div>
                                 </div>
 
                                 <div
@@ -163,7 +164,7 @@
                                             class="text-blue-500"
                                             :stroke-width="2"
                                         />
-                                        <div>Award Year</div>
+                                        <div>Category</div>
                                     </div>
                                     <div class="text-center text-lg">
                                         {{ details.type }}
@@ -322,8 +323,9 @@
                                             :icon="TablerIcons.IconUserEdit"
                                             label="Edit Details"
                                             size="small"
-                                            v-if="!editBtn"
-                                            @click="editBtn = true"
+                                            v-if="!editBtn.info"
+                                            @click="editBtn.info = true"
+                                            raised
                                             class-name="!rounded-xl !px-5"
                                         />
                                         <div
@@ -331,17 +333,23 @@
                                             v-else
                                         >
                                             <DefaultButton
-                                                :icon="TablerIcons.IconUserEdit"
+                                                :icon="
+                                                    TablerIcons.IconUserCancel
+                                                "
                                                 label="Cancel Edit"
                                                 size="small"
                                                 severity="danger"
-                                                @click="editBtn = false"
+                                                @click="editBtn.info = false"
                                                 outlined
                                                 class-name="!rounded-xl !px-5"
                                             />
                                             <DefaultButton
-                                                :icon="TablerIcons.IconUserEdit"
-                                                label="Update Details"
+                                                :icon="
+                                                    TablerIcons.IconUserCheck
+                                                "
+                                                severity="secondary"
+                                                raised
+                                                label="Save this details"
                                                 size="small"
                                                 class-name="!rounded-xl !px-5"
                                             />
@@ -354,7 +362,7 @@
                                             v-model="personalInfo.spas_no"
                                             label="SPAS ID"
                                             capitalize
-                                            :disabled="!editBtn"
+                                            :disabled="!editBtn.info"
                                         ></TextInput>
                                         <div class="flex items-center gap-2">
                                             <TextInput
@@ -362,7 +370,7 @@
                                                     personalInfo.first_name
                                                 "
                                                 label="First Name"
-                                                :disabled="!editBtn"
+                                                :disabled="!editBtn.info"
                                             ></TextInput>
 
                                             <TextInput
@@ -370,30 +378,30 @@
                                                     personalInfo.middle_name
                                                 "
                                                 label="Middle Name"
-                                                :disabled="!editBtn"
+                                                :disabled="!editBtn.info"
                                             ></TextInput>
                                         </div>
                                         <div class="flex items-center gap-2">
                                             <TextInput
                                                 v-model="personalInfo.last_name"
                                                 label="Last Name"
-                                                :disabled="!editBtn"
+                                                :disabled="!editBtn.info"
                                             ></TextInput>
                                             <TextInput
                                                 v-model="personalInfo.suffix"
                                                 label="Suffix"
-                                                :disabled="!editBtn"
+                                                :disabled="!editBtn.info"
                                             ></TextInput>
                                         </div>
                                         <TextInput
                                             v-model="personalInfo.email"
                                             label="Email"
-                                            :disabled="!editBtn"
+                                            :disabled="!editBtn.info"
                                         ></TextInput>
                                         <TextInput
                                             v-model="personalInfo.contact_no"
                                             label="Contact No"
-                                            :disabled="!editBtn"
+                                            :disabled="!editBtn.info"
                                         ></TextInput>
                                         <Divider />
                                         <div class="flex items-center gap-2">
@@ -402,14 +410,14 @@
                                                     personalInfo.birth_date
                                                 "
                                                 label="Birth Date"
-                                                :disabled="!editBtn"
+                                                :disabled="!editBtn.info"
                                             ></DatePickerInput>
                                             <TextInput
                                                 v-model="
                                                     personalInfo.birth_place
                                                 "
                                                 label="Birth Place"
-                                                :disabled="!editBtn"
+                                                :disabled="!editBtn.info"
                                             ></TextInput>
                                         </div>
                                         <div class="flex items-center gap-2">
@@ -417,7 +425,7 @@
                                                 v-model="personalInfo.religion"
                                                 label="Religion"
                                                 capitalize
-                                                :disabled="!editBtn"
+                                                :disabled="!editBtn.info"
                                             ></TextInput>
                                             <TextInput
                                                 v-model="
@@ -425,19 +433,19 @@
                                                 "
                                                 capitalize
                                                 label="Civil Status"
-                                                :disabled="!editBtn"
+                                                :disabled="!editBtn.info"
                                             ></TextInput>
                                         </div>
                                         <TextInput
                                             v-model="personalInfo.address"
                                             label="Address"
-                                            :disabled="!editBtn"
+                                            :disabled="!editBtn.info"
                                             placeholder="Street, Subdivision, etc."
                                         ></TextInput>
                                         <AutoCompleteInput
                                             v-model="personalInfo.fulladdress"
                                             :options="page.props.georesult"
-                                            :disabled="!editBtn"
+                                            :disabled="!editBtn.info"
                                             :loading="loading.address"
                                             placeholder="Find by Barangay, Municipality, Province, or Region"
                                             @complete="autoSearch"
@@ -506,7 +514,48 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="flex gap-3"></div>
+                                                <div class="flex gap-3">
+                                                    <DefaultButton
+                                                        :icon="
+                                                            TablerIcons.IconScript
+                                                        "
+                                                        label="Edit Grades"
+                                                        size="small"
+                                                        raised
+                                                        v-if="!editBtn.grades"
+                                                        @click="
+                                                            editGrades(item)
+                                                        "
+                                                        class-name="!rounded-xl !px-5"
+                                                    />
+                                                    <div
+                                                        class="flex items-center gap-2"
+                                                        v-else
+                                                    >
+                                                        <DefaultButton
+                                                            :icon="
+                                                                TablerIcons.IconScriptX
+                                                            "
+                                                            label="Cancel Edit"
+                                                            size="small"
+                                                            severity="danger"
+                                                            @click="
+                                                                editBtn.grades = false
+                                                            "
+                                                            outlined
+                                                            class-name="!rounded-xl !px-5"
+                                                        />
+                                                        <DefaultButton
+                                                            :icon="
+                                                                TablerIcons.IconScriptPlus
+                                                            "
+                                                            label="Update Details"
+                                                            raised
+                                                            size="small"
+                                                            class-name="!rounded-xl !px-5"
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
                                         </template>
                                         <template #default>
@@ -571,7 +620,91 @@
                                                             </div>
                                                         </template>
                                                         <template #default>
-                                                            {{ selectTerm }}
+                                                            <div
+                                                                class="pt-2 w-full flex flex-col gap-3"
+                                                            >
+                                                                <table
+                                                                    class="min-w-full !border-none text-sm"
+                                                                >
+                                                                    <thead>
+                                                                        <tr
+                                                                            class="bg-gray-100"
+                                                                        >
+                                                                            <th
+                                                                                class="px-3 py-2 text-left"
+                                                                            >
+                                                                                Subject
+                                                                                Name
+                                                                            </th>
+                                                                            <th
+                                                                                class="px-3 py-2 text-left"
+                                                                            >
+                                                                                Subject
+                                                                                Code
+                                                                            </th>
+                                                                            <th
+                                                                                class="px-3 py-2 text-right"
+                                                                            >
+                                                                                Unit
+                                                                            </th>
+                                                                            <th
+                                                                                class="px-3 py-2 text-right"
+                                                                            >
+                                                                                Grades
+                                                                            </th>
+                                                                            <th
+                                                                                class="px-3 py-2 text-right"
+                                                                            >
+                                                                                Remarks
+                                                                            </th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr
+                                                                            v-for="(
+                                                                                item,
+                                                                                index
+                                                                            ) in selectTerm.grades"
+                                                                            :key="
+                                                                                index
+                                                                            "
+                                                                            class="hover:bg-gray-50"
+                                                                        >
+                                                                            <td
+                                                                                class="px-3 py-2 uppercase"
+                                                                            >
+                                                                                {{
+                                                                                    item.name
+                                                                                }}
+                                                                            </td>
+                                                                            <td
+                                                                                class="px-3 py-2"
+                                                                            >
+                                                                                {{
+                                                                                    item.subject_code
+                                                                                }}
+                                                                            </td>
+                                                                            <td
+                                                                                class="px-3 py-2 text-right"
+                                                                            >
+                                                                                {{
+                                                                                    item.unit
+                                                                                }}
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+
+                                                                <DefaultButton
+                                                                    :icon="
+                                                                        TablerIcons.IconScriptPlus
+                                                                    "
+                                                                    label="Add Grades"
+                                                                    severity="secondary"
+                                                                    size="small"
+                                                                    class-name="!rounded-xl w-full !px-5"
+                                                                />
+                                                            </div>
                                                         </template>
                                                     </panel>
                                                     <div
@@ -625,9 +758,13 @@ import DatePickerInput from "../../Components/inputs/DatePickerInput.vue";
 import { router } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
 import { useForm, usePage } from "@inertiajs/vue3";
+import SelectInput from "../../Components/inputs/SelectInput.vue";
 
 const modelValue = defineModel("modelValue");
-const editBtn = ref(false);
+const editBtn = reactive({
+    info: false,
+    grades: false,
+});
 const selectTerm = ref(null);
 const loading = reactive({
     address: false,
@@ -699,6 +836,10 @@ const autoSearch = (event) => {
             },
         },
     );
+};
+
+const editGrades = (el) => {
+    editBtn.grades = true;
 };
 
 const tabChangeGet = (el) => {

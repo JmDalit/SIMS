@@ -35,6 +35,12 @@ class SchoolCampusCourses extends Model
         return $this->hasMany(SchoolCampusCourseSubjects::class, 'course_id', 'id');
     }
 
+    public function curriculum()
+    {
+        return $this->hasMany(SchoolCampusCourseCurriculums::class, 'campus_course_id');
+    }
+
+
 
     public function getCourseArrayAttribute()
     {
