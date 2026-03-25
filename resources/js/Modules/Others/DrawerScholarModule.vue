@@ -561,7 +561,10 @@
                                         <template #default>
                                             <div class="flex w-full gap-3">
                                                 <div class="flex-1/4">
-                                                    <Menu :model="item.records">
+                                                    <Menu
+                                                        :model="item.records"
+                                                        class="text-sm"
+                                                    >
                                                         <template
                                                             #item="{
                                                                 item,
@@ -613,6 +616,10 @@
                                                                     />
                                                                     <div>
                                                                         {{
+                                                                            selectTerm.year_level
+                                                                        }}
+                                                                        /
+                                                                        {{
                                                                             selectTerm.label
                                                                         }}
                                                                     </div>
@@ -650,7 +657,7 @@
                                                                             <th
                                                                                 class="px-3 py-2 text-right"
                                                                             >
-                                                                                Gradesm
+                                                                                Grades
                                                                             </th>
                                                                             <th
                                                                                 class="px-3 py-2 text-right"

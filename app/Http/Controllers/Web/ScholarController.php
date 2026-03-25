@@ -183,6 +183,7 @@ class ScholarController extends Controller
                                     return [
                                         'term_id' => Hashids::encode($term->id),
                                         'index' => $termIndex,
+                                        'year_level' => $term->level->name,
                                         'label' => $term->termType->name,
                                         'grades' => optional($term->subjects)->isNotEmpty()
                                             ? $term->subjects
