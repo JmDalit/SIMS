@@ -514,48 +514,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="flex gap-3">
-                                                    <DefaultButton
-                                                        :icon="
-                                                            TablerIcons.IconScript
-                                                        "
-                                                        label="Edit Grades"
-                                                        size="small"
-                                                        raised
-                                                        v-if="!editBtn.grades"
-                                                        @click="
-                                                            editGrades(item)
-                                                        "
-                                                        class-name="!rounded-xl !px-5"
-                                                    />
-                                                    <div
-                                                        class="flex items-center gap-2"
-                                                        v-else
-                                                    >
-                                                        <DefaultButton
-                                                            :icon="
-                                                                TablerIcons.IconScriptX
-                                                            "
-                                                            label="Cancel Edit"
-                                                            size="small"
-                                                            severity="danger"
-                                                            @click="
-                                                                editBtn.grades = false
-                                                            "
-                                                            outlined
-                                                            class-name="!rounded-xl !px-5"
-                                                        />
-                                                        <DefaultButton
-                                                            :icon="
-                                                                TablerIcons.IconScriptPlus
-                                                            "
-                                                            label="Update Details"
-                                                            raised
-                                                            size="small"
-                                                            class-name="!rounded-xl !px-5"
-                                                        />
-                                                    </div>
-                                                </div>
+                                                <div class="flex gap-3"></div>
                                             </div>
                                         </template>
                                         <template #default>
@@ -569,6 +528,7 @@
                                                             #item="{
                                                                 item,
                                                                 props,
+                                                                key,
                                                             }"
                                                         >
                                                             <a
@@ -578,12 +538,13 @@
                                                                 @click="
                                                                     getGrades(
                                                                         item,
+                                                                        key,
                                                                     )
                                                                 "
-                                                                >{{
+                                                                ><span>{{
                                                                     item.label
-                                                                }}</a
-                                                            >
+                                                                }}</span>
+                                                            </a>
                                                         </template>
                                                     </Menu>
                                                 </div>
@@ -606,7 +567,7 @@
                                                     >
                                                         <template #header>
                                                             <div
-                                                                class="flex justify-between items-center"
+                                                                class="flex justify-between w-full items-center"
                                                             >
                                                                 <div
                                                                     class="flex gap-2 items-center"
@@ -624,6 +585,62 @@
                                                                         }}
                                                                     </div>
                                                                 </div>
+                                                                <div
+                                                                    class="flex gap-2"
+                                                                >
+                                                                    <DefaultButton
+                                                                        :icon="
+                                                                            TablerIcons.IconScript
+                                                                        "
+                                                                        label="Edit Grades"
+                                                                        size="small"
+                                                                        raised
+                                                                        v-if="
+                                                                            !editBtn.grades
+                                                                        "
+                                                                        @click="
+                                                                            editGrades(
+                                                                                item,
+                                                                            )
+                                                                        "
+                                                                        class-name="!rounded-xl !px-5"
+                                                                    />
+                                                                    <div
+                                                                        class="flex items-center gap-2"
+                                                                        v-else
+                                                                    >
+                                                                        <DefaultButton
+                                                                            :icon="
+                                                                                TablerIcons.IconScriptX
+                                                                            "
+                                                                            label="Cancel Edit"
+                                                                            size="small"
+                                                                            severity="danger"
+                                                                            @click="
+                                                                                editBtn.grades = false
+                                                                            "
+                                                                            class-name="!rounded-xl !px-5"
+                                                                        />
+                                                                        <DefaultButton
+                                                                            :icon="
+                                                                                TablerIcons.IconScriptPlus
+                                                                            "
+                                                                            label="Update Details"
+                                                                            raised
+                                                                            :loading="
+                                                                                gradesForm.processing
+                                                                            "
+                                                                            :disabled="
+                                                                                gradesForm.processing
+                                                                            "
+                                                                            @click="
+                                                                                updateGrades
+                                                                            "
+                                                                            size="small"
+                                                                            class-name="!rounded-xl !px-5"
+                                                                        />
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </template>
                                                         <template #default>
@@ -632,6 +649,9 @@
                                                             >
                                                                 <table
                                                                     class="min-w-full !border-none text-sm"
+                                                                    v-if="
+                                                                        !editBtn.grades
+                                                                    "
                                                                 >
                                                                     <thead>
                                                                         <tr
@@ -681,6 +701,9 @@
                                                                                 class="px-3 py-2 uppercase"
                                                                             >
                                                                                 {{
+                                                                                    item
+                                                                                        .subject
+                                                                                        ?.name ??
                                                                                     item.name
                                                                                 }}
                                                                             </td>
@@ -688,6 +711,9 @@
                                                                                 class="px-3 py-2"
                                                                             >
                                                                                 {{
+                                                                                    item
+                                                                                        .subject
+                                                                                        ?.subject_code ??
                                                                                     item.subject_code
                                                                                 }}
                                                                             </td>
@@ -695,18 +721,162 @@
                                                                                 class="px-3 py-2 text-right"
                                                                             >
                                                                                 {{
+                                                                                    item
+                                                                                        .subject
+                                                                                        ?.unit ??
                                                                                     item.unit
                                                                                 }}
+                                                                            </td>
+                                                                            <td
+                                                                                class="px-3 py-2 text-right"
+                                                                            >
+                                                                                {{
+                                                                                    item
+                                                                                        .grade
+                                                                                        ?.name
+                                                                                }}
+                                                                            </td>
+                                                                            <td
+                                                                                class="px-3 py-2 text-right"
+                                                                            >
+                                                                                <div
+                                                                                    v-if="
+                                                                                        item
+                                                                                            .grade
+                                                                                            ?.is_drop
+                                                                                    "
+                                                                                    class="text-red-600"
+                                                                                >
+                                                                                    Dropped
+                                                                                </div>
+                                                                                <div
+                                                                                    v-else-if="
+                                                                                        item
+                                                                                            .grade
+                                                                                            ?.is_failed
+                                                                                    "
+                                                                                    class="text-rose-600"
+                                                                                >
+                                                                                    Failed
+                                                                                </div>
+                                                                                <div
+                                                                                    v-else-if="
+                                                                                        item
+                                                                                            .grade
+                                                                                            ?.is_incomplete
+                                                                                    "
+                                                                                    class="text-amber-600"
+                                                                                >
+                                                                                    Incompleted
+                                                                                </div>
+                                                                                <div
+                                                                                    v-else-if="
+                                                                                        item
+                                                                                            .grade
+                                                                                            ?.is_active
+                                                                                    "
+                                                                                    class="text-green-600"
+                                                                                >
+                                                                                    Passed
+                                                                                </div>
                                                                             </td>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
+                                                                <div
+                                                                    v-else
+                                                                    class="flex flex-col gap-3"
+                                                                >
+                                                                    <div
+                                                                        v-for="(
+                                                                            item,
+                                                                            index
+                                                                        ) in gradesForm.subjects"
+                                                                        class="flex w-full items-end gap-3"
+                                                                        :key="
+                                                                            index
+                                                                        "
+                                                                    >
+                                                                        <div
+                                                                            class="lg:w-[60%]"
+                                                                        >
+                                                                            <SelectInput
+                                                                                label="Subject"
+                                                                                v-model="
+                                                                                    gradesForm
+                                                                                        .subjects[
+                                                                                        index
+                                                                                    ]
+                                                                                        .subject
+                                                                                "
+                                                                                :error-mark="
+                                                                                    gradesForm
+                                                                                        .errors?.[
+                                                                                        `subjects.${index}.subject`
+                                                                                    ]
+                                                                                "
+                                                                                :options="
+                                                                                    options.subjects
+                                                                                "
+                                                                                filter
+                                                                            ></SelectInput>
+                                                                        </div>
+                                                                        <div
+                                                                            class="lg:w-[30%]"
+                                                                        >
+                                                                            <SelectInput
+                                                                                label="Grade"
+                                                                                v-model="
+                                                                                    gradesForm
+                                                                                        .subjects[
+                                                                                        index
+                                                                                    ]
+                                                                                        .grade
+                                                                                "
+                                                                                :error-mark="
+                                                                                    gradesForm
+                                                                                        .errors?.[
+                                                                                        `subjects.${index}.grade`
+                                                                                    ]
+                                                                                "
+                                                                                :options="
+                                                                                    options.grades
+                                                                                "
+                                                                            ></SelectInput>
+                                                                        </div>
+                                                                        <div
+                                                                            class="flex flex-col items-"
+                                                                        >
+                                                                            <DefaultButton
+                                                                                :icon="
+                                                                                    TablerIcons.IconTrash
+                                                                                "
+                                                                                text
+                                                                                severity="danger"
+                                                                                size="small"
+                                                                                shape="circle"
+                                                                                @click="
+                                                                                    removeGrades(
+                                                                                        index,
+                                                                                        item,
+                                                                                    )
+                                                                                "
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
 
                                                                 <DefaultButton
                                                                     :icon="
                                                                         TablerIcons.IconScriptPlus
                                                                     "
                                                                     label="Add Grades"
+                                                                    @click="
+                                                                        addGrades
+                                                                    "
+                                                                    v-if="
+                                                                        editBtn.grades
+                                                                    "
                                                                     severity="secondary"
                                                                     size="small"
                                                                     class-name="!rounded-xl w-full !px-5"
@@ -739,12 +909,18 @@
     </Drawer>
 </template>
 <script setup>
+import DefaultButton from "../../Components/buttons/DefaultButton.vue";
+import TextInput from "../../Components/inputs/TextInput.vue";
+import AutoCompleteInput from "../../Components/inputs/AutoCompleteInput.vue";
+import DatePickerInput from "../../Components/inputs/DatePickerInput.vue";
+import SelectInput from "../../Components/inputs/SelectInput.vue";
 import {
     IconSchool,
     IconCalendar,
     IconCertificate,
     IconCopy,
     IconId,
+    IconScript,
     IconBook2,
     IconMap2,
     IconGridDots,
@@ -758,23 +934,29 @@ import {
 } from "@tabler/icons-vue";
 import * as TablerIcons from "@tabler/icons-vue";
 import { ref, watch, reactive } from "vue";
-import DefaultButton from "../../Components/buttons/DefaultButton.vue";
-import TextInput from "../../Components/inputs/TextInput.vue";
-import AutoCompleteInput from "../../Components/inputs/AutoCompleteInput.vue";
-import DatePickerInput from "../../Components/inputs/DatePickerInput.vue";
+
 import { router } from "@inertiajs/vue3";
 import { route } from "ziggy-js";
 import { useForm, usePage } from "@inertiajs/vue3";
-import SelectInput from "../../Components/inputs/SelectInput.vue";
 
 const modelValue = defineModel("modelValue");
 const editBtn = reactive({
     info: false,
     grades: false,
 });
+const dialog = reactive({
+    request: false,
+});
 const selectTerm = ref(null);
 const loading = reactive({
     address: false,
+});
+const options = reactive({
+    grades: [],
+    subjects: [],
+});
+const popover = reactive({
+    validateClose: null,
 });
 const page = usePage();
 
@@ -829,6 +1011,12 @@ const personalInfo = useForm({
     fulladdress: "",
 });
 
+const gradesForm = useForm({
+    term_id: null,
+    id: null,
+    subjects: [],
+});
+
 const autoSearch = (event) => {
     loading.address = true;
     router.get(
@@ -847,6 +1035,16 @@ const autoSearch = (event) => {
 
 const editGrades = (el) => {
     editBtn.grades = true;
+    options.subjects = el.optionSubject;
+    options.grades = el.optionGrades;
+};
+
+const addGrades = () => {
+    gradesForm.subjects.push({
+        id: null,
+        subject: [],
+        grade: [],
+    });
 };
 
 const tabChangeGet = (el) => {
@@ -855,17 +1053,53 @@ const tabChangeGet = (el) => {
             tab: el,
         },
         only: ["academic"],
+        onSuccess: () => {
+            selectTerm.value = null;
+        },
     });
 };
 
-const getGrades = (e) => {
-    selectTerm.value = e;
+const getGrades = (item, key) => {
+    selectTerm.value = item;
+    gradesForm.reset();
+    Object.values(item.grades).forEach((element) => {
+        gradesForm.subjects.push({
+            id: element.id,
+            subject: element.subject || element,
+            grade: element.grade || [],
+        });
+    });
 };
 
+const removeGrades = (index, item) => {
+    gradesForm.subjects.splice(index, 1);
+
+    if (item.id != null) {
+        router.post(route("scholar.grade-delete", { id: item.id }), {
+            preserveScroll: true,
+            onSuccess: () => {
+                console.log("Grade record deleted successfully");
+            },
+        });
+    }
+};
+
+const updateGrades = () => {
+    gradesForm.post(
+        route("scholar.grade-update", { id: selectTerm.value.term_id }),
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                editBtn.grades = false;
+
+                gradesForm.reset();
+            },
+        },
+    );
+};
 watch(
     () => page.props?.scholarDetails,
     (newVal) => {
-        console.log(newVal);
         personalInfo.spas_no = newVal?.spas_no ?? null;
         personalInfo.last_name = newVal.lname ?? null;
         personalInfo.first_name = newVal.fname ?? null;

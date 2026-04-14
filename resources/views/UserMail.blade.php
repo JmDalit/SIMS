@@ -209,7 +209,7 @@
 													<table class="heading_block block-1" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 														<tr>
 															<td class="pad">
-																<h1 style="margin: 0; color: #005fed; direction: ltr; font-family: 'Montserrat', 'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma, sans-serif; font-size: 38px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: center; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 46px;"><span class="tinyMce-placeholder" style="word-break: break-word;">Welcome to STSIMS</span></h1>
+																<h1 style="margin: 0; color: #005fed; direction: ltr; font-family: 'Montserrat', 'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma, sans-serif; font-size: 38px; font-weight: 700; letter-spacing: normal; line-height: 1.2; text-align: center; margin-top: 0; margin-bottom: 0; mso-line-height-alt: 46px;"><span class="tinyMce-placeholder" style="word-break: break-word;">Welcome to SIMS</span></h1>
 															</td>
 														</tr>
 													</table>
@@ -233,7 +233,7 @@
 														<tr>
 															<td class="pad" style="padding-bottom:10px;padding-left:30px;padding-right:30px;padding-top:10px;">
 																<div style="color:#323537;direction:ltr;font-family:'Montserrat', 'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma, sans-serif;font-size:14px;font-weight:400;letter-spacing:0px;line-height:1.8;text-align:justify;mso-line-height-alt:25px;">
-																	<p style="margin: 0;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;We are thrilled to inform you that you are now officially a member of the <strong>STSIMS</strong> (Science and Technology Scholars Information Management System) family. Your journey with us marks the beginning of meaningful collaboration and growth, and we’re excited to see the great contributions you'll bring to the team.</p>
+																	<p style="margin: 0;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;We are thrilled to inform you that you are now officially a member of the <strong>SIMS</strong> (Science and Technology Scholars Information Management System) family. Your journey with us marks the beginning of meaningful collaboration and growth, and we’re excited to see the great contributions you'll bring to the team.</p>
 																</div>
 															</td>
 														</tr>
@@ -313,7 +313,7 @@
 														<tr>
 															<td class="pad">
 																<div style="color:#323537;direction:ltr;font-family:'Montserrat', 'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma, sans-serif;font-size:14px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:17px;">
-																	<p style="margin: 0;">Best regards,<br><strong>STSIMS administrator</strong></p>
+																	<p style="margin: 0;">Best regards,<br><strong>SIMS administrator</strong></p>
 																</div>
 															</td>
 														</tr>

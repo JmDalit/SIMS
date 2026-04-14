@@ -265,34 +265,56 @@
                         perPage: page.props.scholar.per_page,
                         currentPage: page.props.scholar.current_page,
                     }"
-                    @selected="openModal"
                     :loading="scholarLoadingTable"
                     @paginate="loadPage"
                 >
                     <Column header="Scholars">
                         <template #body="props">
                             <div class="flex items-center gap-2">
-                                <div>
+                                <div class="">
+                                    <OverlayBadge
+                                        severity="danger"
+                                        class="inline-flex"
+                                        v-if="props.data.subjectRequest_cnt"
+                                    >
+                                        <Avatar
+                                            :label="
+                                                props.data.fullname
+                                                    .charAt(0)
+                                                    .toUpperCase()
+                                            "
+                                            style="
+                                                background-color: #dee9fc;
+                                                color: #1a2551;
+                                            "
+                                            class="!w-[40px] !h-[40px] !rounded-xl"
+                                            :image="
+                                                props.data.photo == null
+                                                    ? null
+                                                    : props.data.photo
+                                            "
+                                        />
+                                    </OverlayBadge>
                                     <Avatar
-                                        v-if="props.data.photo == null"
+                                        v-else
                                         :label="
                                             props.data.fullname
                                                 .charAt(0)
                                                 .toUpperCase()
                                         "
-                                        class="!w-[40px] !h-[40px] !rounded-xl"
-                                    />
-
-                                    <Avatar
-                                        v-else
                                         style="
                                             background-color: #dee9fc;
                                             color: #1a2551;
                                         "
-                                        :image="page.props.user.avatar"
+                                        class="!w-[40px] !h-[40px] !rounded-xl"
+                                        :image="
+                                            props.data.photo == null
+                                                ? null
+                                                : props.data.photo
+                                        "
                                     />
                                 </div>
-                                <div class="flex flex-col">
+                                <div class="flex-1 flex flex-col">
                                     <div
                                         :class="[
                                             'text-xs flex items-center',
@@ -404,15 +426,425 @@
                             </div>
                         </template>
                     </Column>
+                    <Column>
+                        <template #header>
+                            <div
+                                class="flex justify-center w-full font-semibold"
+                            >
+                                <div class="font-semibold">Actions</div>
+                            </div>
+                        </template>
+                        <template #body="props">
+                            <div class="flex justify-center items-center gap-2">
+                                <Button
+                                    rounded
+                                    size="small"
+                                    :severity="
+                                        props.data.subjectRequest_cnt
+                                            ? 'danger'
+                                            : 'secondary'
+                                    "
+                                    @click="toggleSubjectRequest(props.data)"
+                                    text
+                                    :disabled="!props.data.subjectRequest_cnt"
+                                    v-tooltip.top="'Subject Requests'"
+                                    class="!p-0"
+                                >
+                                    <template #icon>
+                                        <IconFileAlert :size="20" />
+                                    </template>
+                                </Button>
+
+                                <Button
+                                    rounded
+                                    size="small"
+                                    v-tooltip.top="'Grade Requests'"
+                                    severity="secondary"
+                                    text
+                                    @click="toggleGradeRequest(props.data)"
+                                    class="!p-0"
+                                >
+                                    <template #icon>
+                                        <IconFileText :size="20" />
+                                    </template>
+                                </Button>
+                                <Button
+                                    rounded
+                                    size="small"
+                                    text
+                                    @click="toggleScholarDetails(props.data)"
+                                    class="!p-0"
+                                    v-tooltip.top="'Scholar Details'"
+                                >
+                                    <template #icon>
+                                        <IconUserSquareRounded :size="20" />
+                                    </template>
+                                </Button>
+                            </div>
+                        </template>
+                    </Column>
                 </DefaultSelectionTable>
             </div>
         </div>
         <DrawerScholarModule
+            v-if="scholarDrawer"
             v-model:visible="scholarDrawer"
             :details="selectedRow"
         />
         <DefaultToast ref="toastRef" />
         <DefaultConfirmDialog ref="confirmRef" />
+        <Dialog v-model:visible="dialog.subject" class="w-[95%]" modal>
+            <template #header>
+                <div
+                    class="bg-slate-100 px-5 py-1 shadow rounded-lg flex items-center gap-2"
+                >
+                    <IconScript :size="25" />
+                    <div class="text-lg font-medium">Subject Request</div>
+                </div>
+            </template>
+            <template #default>
+                <div class="flex w-full justify-between min-h-[50rem]">
+                    <div class="flex-50">
+                        <p class="mb-5">
+                            Review and validate the subject request based on
+                            curriculum, year level, and semester. Approve or
+                            return with remarks.
+                        </p>
+
+                        <Panel
+                            v-for="(term, termKey) in page.props
+                                ?.subjectRequest"
+                            :key="termKey"
+                            class="!rounded-xl"
+                        >
+                            <template #header>
+                                <div
+                                    class="flex items-center justify-between w-full"
+                                >
+                                    <div class="flex items-center gap-2">
+                                        <IconGridDots :size="20" />
+                                        <span class="font-medium"
+                                            >{{ term.term?.name }} /
+                                            {{ term.level?.name }}</span
+                                        >
+                                    </div>
+                                    <div
+                                        class="space-x font-semibold text-gray-500"
+                                    >
+                                        {{ term.academic_year }}
+                                    </div>
+                                </div>
+                            </template>
+                            <table class="min-w-full !border-none text-sm">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th
+                                            class="px-3 py-2 !rounded-l-2xl text-nowrap text-left"
+                                        >
+                                            Subject Type
+                                        </th>
+                                        <th class="px-3 py-2 text-left">
+                                            Subject Name
+                                        </th>
+                                        <th
+                                            class="px-3 py-2 text-nowrap text-left"
+                                        >
+                                            Subject Code
+                                        </th>
+                                        <th class="px-3 py-2 text-right">
+                                            Unit
+                                        </th>
+
+                                        <th
+                                            class="px-3 py-2 text-right !rounded-r-2xl"
+                                        >
+                                            Remarks
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        v-for="(item, index) in term?.requests"
+                                        :key="index"
+                                    >
+                                        <td
+                                            class="px-3 py-2 capitalize text-nowrap"
+                                        >
+                                            {{
+                                                item.subject?.class_array
+                                                    .name ??
+                                                item.class_array.name
+                                            }}
+                                        </td>
+                                        <td class="px-3 py-2 uppercase">
+                                            {{
+                                                item.subject?.name ?? item.name
+                                            }}
+                                        </td>
+                                        <td class="px-3 py-2">
+                                            {{
+                                                item.subject?.subject_code ??
+                                                item.subject_code
+                                            }}
+                                        </td>
+                                        <td class="px-3 py-2 text-right">
+                                            {{
+                                                item.subject?.unit ?? item.unit
+                                            }}
+                                        </td>
+                                        <td>
+                                            <div
+                                                class="w-full justify-end flex items-center gap-1"
+                                            >
+                                                <DefaultButton
+                                                    :icon="TablerIcons.IconX"
+                                                    text
+                                                    severity="danger"
+                                                    size="small"
+                                                    @click="
+                                                        (e) => toggleOP(e, item)
+                                                    "
+                                                />
+                                                <DefaultButton
+                                                    :icon="
+                                                        TablerIcons.IconCheck
+                                                    "
+                                                    text
+                                                    severity="success"
+                                                    size="small"
+                                                    @click="
+                                                        validateSubjectRequestAccept(
+                                                            item,
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <Popover
+                                                :ref="
+                                                    (el) =>
+                                                        (popovers[item.id] = el)
+                                                "
+                                            >
+                                                <div
+                                                    class="flex flex-col gap-4 w-[25rem]"
+                                                >
+                                                    <TextInput
+                                                        label="Remarks"
+                                                        :error-mark="
+                                                            page.props.errors
+                                                                ?.remarks
+                                                        "
+                                                        v-model="
+                                                            subjectRequestForm.remarks
+                                                        "
+                                                        placeholder="Enter remarks for returning the subject request"
+                                                    />
+                                                    <DefaultButton
+                                                        label="Validate and Return"
+                                                        size="small"
+                                                        @click="
+                                                            validateSubjectRequest(
+                                                                item,
+                                                            )
+                                                        "
+                                                        severity="danger"
+                                                        class-name="!rounded-xl !px-5"
+                                                    />
+                                                </div>
+                                            </Popover>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </Panel>
+                    </div>
+                    <Divider layout="vertical" class="flex mx-5" />
+                    <div class="flex-50">
+                        <p>
+                            Review and validate the subject request based on
+                            curriculum, year level, and semester. Approve or
+                            return with remarks.
+                        </p>
+                    </div>
+                </div>
+            </template>
+        </Dialog>
+        <Dialog v-model:visible="dialog.grade" class="w-[95%]" modal>
+            <template #header>
+                <div
+                    class="bg-slate-100 px-5 py-1 shadow rounded-lg flex items-center gap-2"
+                >
+                    <IconScript :size="25" />
+                    <div class="text-lg font-medium">Grade Request</div>
+                </div>
+            </template>
+            <template #default>
+                <div class="flex w-full justify-between min-h-[50rem]">
+                    <div class="flex-50">
+                        <p class="mb-5">
+                            Review and validate the subject request based on
+                            curriculum, year level, and semester. Approve or
+                            return with remarks.
+                        </p>
+
+                        <Panel
+                            v-for="(term, termKey) in page.props
+                                ?.subjectRequest"
+                            :key="termKey"
+                            class="!rounded-xl"
+                        >
+                            <template #header>
+                                <div
+                                    class="flex items-center justify-between w-full"
+                                >
+                                    <div class="flex items-center gap-2">
+                                        <IconGridDots :size="20" />
+                                        <span class="font-medium"
+                                            >{{ term.term?.name }} /
+                                            {{ term.level?.name }}</span
+                                        >
+                                    </div>
+                                    <div
+                                        class="space-x font-semibold text-gray-500"
+                                    >
+                                        {{ term.academic_year }}
+                                    </div>
+                                </div>
+                            </template>
+                            <table class="min-w-full !border-none text-sm">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th
+                                            class="px-3 py-2 !rounded-l-2xl text-nowrap text-left"
+                                        >
+                                            Subject Type
+                                        </th>
+                                        <th class="px-3 py-2 text-left">
+                                            Subject Name
+                                        </th>
+                                        <th
+                                            class="px-3 py-2 text-nowrap text-left"
+                                        >
+                                            Subject Code
+                                        </th>
+                                        <th class="px-3 py-2 text-right">
+                                            Unit
+                                        </th>
+
+                                        <th
+                                            class="px-3 py-2 text-right !rounded-r-2xl"
+                                        >
+                                            Remarks
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        v-for="(item, index) in term?.requests"
+                                        :key="index"
+                                    >
+                                        <td
+                                            class="px-3 py-2 capitalize text-nowrap"
+                                        >
+                                            {{
+                                                item.subject?.class_array
+                                                    .name ??
+                                                item.class_array.name
+                                            }}
+                                        </td>
+                                        <td class="px-3 py-2 uppercase">
+                                            {{
+                                                item.subject?.name ?? item.name
+                                            }}
+                                        </td>
+                                        <td class="px-3 py-2">
+                                            {{
+                                                item.subject?.subject_code ??
+                                                item.subject_code
+                                            }}
+                                        </td>
+                                        <td class="px-3 py-2 text-right">
+                                            {{
+                                                item.subject?.unit ?? item.unit
+                                            }}
+                                        </td>
+                                        <td>
+                                            <div
+                                                class="w-full justify-end flex items-center gap-1"
+                                            >
+                                                <DefaultButton
+                                                    :icon="TablerIcons.IconX"
+                                                    text
+                                                    severity="danger"
+                                                    size="small"
+                                                    @click="
+                                                        (e) => toggleOP(e, item)
+                                                    "
+                                                />
+                                                <DefaultButton
+                                                    :icon="
+                                                        TablerIcons.IconCheck
+                                                    "
+                                                    text
+                                                    severity="success"
+                                                    size="small"
+                                                    @click="
+                                                        validateSubjectRequestAccept(
+                                                            item,
+                                                        )
+                                                    "
+                                                />
+                                            </div>
+                                            <Popover
+                                                :ref="
+                                                    (el) =>
+                                                        (popovers[item.id] = el)
+                                                "
+                                            >
+                                                <div
+                                                    class="flex flex-col gap-4 w-[25rem]"
+                                                >
+                                                    <TextInput
+                                                        label="Remarks"
+                                                        :error-mark="
+                                                            page.props.errors
+                                                                ?.remarks
+                                                        "
+                                                        v-model="
+                                                            subjectRequestForm.remarks
+                                                        "
+                                                        placeholder="Enter remarks for returning the subject request"
+                                                    />
+                                                    <DefaultButton
+                                                        label="Validate and Return"
+                                                        size="small"
+                                                        @click="
+                                                            validateSubjectRequest(
+                                                                item,
+                                                            )
+                                                        "
+                                                        severity="danger"
+                                                        class-name="!rounded-xl !px-5"
+                                                    />
+                                                </div>
+                                            </Popover>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </Panel>
+                    </div>
+                    <Divider layout="vertical" class="flex mx-5" />
+                    <div class="flex-50">
+                        <p>
+                            Review and validate the subject request based on
+                            curriculum, year level, and semester. Approve or
+                            return with remarks.
+                        </p>
+                    </div>
+                </div>
+            </template>
+        </Dialog>
     </AuthLayout>
 </template>
 <script setup>
@@ -423,35 +855,34 @@ import DefaultSelectionTable from "../../Components/tables/DefaultSelectionTable
 import ToolbarModule from "../../Modules/Others/ToolbarModule.vue";
 import DefaultToast from "../../Components/messages/DefaultToast.vue";
 import DefaultConfirmDialog from "../../Components/dialogs/DefaultConfirmDialog.vue";
-import DefaultDialog from "../../Components/dialogs/DefaultDialog.vue";
+import TextInput from "../../Components/inputs/TextInput.vue";
 import DrawerScholarModule from "../../Modules/Others/DrawerScholarModule.vue";
 import UploadInput from "../../Components/inputs/UploadInput.vue";
 import DefaultButton from "../../Components/buttons/DefaultButton.vue";
 import * as TablerIcons from "@tabler/icons-vue";
-import { computed, ref, watch } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import { Head, router, useForm, usePage } from "@inertiajs/vue3";
 import {
+    IconScript,
     IconCheck,
-    IconLock,
+    IconFileAlert,
     IconUserCog,
     IconX,
-    IconBook2,
-    IconPencilCog,
-    IconTrash,
     IconBooks,
-    IconUserQuestion,
-    IconCalendarWeek,
-    IconFileDescription,
-    IconFileTime,
-    IconHistory,
+    IconGridDots,
     IconFileText,
     IconDotsCircleHorizontal,
     IconSettings,
     IconCircleX,
+    IconUserSquareRounded,
     IconCircleCheck,
-    IconGenderMale,
-    IconGenderFemale,
+    IconId,
+    IconFileUnknown,
 } from "@tabler/icons-vue";
+
+const subjectRequestForm = useForm({
+    remarks: null,
+});
 
 const page = usePage();
 const searchInput = ref(null);
@@ -459,11 +890,18 @@ const timerBounce = ref(null);
 const selectedRow = ref(null);
 const toolbarRef = ref(null);
 const toastRef = ref(null);
+const menu = ref(null);
 const scholarLoadingTable = ref(false);
+const dialog = reactive({
+    subject: false,
+    grade: false,
+});
+const popovers = ref({});
 const filesLoadingTable = ref(false);
 const scholarDrawer = ref(false);
 const confirmRef = ref(null);
 const uploadRef = ref(null);
+
 const progressUpload = ref(0);
 const filterFileStatus = ref("Pending");
 const filterFileOption = ref(["Pending", "Accept", "Reject"]);
@@ -494,6 +932,45 @@ const toggleModal = () => {
         },
     });
 };
+
+const toggleOption = (event, rowData) => {
+    selectedRow.value = rowData;
+    menu.value.toggle(event);
+};
+
+const menuItems = computed(() => {
+    if (!selectedRow.value) return [];
+
+    return [
+        {
+            label: "Scholar Details",
+            icon: IconId,
+            class: "text-slate-500",
+
+            command: () => {},
+        },
+
+        {
+            label: "Subject Requests",
+            icon: IconFileUnknown,
+            class: "text-slate-500",
+            badge: selectedRow.value.requests_count
+                ? selectedRow.value.requests_count
+                : null,
+            command: () => {
+                dialog.subject = true;
+            },
+        },
+        {
+            label: "Grade Requests",
+            icon: IconBooks,
+            class: "text-red-500",
+            command: () => {
+                deleteRow(selectedRow.value.id);
+            },
+        },
+    ];
+});
 
 const deleteRow = (id) => {
     confirmRef.value.popupDialog(() => {
@@ -546,34 +1023,62 @@ const validateFiles = (res) => {
     );
 };
 
-const openModal = (event) => {
-    selectedRow.value = event;
-    router.reload({
-        data: { id: event.id },
-        only: ["scholarDetails"],
+const clearSearch = () => {
+    searchInput.value = null;
+};
 
+const toggleScholarDetails = (data) => {
+    selectedRow.value = data;
+    router.reload({
+        data: { id: selectedRow.value.id },
+        only: ["scholarDetails"],
         onSuccess: () => {
             scholarDrawer.value = true;
         },
     });
 };
 
-// const updateStatus = (result) => {
-//     scholarForm.isActive = result.is_active;
-//     scholarForm.put(
-//         route("academic.courses.update", { id: result.id, type: "status" }),
-//         {
-//             onSuccess: () => {
-//                 toastRef.value.show(page.props.flash);
-//             },
-//         },
-//     );
-// };
-
-const clearSearch = () => {
-    searchInput.value = null;
+const toggleSubjectRequest = (data) => {
+    router.reload({
+        data: { id: data.id },
+        only: ["subjectRequest"],
+        onSuccess: () => {
+            dialog.subject = true;
+        },
+    });
+};
+const toggleGradeRequest = (data) => {
+    router.reload({
+        data: { id: data.id },
+        only: ["gradeRequest"],
+        onSuccess: () => {
+            dialog.grade = true;
+        },
+    });
 };
 
+const validateSubjectRequest = (item) => {
+    subjectRequestForm.post(route("scholar.requestSubject-denied", item.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            toastRef.value.show(page.props.flash);
+            popovers.value[item.id]?.hide();
+        },
+    });
+};
+
+const validateSubjectRequestAccept = (item) => {
+    router.post(route("scholar.requestSubject-accept", item.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            toastRef.value.show(page.props.flash);
+        },
+    });
+};
+
+const toggleOP = (event, item) => {
+    popovers.value[item.id]?.toggle(event);
+};
 // const autoSearch = (event) => {
 //     setTimeout(() => {
 //         if (!event.trim().length) {

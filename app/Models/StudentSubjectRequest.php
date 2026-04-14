@@ -4,17 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ScholarSchoolGrades extends Model
+class StudentSubjectRequest extends Model
 {
+    protected $connection = 'scholars';
+    protected $table = 'student_subject_requests';
+    public $timestamps = false;
     protected $fillable = [
         'term_record_id',
         'subject_id',
+        'reviewed_at',
+        'reviewed_by',
+        'status',
         'remarks',
-        'grade_id',
-        'is_deleted',
     ];
-
-    protected $hidden = ['grade_id', 'subject_id', 'term_record_id', 'created_at', 'updated_at'];
 
     public function termRecord()
     {
@@ -24,10 +26,5 @@ class ScholarSchoolGrades extends Model
     public function subject()
     {
         return $this->belongsTo(SchoolCampusCourseCurriculumSubjects::class, 'subject_id');
-    }
-
-    public function grade()
-    {
-        return $this->belongsTo(SchoolCampusGrades::class, 'grade_id');
     }
 }

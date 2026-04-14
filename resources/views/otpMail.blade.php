@@ -298,7 +298,7 @@
 														<tr>
 															<td class="pad">
 																<div style="color:#323537;direction:ltr;font-family:'Montserrat', 'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma, sans-serif;font-size:14px;font-weight:400;letter-spacing:0px;line-height:1.2;text-align:left;mso-line-height-alt:17px;">
-																	<p style="margin: 0;">Best regards,<br><strong>STSIMS</strong></p>
+																	<p style="margin: 0;">Best regards,<br><strong>SIMS</strong></p>
 																</div>
 															</td>
 														</tr>

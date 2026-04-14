@@ -7,9 +7,11 @@ use App\Http\Requests\Web\ScholarRequest;
 use App\Imports\CheckScholarImport;
 use App\Imports\ScholarImport;
 use App\Models\Scholars;
+use App\Models\ScholarSchoolGrades;
 use App\Models\ScholarSchoolInfos;
 use App\Models\ScholarTerm;
 use App\Models\ScholarUploadedFiles;
+use App\Models\StudentSubjectRequest;
 use App\Models\User;
 use App\Notifications\ScholarUploadedNotification;
 use App\Notifications\ValidatedFilesNotification;
@@ -22,6 +24,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use Vinkla\Hashids\Facades\Hashids;
@@ -69,6 +72,17 @@ class ScholarController extends Controller
                     'program:id,name',
                     'type:id,name',
                     'profile:id,scholar_id,photo,sex,fname,lname,mname,suffix,email,contact_no',
+                    'termRecords' => fn($q) => $q
+                        ->select('id', 'scholar_id', 'term_id', 'level_id', 'academic_year', 'scholar_school_id', 'term_type_id')
+                        ->with([
+                            'requests' => fn($q) => $q
+                                ->select('id', 'term_record_id', 'subject_id', 'reviewed_at', 'reviewed_by', 'status', 'remarks')
+                                ->with([
+                                    'subject:id,name,year,subject_code,unit,subject_class,semester_id'
+                                ])
+                                ->where('status', 'pending'),
+
+                        ]),
                     'schoolInfo' => fn($q) => $q
                         ->select('id', 'scholar_id', 'campus_id', 'campus_course_id')
                         ->with([
@@ -93,6 +107,10 @@ class ScholarController extends Controller
                 ->through(fn($q) => [
                     'id' => Hashids::encode($q->id),
                     'spas_no' => $q->spas_no,
+                    'subjectRequest_cnt' => $q->termRecords
+                        ->pluck('requests')
+                        ->flatten()
+                        ->count(),
                     'photo' => $q->profile?->photo,
                     'email' => $q->profile?->email,
                     'contact_no' => $q->profile?->contact_no,
@@ -120,22 +138,23 @@ class ScholarController extends Controller
                     'verified_at' => $q->verified_at,
                     'validate_status' => $q->validate_status,
                 ]),
-            'scholarDetails' =>
-            [
-                'spas_no' => $scholarDetails?->spas_no,
-                'photo' => $scholarDetails?->profile?->photo,
-                'sex' => $scholarDetails?->profile?->sex,
-                'fname' => $scholarDetails?->profile?->fname,
-                'mname' => $scholarDetails?->profile?->mname,
-                'lname' => $scholarDetails?->profile?->lname,
-                'suffix' => $scholarDetails?->profile?->suffix,
-                'email' => $scholarDetails?->profile?->email,
-                'contact_no' => $scholarDetails?->profile?->contact_no,
-                'birthplace' => $scholarDetails?->profile?->birthplace,
-                'birthdate' => Carbon::parse($scholarDetails?->profile?->birthdate)->format('Y-m-d'),
-                'religion' => $scholarDetails?->profile?->religion,
-                'civil_status' => $scholarDetails?->profile?->civil_status,
-            ],
+            'scholarDetails' => request('id') ?
+                [
+                    'id' => Hashids::encode($scholarDetails?->id),
+                    'spas_no' => $scholarDetails?->spas_no,
+                    'photo' => $scholarDetails?->profile?->photo,
+                    'sex' => $scholarDetails?->profile?->sex,
+                    'fname' => $scholarDetails?->profile?->fname,
+                    'mname' => $scholarDetails?->profile?->mname,
+                    'lname' => $scholarDetails?->profile?->lname,
+                    'suffix' => $scholarDetails?->profile?->suffix,
+                    'email' => $scholarDetails?->profile?->email,
+                    'contact_no' => $scholarDetails?->profile?->contact_no,
+                    'birthplace' => $scholarDetails?->profile?->birthplace,
+                    'birthdate' => Carbon::parse($scholarDetails?->profile?->birthdate)->format('Y-m-d'),
+                    'religion' => $scholarDetails?->profile?->religion,
+                    'civil_status' => $scholarDetails?->profile?->civil_status,
+                ] : null,
             'academic' => request('id') ?
                 ScholarSchoolInfos::select(
                     'id',
@@ -146,7 +165,7 @@ class ScholarController extends Controller
                 ->with([
                     'campus' => fn($q) =>
                     $q->select('id', 'generated_name', 'term_id')
-                        ->with(['term:id,name']),
+                        ->with(['term:id,name', 'grades']),
 
                     'course' => fn($q) => $q
                         ->select('id', 'course_id')
@@ -164,10 +183,17 @@ class ScholarController extends Controller
                         ->with([
                             'term:id,name',
                             'level:id,name,others',
-                            'subjects',
-                            'termType:id,name'
-                        ]),
+                            'subjects' => fn($q) => $q
+                                ->select('id', 'term_record_id', 'subject_id', 'grade_id')
+                                ->with([
+                                    'subject:id,name,year,subject_code,unit,subject_class,semester_id',
+                                    'grade' => fn($q) => $q
+                                        ->select('id', 'grade as name', 'is_incomplete', 'is_failed', 'is_drop', 'is_active')
 
+                                ])->where('is_deleted', false),
+                            'termType:id,name',
+
+                        ])
                 ])
                 ->where('scholar_id', Hashids::decode(request('id'))[0] ?? 0)
                 ->get()
@@ -186,8 +212,8 @@ class ScholarController extends Controller
                                         'year_level' => $term->level->name,
                                         'label' => $term->termType->name,
                                         'grades' => optional($term->subjects)->isNotEmpty()
-                                            ? $term->subjects
-                                            : $q->course?->curriculum?->first()?->subjects->where('semester_id', $term->term_type_id)->where('year', $term->level?->others)
+                                            ?  $term->subjects
+                                            :  $q->course?->curriculum?->first()?->subjects->where('semester_id', $term->term_type_id)->where('year', $term->level?->others)
                                     ];
                                 })->values()
                             ];
@@ -200,7 +226,16 @@ class ScholarController extends Controller
                         'term' => $q->campus?->term_array,
                         'records' => $records,
                         'optionSubject' =>
-                        $q->course?->curriculum?->first()?->subjects
+                        $q->course?->curriculum?->first()?->subjects,
+                        'optionGrades' => $q->campus?->grades->map(fn($grade) => [
+                            'id' => $grade->id,
+                            'name' => $grade->grade,
+                            'is_incomplete' => $grade->is_incomplete,
+                            'is_failed' => $grade->is_failed,
+                            'is_drop' => $grade->is_drop,
+                            'is_active' => $grade->is_active,
+
+                        ])
 
                     ];
                 })
@@ -225,10 +260,24 @@ class ScholarController extends Controller
                     'status'        => Str::ucwords($q->status->name),
                     'icon'          => $q->status->icon,
                     'color_array'   => $q->status->color_array,
-                    'total'   => $q->total,
+                    'total'         => $q->total,
                 ]),
             'georesult' => request('geosearch') ? ($location->getFullAddress(request('geosearch'), false) ?? [])
                 : [],
+            'subjectRequest' => request('id') ? ScholarTerm::select('id', 'term_id', 'level_id', 'academic_year', 'scholar_school_id', 'term_type_id')
+                ->with([
+                    'term:id,name',
+                    'level:id,name,others',
+                    'termType:id,name',
+                    'requests' => fn($q) => $q->select('id', 'term_record_id', 'subject_id', 'reviewed_at', 'reviewed_by', 'status', 'remarks')
+                        ->with([
+                            'subject:id,name,year,subject_code,unit,subject_class,semester_id'
+                        ])
+                        ->where('status', 'pending'),
+                ])
+                ->where('scholar_id', Hashids::decode(request('id'))[0] ?? 0)
+                ->get()
+                : null,
 
         ]);
     }
@@ -345,6 +394,132 @@ class ScholarController extends Controller
             ]);
         }
     }
+
+    function gradeUpdate(Request $request, string $id)
+    {
+
+        $data = $request->validate([
+
+            'subjects.*.grade' => 'required|array',
+            'subjects.*.subject' => 'required|array',
+        ]);
+
+
+
+
+        DB::beginTransaction();
+        try {
+            $termRecordId = Hashids::decode($id)[0] ?? 0;
+
+            foreach ($data['subjects'] as $key => $value) {
+
+                ScholarSchoolGrades::updateOrCreate(
+                    [
+                        'term_record_id' => $termRecordId,
+                        'subject_id'     => $value['subject']['id'],
+                    ],
+                    [
+                        'grade_id' => $value['grade']['id'],
+                    ]
+                );
+                DB::commit();
+            }
+
+
+            return redirect()->back()->with('flash', [
+                'status'  => 'success',
+                'title'   => 'Grades Updated!',
+                'message' => 'The grades have been successfully updated.',
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+
+
+            throw ValidationException::withMessages([
+                'subjects' => ['There was an error updating the grades: ' . $e->getMessage()],
+            ]);
+        }
+    }
+
+
+    public function gradeDelete(int $id)
+    {
+        try {
+            $grade = ScholarSchoolGrades::findOrFail($id);
+            $grade->update([
+                'is_deleted' => true,
+            ]);
+
+            return redirect()->back()->with('flash', [
+                'status'  => 'success',
+                'title'   => 'Grade Deleted!',
+                'message' => 'The grade has been successfully deleted.',
+            ]);
+        } catch (Exception $e) {
+            throw ValidationException::withMessages([
+                'subjects' => ['There was an error deleting the grade: ' . $e->getMessage()],
+            ]);
+        }
+    }
+
+
+    public function requestSubjectDenied(Request $request, string $id)
+    {
+
+
+        $data = $request->validate([
+            'remarks' => 'required|string',
+        ]);
+
+        try {
+            $requestRecord = StudentSubjectRequest::findOrFail($id);
+            $requestRecord->update([
+                'status' => 'rejected',
+                'remarks' => $data['remarks'],
+                'reviewed_at' => now(),
+                'reviewed_by' => Auth::user()->profile->fullname,
+            ]);
+
+            return redirect()->back()->with('flash', [
+                'status'  => 'success',
+                'title'   => 'Request Updated!',
+                'message' => 'The subject request has been successfully updated.',
+            ]);
+        } catch (Exception $e) {
+            throw ValidationException::withMessages([
+                'request' => ['There was an error updating the request: ' . $e->getMessage()],
+            ]);
+        }
+    }
+
+    public function requestSubjectAccept(Request $request, string $id)
+    {
+        try {
+            $requestRecord = StudentSubjectRequest::findOrFail($id);
+            $requestRecord->update([
+                'status' => 'approved',
+                'reviewed_at' => now(),
+                'reviewed_by' => Auth::user()->profile->fullname,
+            ]);
+
+            ScholarSchoolGrades::create([
+                'term_record_id' => $requestRecord->term_record_id,
+                'subject_id' => $requestRecord->subject_id,
+                'grade_id' => null,
+            ]);
+
+            return redirect()->back()->with('flash', [
+                'status'  => 'success',
+                'title'   => 'Request Updated!',
+                'message' => 'The subject request has been successfully updated.',
+            ]);
+        } catch (Exception $e) {
+            throw ValidationException::withMessages([
+                'request' => ['There was an error updating the request: ' . $e->getMessage()],
+            ]);
+        }
+    }
+
     // function update(StatusRequest $request, string $id, string $type)
     // {
 

@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Scholars extends Model
 {
-
     protected $fillable = [
         'spas_no',
         'status_id',

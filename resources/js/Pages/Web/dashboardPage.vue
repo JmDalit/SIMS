@@ -35,5 +35,6 @@ import AuthLayout from "../../Layouts/AuthLayout.vue";
 import RegionStaffDashboardModule from "../../Modules/Others/RegionStaffDashboardModule.vue";
 
 import { ref } from "vue";
+
 const page = usePage();
 </script>

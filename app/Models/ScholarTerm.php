@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ScholarTerm extends Model
 {
+    protected $connection = 'pgsql';
     protected $table = 'scholar_term_records';
-
     protected $fillable = [
         'term_id',
         'scholar_id',
@@ -40,8 +40,14 @@ class ScholarTerm extends Model
     {
         return $this->belongsTo(ListReferences::class, 'level_id');
     }
+
     public function subjects()
     {
         return $this->hasMany(ScholarSchoolGrades::class, 'term_record_id');
+    }
+
+    public function requests()
+    {
+        return $this->hasMany(StudentSubjectRequest::class, 'term_record_id');
     }
 }
