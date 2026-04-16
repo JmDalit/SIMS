@@ -129,14 +129,15 @@ Route::middleware(['auth', 'web'])->group(function () {
     Route::patch('campus/curriculum/{id}/copy', [SchoolCampusCurriculumController::class, 'copy'])->name('campus.curriculum.copy');
     Route::patch('campus/curriculum/{id}/paste', [SchoolCampusCurriculumController::class, 'paste'])->name('campus.curriculum.paste');
 
-    // Route::post('scholar', [ScholarController::class, 'store'])->name('scholar.store');
-    // Route::post('scholar/{id}/validated', [ScholarController::class, 'insert'])->name('scholar.insert');
-    // Route::delete('scholar/{id}/{type}', [ScholarController::class, 'destroy'])->name('scholar.destroy');
-    // Route::post('scholar/{id}/grade-update', [ScholarController::class, 'gradeUpdate'])->name('scholar.grade-update');
-    // Route::post('scholar/{id}/grade-delete', [ScholarController::class, 'gradeDelete'])->name('scholar.grade-delete');
-    // Route::post('scholar/{id}/requestSubject', [ScholarController::class, 'requestSubjectDenied'])->name('scholar.requestSubject-denied');
-    // Route::post('scholar/{id}/requestSubjectAccept', [ScholarController::class, 'requestSubjectAccept'])->name('scholar.requestSubject-accept');
+    Route::post('scholar', [ScholarController::class, 'store'])->name('scholar.store');
+    Route::post('scholar/{id}/validated', [ScholarController::class, 'insert'])->name('scholar.insert');
+    Route::delete('scholar/{id}/{type}', [ScholarController::class, 'destroy'])->name('scholar.destroy');
+    Route::post('scholar/{id}/grade-update', [ScholarController::class, 'gradeUpdate'])->name('scholar.grade-update');
+    Route::post('scholar/{id}/grade-delete', [ScholarController::class, 'gradeDelete'])->name('scholar.grade-delete');
+    Route::post('scholar/{id}/requestSubject', [ScholarController::class, 'requestSubjectDenied'])->name('scholar.requestSubject-denied');
+    Route::post('scholar/{id}/requestSubjectAccept', [ScholarController::class, 'requestSubjectAccept'])->name('scholar.requestSubject-accept');
     Route::post('geolocation', [GeolocationController::class, 'store'])->name('geolocation.store');
+
 });
 Route::middleware(['auth', 'web', 'role'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -151,7 +152,7 @@ Route::middleware(['auth', 'web', 'role'])->group(function () {
     Route::get('academic/references', [ReferenceController::class, 'index'])->name('academic.references');
     Route::get('academic/schools', [SchoolController::class, 'index'])->name('academic.universities');
     Route::get('scholar/statuses', [StatusController::class, 'index'])->name('statuses');
-    //Route::get('scholars', [ScholarController::class, 'index'])->name('scholars');
+    // Route::get('scholars', [ScholarController::class, 'index'])->name('scholars');
     Route::get('scholars', [Scholar1Controller::class, 'index'])->name('scholars');
     Route::get('programs', [programController::class, 'index'])->name('programs');
     Route::get('events', [eventController::class, 'index'])->name('events');

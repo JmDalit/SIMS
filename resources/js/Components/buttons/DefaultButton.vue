@@ -9,6 +9,8 @@
         @click="onClick($event)"
         :variant="variant"
         :raised="raised"
+        :badge="badge"
+        badge-severity="danger"
         :text="text"
         :outlined="outlined"
         v-tooltip.top="tooltip"
@@ -62,6 +64,10 @@ defineProps({
     outlined: {
         type: [Boolean],
         default: false,
+    },
+    badge:{
+        type: [String],
+        default: null
     },
     severity: {
         type: [String],
