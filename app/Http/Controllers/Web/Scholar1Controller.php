@@ -161,7 +161,29 @@ class Scholar1Controller extends Controller
                 'programOptions' => $programFilter,
                 'SubProgramOptions' => $subFilter,
                 'filterSearch' => $request->input('search') ?? null,
-                'filterSchool' => request()->only(['schools'])?? []
+                'filterSchool' => Scholars::with([
+                    'schoolInfo' => fn($q) => $q
+                        ->select('id', 'scholar_id', 'campus_id')
+                        ->with('campus:id,generated_name')
+                        ->latest()
+                        ->limit(1)
+                ])
+                    ->when($request->input('schools'), function ($q, $schools) {
+                        $q->whereHas('schoolInfo', fn($w) => $w->whereHas('campus', fn($r) => $r->whereIn('generated_name', $schools)));
+                    })
+                    ->get()
+                    ->map(function ($q) {
+                        $school = $q->schoolInfo->first()?->campus;
+
+                        return [
+                            'id' => $school?->id,
+                            'name' => $school?->generated_name,
+                        ];
+                    })
+                    ->filter()
+                    ->unique('id')
+                    ->values()
+                    ?? null
             ]
         );
     }

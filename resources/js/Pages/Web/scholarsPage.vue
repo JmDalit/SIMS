@@ -409,6 +409,7 @@ const searchInput = ref( page.props?.filterSearch ?? null);
 const timerBounce = ref(null);
 
 const loadPage = (page) => {
+    console.log(filterSchool)
     router.get(
         route("scholars"),
         {
@@ -421,10 +422,6 @@ const loadPage = (page) => {
         {
             preserveState: true,
             preserveScroll: true,
-               qsStringifyOptions: {
-            arrayFormat: 'brackets',  // schools[0][id]=16&schools[0][name]=Cebu
-            encode: false,
-        },
             onBefore: () => (loading.table = true),
             onFinish: () => (loading.table = false),
         },

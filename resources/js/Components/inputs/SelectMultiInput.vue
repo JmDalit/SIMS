@@ -7,7 +7,6 @@
             :disabled="disable"
             :filter="filter"
             optionLabel="name"
-            :optionGroupChildren="['id','name']"
             display="chip"
             @update:modelValue="emit('update-model', $event)"
             :options="options"
