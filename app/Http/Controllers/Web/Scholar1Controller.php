@@ -64,8 +64,40 @@ class Scholar1Controller extends Controller
                         'name' => $school?->generated_name,
                     ];
                 })
-                ->filter() // remove nulls
-                ->unique('id') // remove duplicates
+                ->filter()
+                ->unique('id')
+                ->values()
+        );
+        $programFilter = Inertia::optional(
+            fn() => Scholars::with([
+                'program:id,name'
+            ])
+                ->get()
+                ->map(function ($q) {
+
+
+                    return [
+                        'id' => $q->program->id,
+                        'name' => $q->program->name
+                    ];
+                })
+                ->filter()
+                ->unique('id')
+                ->values()
+        );
+        $subFilter = Inertia::optional(
+            fn() => Scholars::with([
+                'type:id,name'
+            ])
+                ->get()
+                ->map(function ($q) {
+                    return [
+                        'id' => $q->type->id,
+                        'name' => $q->type->name
+                    ];
+                })
+                ->filter()
+                ->unique('id')
                 ->values()
         );
 
@@ -80,7 +112,20 @@ class Scholar1Controller extends Controller
                     'profile',
                     fn($q) =>
                     $q->whereRaw("CONCAT(lname, ' ', fname, ' ', COALESCE(mname, '')) ILIKE ?", ['%' . $request->input('search') . '%'])
-                ))->orderBy('scholar_profiles.lname', 'ASC')
+                ))
+                    ->when($request->input('schools'), function ($q, $schools) {
+                        $q->whereHas('schoolInfo', fn($w) => $w->whereHas('campus', fn($r) => $r->whereIn('generated_name', $schools)));
+                    })
+                    ->when($request->input('programs'), function ($q, $programs) {
+                        $q->whereHas('program', fn($w) => $w->whereIn('name', $programs));
+                    })
+
+                    ->when($request->input('sub'), function ($q, $sub) {
+                        $q->whereHas('type', fn($w) => $w->whereIn('name', $sub));
+                    })
+
+
+                    ->orderBy('scholar_profiles.lname', 'ASC')
                     ->paginate(10)
                     ->through(fn($q) => [
                         'id' => Hashids::encode($q->id),
@@ -112,7 +157,11 @@ class Scholar1Controller extends Controller
                 'details' => Inertia::optional(fn() => $scholar
                     ->where('scholars.id', Hashids::decode(request('id'))[0] ?? 0)
                     ->first()),
-                'schoolFilter' =>  $schoolFilter
+                'schoolOptions' =>  $schoolFilter,
+                'programOptions' => $programFilter,
+                'SubProgramOptions' => $subFilter,
+                'filterSearch' => $request->input('search') ?? null,
+                'filterSchool' => request()->only(['schools'])?? []
             ]
         );
     }

@@ -7,11 +7,13 @@
             :disabled="disable"
             :filter="filter"
             optionLabel="name"
+            :optionGroupChildren="['id','name']"
             display="chip"
             @update:modelValue="emit('update-model', $event)"
             :options="options"
             :showClear="clearable"
             fluid
+            :maxSelectedLabels="3"
             :pt="{
                 root: {
                     class: [
