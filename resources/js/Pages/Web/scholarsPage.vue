@@ -77,15 +77,12 @@
                             @click="toggleopProgram"
                         />
                         <Popover ref="opProgram">
-                     
                             <div
                                 class="gap-3 flex"
                                 v-if="page.props?.programOptions"
                             >
-                          
                                 <div class="flex-1 w-60">
                                     <SelectMultiInput
-                                     
                                         v-model="filterProgram"
                                         :options="page.props?.programOptions"
                                         capitalize
@@ -123,7 +120,7 @@
                             class-name=" !rounded-xl"
                             size="small"
                             severity="secondary"
-                            @click="toggleoSub"
+                            @click="toggleopSub"
                         />
                         <Popover ref="opSub">
                             <div
@@ -132,7 +129,6 @@
                             >
                                 <div class="flex-1 w-60">
                                     <SelectMultiInput
-                                       
                                         v-model="filterSub"
                                         :options="page.props?.SubProgramOptions"
                                         capitalize
@@ -162,7 +158,7 @@
                     <div>
                         <DefaultButton
                             :icon="
-                                filterSchool != null
+                                filterStatus != null
                                     ? TablerIcons.IconFilterFilled
                                     : TablerIcons.IconFilter
                             "
@@ -170,18 +166,17 @@
                             class-name=" !rounded-xl"
                             size="small"
                             severity="secondary"
-                            @click="toggleOpSchool"
+                            @click="toggleopStatus"
                         />
-                        <Popover ref="opSchool">
+                        <Popover ref="opStatus">
                             <div
                                 class="gap-3 flex"
-                                v-if="page.props?.schoolOptions"
+                                v-if="page.props?.statusOptions"
                             >
                                 <div class="flex-1 w-60">
                                     <SelectMultiInput
-                                        filter
-                                        v-model="filterSchool"
-                                        :options="page.props?.schoolOptions"
+                                        v-model="filterStatus"
+                                        :options="page.props?.statusOptions"
                                         capitalize
                                     ></SelectMultiInput>
                                 </div>
@@ -190,14 +185,14 @@
                                     class="flex justify-end items-center gap-2"
                                 >
                                     <DefaultButton
-                                        @click="schoolFilterClear"
+                                        @click="statusFilterClear"
                                         label="Clear"
                                         class-name="w-20 !rounded-xl"
                                         size="small"
                                         severity="secondary"
                                     />
                                     <DefaultButton
-                                        @click="schoolFilter"
+                                        @click="statusFilter"
                                         label="Filter"
                                         class-name="w-20 !rounded-xl"
                                         size="small"
@@ -209,20 +204,33 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <DefaultButton
-                        label="Requests"
-                        class-name="w-30  !rounded-xl"
+                    <ToggleButton
+                        v-model="filterSubjectRequest"
                         size="small"
-                        severity="secondary"
-                        :badge="page.props?.request_cnt"
-                    />
-                    <DefaultButton
+                        :disabled="page.props?.request_cnt == '0'"
+                        class="!rounded-xl"
+                        @update:model-value="toggleSubjectRequest"
+                    >
+                        <template #default>
+                            <div class="flex items-center gap-2">
+                                <div class="text-xs">Subject Request</div>
+                                <Badge
+                                    v-if="page.props?.request_cnt != '0'"
+                                    :value="page.props?.request_cnt"
+                                    size="small"
+                                    severity="danger"
+                                ></Badge>
+                            </div>
+                        </template>
+                    </ToggleButton>
+                    <!-- <DefaultButton
                         :icon="TablerIcons.IconPlus"
                         label="Create"
+                        @click="dialogUploadScholar = true"
                         class-name="w-30  !rounded-xl"
                         size="small"
                         raised
-                    />
+                    /> -->
                 </div>
             </div>
             <DefaultSelectionTable
@@ -243,7 +251,7 @@
                                 <OverlayBadge
                                     severity="danger"
                                     class="inline-flex"
-                                    v-if="props.data.subjectRequest_cnt"
+                                    v-if="props.data.request"
                                 >
                                     <Avatar
                                         :label="
@@ -376,40 +384,52 @@
                             </div>
                         </div>
                     </template>
-          
                 </Column>
             </DefaultSelectionTable>
         </div>
+        <!-- <DialogUploadScholarModule
+            v-if="dialogUploadScholar"
+            v-model="dialogUploadScholar"
+        ></DialogUploadScholarModule> -->
+        <DrawerScholar1Module v-if="drawerScholar" v-model="drawerScholar" />
     </AuthLayout>
 </template>
 <script setup>
-import { computed, reactive, ref, watch } from "vue";
 import AuthLayout from "../../Layouts/AuthLayout.vue";
 import * as TablerIcons from "@tabler/icons-vue";
 import HeaderModule from "../../Modules/Others/HeaderModule.vue";
 import DefaultSelectionTable from "../../Components/tables/DefaultSelectionTable.vue";
-import { Head, usePage, router } from "@inertiajs/vue3";
+import SelectMultiInput from "../../Components/inputs/SelectMultiInput.vue";
+import DrawerScholarRequestModule from "../../Modules/Others/DrawerScholar1Module.vue";
+import DialogUploadScholarModule from "../../Modules/Others/DialogUploadScholarModule.vue";
 import TextInput from "../../Components/inputs/TextInput.vue";
 import IconTextInput from "../../Components/inputs/IconTextInput.vue";
 import DefaultButton from "../../Components/buttons/DefaultButton.vue";
+import { computed, reactive, ref, watch } from "vue";
 import { route } from "ziggy-js";
-import { event } from "@primeuix/themes/aura/timeline";
-import SelectMultiInput from "../../Components/inputs/SelectMultiInput.vue";
+import { Head, usePage, router } from "@inertiajs/vue3";
+import DrawerScholar1Module from "../../Modules/Others/DrawerScholar1Module.vue";
+
 const page = usePage();
 const loading = reactive({
     table: false,
+    request: false,
 });
 const opSchool = ref(null);
 const opProgram = ref(null);
-const opSub = ref(null)
-const filterSchool = ref(page.props?.filterSchool ?? [] );
+const opSub = ref(null);
+const opStatus = ref(null);
+const filterSchool = ref(page.props?.filterSchool ?? null);
 const filterProgram = ref(null);
-const filterSub = ref(null)
-const searchInput = ref( page.props?.filterSearch ?? null);
+const filterSub = ref(null);
+const filterStatus = ref(null);
+const filterSubjectRequest = ref(false);
+const dialogUploadScholar = ref(false);
+const drawerScholar = ref(false);
+const searchInput = ref(page.props?.filterSearch ?? null);
 const timerBounce = ref(null);
 
 const loadPage = (page) => {
-    console.log(filterSchool)
     router.get(
         route("scholars"),
         {
@@ -417,7 +437,11 @@ const loadPage = (page) => {
             ...(searchInput.value ? { search: searchInput.value } : {}),
             ...(filterSchool.value ? { schools: filterSchool.value } : {}),
             ...(filterProgram.value ? { programs: filterProgram.value } : {}),
-                        ...(filterSub.value ? { sub: filterSub.value } : {}),
+            ...(filterSub.value ? { sub: filterSub.value } : {}),
+            ...(filterStatus.value ? { status: filterStatus.value } : {}),
+            ...(filterSubjectRequest.value
+                ? { subjectRequest: filterSubjectRequest.value }
+                : {}),
         },
         {
             preserveState: true,
@@ -433,7 +457,11 @@ const toggleScholarDetails = (event) => {
         only: ["details"],
         data: { id: event.id },
         preserveState: true,
-        onSuccess: () => {},
+        showProgress: true,
+        replace: true,
+        onFinish: () => {
+            drawerScholar.value = true;
+        },
     });
 };
 
@@ -446,7 +474,7 @@ const toggleOpSchool = (event) => {
 
 const schoolFilter = (event) => {
     opSchool.value.toggle(event);
-    console.log(filterSchool.value )
+    console.log(filterSchool.value);
     clearTimeout(timerBounce.value);
     timerBounce.value = setTimeout(() => {
         loadPage(1);
@@ -486,7 +514,7 @@ const programFilterClear = (event) => {
     }, 300);
 };
 
-const toggleoSub = (event) => {
+const toggleopSub = (event) => {
     opSub.value.toggle(event);
     router.reload({
         only: ["SubProgramOptions"],
@@ -504,6 +532,37 @@ const subFilter = (event) => {
 const subFilterClear = (event) => {
     opSub.value.toggle(event);
     filterSub.value = null;
+    clearTimeout(timerBounce.value);
+    timerBounce.value = setTimeout(() => {
+        loadPage(1);
+    }, 300);
+};
+
+const toggleopStatus = (event) => {
+    opStatus.value.toggle(event);
+    router.reload({
+        only: ["statusOptions"],
+    });
+};
+
+const statusFilter = (event) => {
+    opStatus.value.toggle(event);
+    clearTimeout(timerBounce.value);
+    timerBounce.value = setTimeout(() => {
+        loadPage(1);
+    }, 300);
+};
+
+const statusFilterClear = (event) => {
+    opStatus.value.toggle(event);
+    filterStatus.value = null;
+    clearTimeout(timerBounce.value);
+    timerBounce.value = setTimeout(() => {
+        loadPage(1);
+    }, 300);
+};
+
+const toggleSubjectRequest = (event) => {
     clearTimeout(timerBounce.value);
     timerBounce.value = setTimeout(() => {
         loadPage(1);

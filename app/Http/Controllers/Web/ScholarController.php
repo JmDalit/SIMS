@@ -81,7 +81,6 @@ class ScholarController extends Controller
                                     'subject:id,name,year,subject_code,unit,subject_class,semester_id'
                                 ])
                                 ->where('status', 'pending'),
-
                         ]),
                     'schoolInfo' => fn($q) => $q
                         ->select('id', 'scholar_id', 'campus_id', 'campus_course_id')
