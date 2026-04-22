@@ -323,7 +323,7 @@ class Scholar1Controller extends Controller
     }
 
 
-    public function update(int $id,string $type, Request $request)
+    public function update(int $id, string $type, Request $request)
     {
         $scholar = Scholars::findOrFail($id);
 
@@ -356,9 +356,10 @@ class Scholar1Controller extends Controller
                     'civil_status' => $data['civil_status'],
                 ]
             );
-        return back()->with([
-            'message' => 'Information updated successfully.',
-            'type' => 'success'
-        ]);
+            return back()->with([
+                'message' => 'Information updated successfully.',
+                'type' => 'success'
+            ]);
+        }
     }
 }
