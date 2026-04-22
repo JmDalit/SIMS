@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Scholars;
 use App\Models\ScholarSchoolInfos;
 use App\Models\StudentSubjectRequest;
+use App\References\LocationClass;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,7 @@ use Vinkla\Hashids\Facades\Hashids;
 
 class Scholar1Controller extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, LocationClass $location)
     {
         $schoolFilter = Inertia::optional(
             fn() => Scholars::with([
@@ -194,7 +195,7 @@ class Scholar1Controller extends Controller
                             ->flatten()
                             ->isNotEmpty()
                     ]),
-                'details' => Inertia::optional(function () use ($request) {
+                'details' => Inertia::optional(function () use ($request, $location) {
                     $id = Hashids::decode($request->input('id'))[0] ?? 0;
                     $q = Scholars::select(
                         'scholars.id',
@@ -208,6 +209,7 @@ class Scholar1Controller extends Controller
                         ->with([
                             'status:id,name,icon,color_id',
                             'status.color:id,background_color,text_color',
+                            'address:id,scholar_id,region_code,province_code,city_code,barangay_code',
                             'program:id,name',
                             'type:id,name',
                             'profile:id,scholar_id,photo,sex,fname,lname,mname,suffix,email,contact_no,birthplace,birthdate,religion,civil_status',
@@ -267,7 +269,11 @@ class Scholar1Controller extends Controller
                             'tcolor' => $q?->status?->color?->text_color,
                             'icon' => $q?->status?->icon
                         ],
-
+                        'address'   => [
+                            'region'       => $q->address?->region_array,
+                            'municipality' => $q->address?->municipality_array,
+                            'barangay'     => $q->address?->barangay_array,
+                        ],
                         'awardYear' => $q?->award_year,
                         'course' => $q?->schoolInfo->first()?->course->course->name,
                         'school' => $q?->schoolInfo->first()?->campus->generated_name,
