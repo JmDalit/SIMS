@@ -161,7 +161,7 @@
                                     <component :is="TablerIcons[item.icon]" :size="18"></component>
                                     <span class="!text-xs">{{
                                         item.label
-                                        }}</span>
+                                    }}</span>
                                     <Badge v-if="item.badge" size="small" severity="danger" class="ml-auto !text-xs"
                                         :value="item.badge" />
                                 </a>
@@ -233,7 +233,11 @@
                                 </div>
                                 <TextInput v-model="personalInfo.address" label="Address" :disabled="!editBtn.info"
                                     placeholder="Street, Subdivision, etc."></TextInput>
-
+                                <AutoCompleteInput v-model="personalInfo.fulladdress"
+                                    :options="page.props?.resultSearch" :disabled="!editBtn.info"
+                                    :loading="loading.address"
+                                    placeholder="Find by Barangay, Municipality, Province, or Region"
+                                    @complete="autoSearch" selection></AutoCompleteInput>
 
                             </div>
                         </template>
@@ -244,7 +248,7 @@
     </Drawer>
 </template>
 <script setup>
-import { useForm, usePage } from "@inertiajs/vue3";
+import { router, useForm, usePage } from "@inertiajs/vue3";
 import {
     IconCopy,
     IconId,
@@ -270,6 +274,9 @@ const editBtn = ref({
     tr: false,
     stipend: false,
     activity: false,
+});
+const loading = ref({
+    address: false,
 });
 
 const personalInfo = useForm({
@@ -312,6 +319,19 @@ const tabs = ref([
 const changeMenu = (item) => {
     selectedTab.value = item;
 };
+
+const autoSearch = (event) => {
+    router.get(
+        route("scholars"),
+        { findAddress: event },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+            only: ["resultSearch"],
+        },
+    );
+};
 watch(
     () => page.props?.details,
     (newVal) => {
@@ -329,6 +349,8 @@ watch(
         personalInfo.birth_place = newVal.birthplace ?? null;
         personalInfo.religion = newVal.religion ?? null;
         personalInfo.civil_status = newVal.civil_status ?? null;
+        personalInfo.address = newVal.address?.address ?? null;
+        personalInfo.fulladdress = newVal.fullAddress ?? null;
     },
     { immediate: true },
 );

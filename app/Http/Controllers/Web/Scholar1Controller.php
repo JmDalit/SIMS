@@ -209,7 +209,7 @@ class Scholar1Controller extends Controller
                         ->with([
                             'status:id,name,icon,color_id',
                             'status.color:id,background_color,text_color',
-                            'address:id,scholar_id,region_code,province_code,city_code,barangay_code',
+                            'address:id,scholar_id,region_code,province_code,municipality_code,barangay_code,address',
                             'program:id,name',
                             'type:id,name',
                             'profile:id,scholar_id,photo,sex,fname,lname,mname,suffix,email,contact_no,birthplace,birthdate,religion,civil_status',
@@ -270,10 +270,13 @@ class Scholar1Controller extends Controller
                             'icon' => $q?->status?->icon
                         ],
                         'address'   => [
-                            'region'       => $q->address?->region_array,
-                            'municipality' => $q->address?->municipality_array,
-                            'barangay'     => $q->address?->barangay_array,
+                            'address'      => $q?->address?->address,
+                            'province'     => $q?->address?->province_array,
+                            'region'       => $q?->address?->region_array,
+                            'municipality' => $q?->address?->municipality_array,
+                            'barangay'     => $q?->address?->barangay_array,
                         ],
+                        'fullAddress' => $q?->address?->full_address,
                         'awardYear' => $q?->award_year,
                         'course' => $q?->schoolInfo->first()?->course->course->name,
                         'school' => $q?->schoolInfo->first()?->campus->generated_name,
@@ -284,6 +287,9 @@ class Scholar1Controller extends Controller
                             ->count(),
                     ];
                 }),
+                'resultSearch' => request('findAddress')
+                    ? ($location->getFullAddress(request('findAddress')) ?? [])
+                    : [],
                 'schoolOptions' =>  $schoolFilter,
                 'programOptions' => $programFilter,
                 'SubProgramOptions' => $subFilter,
@@ -314,5 +320,45 @@ class Scholar1Controller extends Controller
                     : null
             ]
         );
+    }
+
+
+    public function update(int $id,string $type, Request $request)
+    {
+        $scholar = Scholars::findOrFail($id);
+
+        if ($type === 'personal_info') {
+            $data = $request->validate([
+                'fname' => 'required|string|max:255',
+                'mname' => 'nullable|string|max:255',
+                'lname' => 'required|string|max:255',
+                'suffix' => 'nullable|string|max:255',
+                'email' => 'required|email|max:255',
+                'contact_no' => 'nullable|string|max:20',
+                'birthplace' => 'nullable|string|max:255',
+                'birthdate' => 'nullable|date',
+                'religion' => 'nullable|string|max:255',
+                'civil_status' => 'nullable|string|max:255',
+            ]);
+
+            $scholar->profile()->updateOrCreate(
+                ['scholar_id' => $scholar->id],
+                [
+                    'fname' => $data['fname'],
+                    'mname' => $data['mname'],
+                    'lname' => $data['lname'],
+                    'suffix' => $data['suffix'],
+                    'email' => $data['email'],
+                    'contact_no' => $data['contact_no'],
+                    'birthplace' => $data['birthplace'],
+                    'birthdate' => $data['birthdate'],
+                    'religion' => $data['religion'],
+                    'civil_status' => $data['civil_status'],
+                ]
+            );
+        return back()->with([
+            'message' => 'Information updated successfully.',
+            'type' => 'success'
+        ]);
     }
 }

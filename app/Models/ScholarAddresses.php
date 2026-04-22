@@ -35,4 +35,50 @@ class ScholarAddresses extends Model
     {
         return $this->belongsTo(Scholars::class, 'scholar_id');
     }
+
+    public function getBarangayArrayAttribute()
+    {
+        return $this->barangay ? [
+            'code' => $this->barangay->code,
+            'name' => $this->barangay->name
+        ] : null;
+    }
+
+    // Municipality
+    public function getMunicipalityArrayAttribute()
+    {
+        return $this->municipality ? [
+            'code' => $this->municipality->code,
+            'name' => $this->municipality->name
+        ] : null;
+    }
+
+    // Province
+    public function getProvinceArrayAttribute()
+    {
+        return $this->province ? [
+            'code' => $this->province->code,
+            'name' => $this->province->name
+        ] : null;
+    }
+
+    // Region
+    public function getRegionArrayAttribute()
+    {
+        return $this->region ? [
+            'code' => $this->region->code,
+            'name' => $this->region->name
+        ] : null;
+    }
+
+    public function getFullAddressAttribute()
+    {
+        return [
+            'id' =>  $this->barangay_code . '-' . $this->municipality_code . '-' . $this->province_code . '-' . $this->region_code,
+            'name' => ($this->barangay ? $this->barangay->name . ', ' : '') .
+                ($this->municipality ? $this->municipality->name . ', ' : '') .
+                ($this->province ? $this->province->name . ', ' : '') .
+                ($this->region ? $this->region->name : ''),
+        ];
+    }
 }
