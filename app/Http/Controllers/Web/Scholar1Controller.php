@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Scholars;
 use App\Models\ScholarSchoolInfos;
 use App\Models\StudentSubjectRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -209,7 +210,7 @@ class Scholar1Controller extends Controller
                             'status.color:id,background_color,text_color',
                             'program:id,name',
                             'type:id,name',
-                            'profile:id,scholar_id,photo,sex,fname,lname,mname,suffix,email,contact_no',
+                            'profile:id,scholar_id,photo,sex,fname,lname,mname,suffix,email,contact_no,birthplace,birthdate,religion,civil_status',
                             'schoolInfo' => fn($q) => $q
                                 ->select('id', 'scholar_id', 'campus_id', 'campus_course_id')
                                 ->with([
@@ -242,10 +243,18 @@ class Scholar1Controller extends Controller
 
                     return [
                         'spas_no' => $q?->spas_no,
-                        'name' => $q?->name,
                         'type' => $q?->type?->name,
                         'program' => $q?->program?->name,
                         'email' => $q?->profile?->email,
+                        'contact_no' => $q?->profile?->contact_no,
+                        'fname' => $q?->profile?->fname,
+                        'mname' => $q?->profile?->mname,
+                        'lname' => $q?->profile?->lname,
+                        'suffix' => $q?->profile?->suffix,
+                        'birthplace' => $q?->profile?->birthplace,
+                        'birthdate' => Carbon::parse($q?->profile?->birthdate)->format('Y-m-d'),
+                        'religion' => $q?->profile?->religion,
+                        'civil_status' => $q?->profile?->civil_status,
                         'fullname' => trim(collect([
                             $q?->profile?->lname . ',',
                             $q?->profile?->fname,
@@ -258,6 +267,7 @@ class Scholar1Controller extends Controller
                             'tcolor' => $q?->status?->color?->text_color,
                             'icon' => $q?->status?->icon
                         ],
+
                         'awardYear' => $q?->award_year,
                         'course' => $q?->schoolInfo->first()?->course->course->name,
                         'school' => $q?->schoolInfo->first()?->campus->generated_name,

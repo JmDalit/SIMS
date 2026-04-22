@@ -153,6 +153,7 @@ class ScholarController extends Controller
                     'birthdate' => Carbon::parse($scholarDetails?->profile?->birthdate)->format('Y-m-d'),
                     'religion' => $scholarDetails?->profile?->religion,
                     'civil_status' => $scholarDetails?->profile?->civil_status,
+                    
                 ] : null,
             'academic' => request('id') ?
                 ScholarSchoolInfos::select(
