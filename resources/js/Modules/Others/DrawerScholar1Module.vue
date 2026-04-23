@@ -396,6 +396,69 @@
                                     @complete="autoSearch"
                                     selection
                                 ></AutoCompleteInput>
+
+                                <Divider align="left">
+                                    <span class="text-xs font-semibold"
+                                        >Scholarship Assignment</span
+                                    >
+                                </Divider>
+                                <div class="flex items-center gap-3">
+                                    <SelectInput
+                                        label="Scholar Program"
+                                        v-model="personalInfo.program"
+                                        :options="page.props?.programOptions"
+                                    ></SelectInput>
+
+                                    <SelectInput
+                                        label="Scholar Sub-Program"
+                                        v-model="personalInfo.sub_program"
+                                        :options="page.props?.subProgramOptions"
+                                    ></SelectInput>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <TextInput
+                                        v-model="personalInfo.last_name"
+                                        label="Award Year"
+                                        :disabled="!editBtn.info"
+                                    ></TextInput>
+                                    <TextInput
+                                        v-model="personalInfo.suffix"
+                                        label="Status"
+                                        :disabled="!editBtn.info"
+                                    >
+                                    </TextInput>
+                                </div>
+                                <Divider align="left">
+                                    <span class="text-xs font-semibold"
+                                        >Guardian Information</span
+                                    >
+                                </Divider>
+                                <div class="flex items-center gap-3">
+                                    <TextInput
+                                        v-model="personalInfo.last_name"
+                                        label="Program"
+                                        :disabled="!editBtn.info"
+                                    ></TextInput>
+                                    <TextInput
+                                        v-model="personalInfo.suffix"
+                                        label="Sub-Program"
+                                        :disabled="!editBtn.info"
+                                    >
+                                    </TextInput>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <TextInput
+                                        v-model="personalInfo.last_name"
+                                        label="Award Year"
+                                        :disabled="!editBtn.info"
+                                    ></TextInput>
+                                    <TextInput
+                                        v-model="personalInfo.suffix"
+                                        label="Status"
+                                        :disabled="!editBtn.info"
+                                    >
+                                    </TextInput>
+                                </div>
                             </div>
                         </template>
                     </Panel>
@@ -423,6 +486,7 @@ import DefaultButton from "../../Components/buttons/DefaultButton.vue";
 import TextInput from "../../Components/inputs/TextInput.vue";
 import DatePickerInput from "../../Components/inputs/DatePickerInput.vue";
 import AutoCompleteInput from "../../Components/inputs/AutoCompleteInput.vue";
+import SelectInput from "../../Components/inputs/SelectInput.vue";
 const page = usePage();
 const modelValue = defineModel("modelValue");
 const selectedTab = ref({
@@ -453,6 +517,10 @@ const personalInfo = useForm({
     civil_status: "",
     address: "",
     fulladdress: "",
+    rogram: "",
+    sub_program: "",
+    award_year: "",
+    status: "",
 });
 
 const tabs = ref([

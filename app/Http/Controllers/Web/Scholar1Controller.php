@@ -326,41 +326,59 @@ class Scholar1Controller extends Controller
 
     public function update(int $id, string $type, Request $request)
     {
-        $scholar = Scholars::findOrFail($id);
+        try {
+            $scholar = Scholars::findOrFail($id);
 
-        if ($type === 'personal_info') {
-            $data = $request->validate([
-                'fname' => 'required|string|max:255',
-                'mname' => 'nullable|string|max:255',
-                'lname' => 'required|string|max:255',
-                'suffix' => 'nullable|string|max:255',
-                'email' => 'required|email|max:255',
-                'contact_no' => 'nullable|string|max:20',
-                'birthplace' => 'nullable|string|max:255',
-                'birthdate' => 'nullable|date',
-                'religion' => 'nullable|string|max:255',
-                'civil_status' => 'nullable|string|max:255',
+            if ($type === 'personal_info') {
+                $data = $request->validate([
+                    'fname' => 'required|string|max:255',
+                    'mname' => 'nullable|string|max:255',
+                    'lname' => 'required|string|max:255',
+                    'suffix' => 'nullable|string|max:255',
+                    'email' => 'required|email|max:255',
+                    'contact_no' => 'nullable|string|max:20',
+                    'birthplace' => 'nullable|string|max:255',
+                    'birthdate' => 'nullable|date',
+                    'religion' => 'nullable|string|max:255',
+                    'civil_status' => 'nullable|string|max:255',
+                ]);
+
+                $scholar->profile()->updateOrCreate(
+                    ['scholar_id' => $scholar->id],
+                    [
+                        'fname' => $data['fname'],
+                        'mname' => $data['mname'],
+                        'lname' => $data['lname'],
+                        'suffix' => $data['suffix'],
+                        'email' => $data['email'],
+                        'contact_no' => $data['contact_no'],
+                        'birthplace' => $data['birthplace'],
+                        'birthdate' => $data['birthdate'],
+                        'religion' => $data['religion'],
+                        'civil_status' => $data['civil_status'],
+                    ]
+                );
+
+                $scholar->address()->updateOrCreate(
+                    ['scholar_id' => $scholar->id],
+                    [
+                        'address' => $request->input('address'),
+                        'region_code' => $request->input('region_code'),
+                        'province_code' => $request->input('province_code'),
+                        'municipality_code' => $request->input('municipality_code'),
+                        'barangay_code' => $request->input('barangay_code'),
+                    ]
+                );
+            }
+            return back()->with([
+                'message' => 'Information updated successfully.',
+                'type' => 'success'
             ]);
-
-            $scholar->profile()->updateOrCreate(
-                ['scholar_id' => $scholar->id],
-                [
-                    'fname' => $data['fname'],
-                    'mname' => $data['mname'],
-                    'lname' => $data['lname'],
-                    'suffix' => $data['suffix'],
-                    'email' => $data['email'],
-                    'contact_no' => $data['contact_no'],
-                    'birthplace' => $data['birthplace'],
-                    'birthdate' => $data['birthdate'],
-                    'religion' => $data['religion'],
-                    'civil_status' => $data['civil_status'],
-                ]
-            );
+        } catch (\Throwable $th) {
+            return back()->with([
+                'message' => 'An error occurred.' . $th->getMessage(),
+                'type' => 'error'
+            ]);
         }
-        return back()->with([
-            'message' => 'Information updated successfully.',
-            'type' => 'success'
-        ]);
     }
 }

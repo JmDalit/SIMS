@@ -454,7 +454,7 @@ const loadPage = (page) => {
 
 const toggleScholarDetails = (event) => {
     router.reload({
-        only: ["details"],
+        only: ["details", "programOptions", "SubProgramOptions"],
         data: { id: event.id },
         preserveState: true,
         showProgress: true,
@@ -578,6 +578,4 @@ watch(
         }, 300);
     },
 );
-
-
 </script>
