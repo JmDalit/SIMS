@@ -405,7 +405,7 @@ import DialogUploadScholarModule from "../../Modules/Others/DialogUploadScholarM
 import TextInput from "../../Components/inputs/TextInput.vue";
 import IconTextInput from "../../Components/inputs/IconTextInput.vue";
 import DefaultButton from "../../Components/buttons/DefaultButton.vue";
-import { computed, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { route } from "ziggy-js";
 import { Head, usePage, router } from "@inertiajs/vue3";
 import DrawerScholar1Module from "../../Modules/Others/DrawerScholar1Module.vue";
