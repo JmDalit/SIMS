@@ -16,6 +16,7 @@ use Vinkla\Hashids\Facades\Hashids;
 
 class Scholar1Controller extends Controller
 {
+
     public function index(Request $request, LocationClass $location)
     {
         $schoolFilter = Inertia::optional(
@@ -356,10 +357,10 @@ class Scholar1Controller extends Controller
                     'civil_status' => $data['civil_status'],
                 ]
             );
-            return back()->with([
-                'message' => 'Information updated successfully.',
-                'type' => 'success'
-            ]);
         }
+        return back()->with([
+            'message' => 'Information updated successfully.',
+            'type' => 'success'
+        ]);
     }
 }
