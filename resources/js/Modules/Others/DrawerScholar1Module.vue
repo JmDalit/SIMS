@@ -505,22 +505,22 @@ const loading = ref({
 });
 
 const personalInfo = useForm({
-    last_name: "",
-    first_name: "",
-    middle_name: "",
-    suffix: "",
-    email: "",
-    contact_no: "",
-    birth_date: "",
-    birth_place: "",
-    religion: "",
-    civil_status: "",
-    address: "",
-    fulladdress: "",
-    rogram: "",
-    sub_program: "",
-    award_year: "",
-    status: "",
+    last_name: null,
+    first_name: null,
+    middle_name: null,
+    suffix: null,
+    email: null,
+    contact_no: null,
+    birth_date: null,
+    birth_place: null,
+    religion: null,
+    civil_status: null,
+    address: null,
+    fulladdress: null,
+    rogram: null,
+    sub_program: null,
+    award_year: null,
+    status: null,
 });
 
 const tabs = ref([
