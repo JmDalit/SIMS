@@ -125,12 +125,12 @@
                         <Popover ref="opSub">
                             <div
                                 class="gap-3 flex"
-                                v-if="page.props?.SubProgramOptions"
+                                v-if="page.props?.subProgramOptions"
                             >
                                 <div class="flex-1 w-60">
                                     <SelectMultiInput
                                         v-model="filterSub"
-                                        :options="page.props?.SubProgramOptions"
+                                        :options="page.props?.subProgramOptions"
                                         capitalize
                                     ></SelectMultiInput>
                                 </div>
@@ -454,7 +454,12 @@ const loadPage = (page) => {
 
 const toggleScholarDetails = (event) => {
     router.reload({
-        only: ["details", "programOptions", "SubProgramOptions"],
+        only: [
+            "details",
+            "programOptions",
+            "subProgramOptions",
+            "forDetailStatusOptions",
+        ],
         data: { id: event.id },
         preserveState: true,
         showProgress: true,
@@ -474,7 +479,6 @@ const toggleOpSchool = (event) => {
 
 const schoolFilter = (event) => {
     opSchool.value.toggle(event);
-    console.log(filterSchool.value);
     clearTimeout(timerBounce.value);
     timerBounce.value = setTimeout(() => {
         loadPage(1);
@@ -517,7 +521,7 @@ const programFilterClear = (event) => {
 const toggleopSub = (event) => {
     opSub.value.toggle(event);
     router.reload({
-        only: ["SubProgramOptions"],
+        only: ["subProgramOptions"],
     });
 };
 

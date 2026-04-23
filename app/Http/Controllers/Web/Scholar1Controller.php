@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\ListStatuses;
 use App\Models\Scholars;
 use App\Models\ScholarSchoolInfos;
 use App\Models\StudentSubjectRequest;
 use App\References\LocationClass;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -88,6 +90,18 @@ class Scholar1Controller extends Controller
                 ->unique('id')
                 ->values()
         );
+
+        $statusDetailsOptions = ListStatuses::where('type', 'progress')
+            ->where('is_active', true)
+            ->where('is_delete', false)
+            ->get()->map(function ($q) {
+                return [
+                    'name' => $q->name,
+                    'icon' => $q->icon,
+                    'bcolor' => $q->color?->background_color,
+                    'tcolor' => $q->color?->text_color,
+                ];
+            });
 
         $termRecordIds = StudentSubjectRequest::where('status', 'pending')->pluck('term_record_id')->toArray();
 
@@ -208,6 +222,7 @@ class Scholar1Controller extends Controller
                     )
                         ->join('scholar_profiles', 'scholar_profiles.scholar_id', '=', 'scholars.id')
                         ->with([
+                            'parent',
                             'status:id,name,icon,color_id',
                             'status.color:id,background_color,text_color',
                             'address:id,scholar_id,region_code,province_code,municipality_code,barangay_code,address',
@@ -245,9 +260,16 @@ class Scholar1Controller extends Controller
 
 
                     return [
+                        'id' => Hashids::encode($q->id),
                         'spas_no' => $q?->spas_no,
-                        'type' => $q?->type?->name,
-                        'program' => $q?->program?->name,
+                        'type' => [
+                            'id' => $q?->type?->id,
+                            'name' => $q?->type?->name
+                        ],
+                        'program' => [
+                            'id' => $q?->program?->id,
+                            'name' => $q?->program?->name
+                        ],
                         'email' => $q?->profile?->email,
                         'contact_no' => $q?->profile?->contact_no,
                         'fname' => $q?->profile?->fname,
@@ -286,6 +308,13 @@ class Scholar1Controller extends Controller
                             ->pluck('requests')
                             ->flatten()
                             ->count(),
+                        'guardian' => [
+                            'name' => $q?->parent?->fname,
+                            'id_no' => $q?->parent?->id_no,
+                            'place_issue' => $q?->parent?->id_place,
+                            'date_issue' => $q?->parent?->id_date,
+
+                        ]
                     ];
                 }),
                 'resultSearch' => request('findAddress')
@@ -293,7 +322,8 @@ class Scholar1Controller extends Controller
                     : [],
                 'schoolOptions' =>  $schoolFilter,
                 'programOptions' => $programFilter,
-                'SubProgramOptions' => $subFilter,
+                'subProgramOptions' => $subFilter,
+                'forDetailStatusOptions' => $statusDetailsOptions,
                 'statusOptions' => $statusFilter,
                 'filterSearch' => $request->input('search') ?? null,
                 'filterSchool' => $request->input('schools') != null ? Scholars::with([
@@ -324,56 +354,83 @@ class Scholar1Controller extends Controller
     }
 
 
-    public function update(int $id, string $type, Request $request)
+    public function update(string $id, string $type, Request $request)
     {
         try {
+            $id = Hashids::decode($id)[0] ?? 0;
             $scholar = Scholars::findOrFail($id);
 
-            if ($type === 'personal_info') {
+            if ($type == 'personal') {
+
                 $data = $request->validate([
-                    'fname' => 'required|string|max:255',
-                    'mname' => 'nullable|string|max:255',
-                    'lname' => 'required|string|max:255',
+                    'first_name' => 'required|string|max:255',
+                    'middle_name' => 'nullable|string|max:255',
+                    'last_name' => 'required|string|max:255',
                     'suffix' => 'nullable|string|max:255',
                     'email' => 'required|email|max:255',
                     'contact_no' => 'nullable|string|max:20',
-                    'birthplace' => 'nullable|string|max:255',
-                    'birthdate' => 'nullable|date',
+                    'birth_place' => 'nullable|string|max:255',
+                    'birth_date' => 'nullable|date',
                     'religion' => 'nullable|string|max:255',
                     'civil_status' => 'nullable|string|max:255',
+                    'fulladdress' => 'required',
+                    // // Scholarship
+                    'program' => 'required',
+                    'sub_program' => 'required',
+                    'award_year' => 'required',
+                    'status' => 'required',
+
+                    // // Guardian
+                    'guardian_name' => 'nullable|string|max:255',
+                    'guardian_id_no' => 'nullable|string|max:255',
+                    'guardian_place_issue' => 'nullable|string|max:255',
+                    'guardian_date_issue' => 'nullable|date',
                 ]);
+
+                $slice = explode('-', $data['fulladdress']['id']);
 
                 $scholar->profile()->updateOrCreate(
                     ['scholar_id' => $scholar->id],
                     [
-                        'fname' => $data['fname'],
-                        'mname' => $data['mname'],
-                        'lname' => $data['lname'],
-                        'suffix' => $data['suffix'],
+                        'fname' => $data['first_name'],
+                        'mname' => $data['middle_name'] ?? null,
+                        'lname' => $data['last_name'],
+                        'suffix' => $data['suffix'] ?? null,
                         'email' => $data['email'],
-                        'contact_no' => $data['contact_no'],
-                        'birthplace' => $data['birthplace'],
-                        'birthdate' => $data['birthdate'],
-                        'religion' => $data['religion'],
-                        'civil_status' => $data['civil_status'],
+                        'contact_no' => $data['contact_no'] ?? null,
+                        'birthplace' => $data['birth_place'] ?? null,
+                        'birthdate' => $data['birth_date'] ?? null,
+                        'religion' => $data['religion'] ?? null,
+                        'civil_status' => $data['civil_status'] ?? null,
                     ]
                 );
 
                 $scholar->address()->updateOrCreate(
                     ['scholar_id' => $scholar->id],
                     [
-                        'address' => $request->input('address'),
-                        'region_code' => $request->input('region_code'),
-                        'province_code' => $request->input('province_code'),
-                        'municipality_code' => $request->input('municipality_code'),
-                        'barangay_code' => $request->input('barangay_code'),
+                        'address' => $data['address'] ?? null,
+                        'region_code' => $slice[0] ?? null,
+                        'province_code' => $slice[1] ?? null,
+                        'municipality_code' => $slice[2] ?? null,
+                        'barangay_code' => $slice[3] ?? null,
+
                     ]
                 );
+
+                $scholar->parent()->updateOrCreate(
+                    ['scholar_id' => $scholar->id],
+                    [
+                        'fname' => $data['guardian_name'] ?? null,
+                        'id_no' => $data['guardian_id_no'] ?? null,
+                        'id_place' => $data['guardian_place_issue'] ?? null,
+                        'id_date' => $data['guardian_date_issue'] ?? null,
+                    ]
+                );
+                return back()->with([
+                    'message' => 'Information updated successfully.',
+                    'type' => 'success'
+                ]);
             }
-            return back()->with([
-                'message' => 'Information updated successfully.',
-                'type' => 'success'
-            ]);
         } catch (\Throwable $th) {
             return back()->with([
                 'message' => 'An error occurred.' . $th->getMessage(),

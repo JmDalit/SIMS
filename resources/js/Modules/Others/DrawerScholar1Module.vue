@@ -135,7 +135,9 @@
                                 <div
                                     class="flex flex-col items-center justify-center"
                                 >
-                                    <div>{{ page.props?.details.type }}</div>
+                                    <div>
+                                        {{ page.props?.details.type.name }}
+                                    </div>
                                     <div class="text-xs text-gray-400">
                                         Program
                                     </div>
@@ -143,7 +145,9 @@
                                 <div
                                     class="flex flex-col items-center justify-center"
                                 >
-                                    <div>{{ page.props?.details.program }}</div>
+                                    <div>
+                                        {{ page.props?.details.program.name }}
+                                    </div>
                                     <div class="text-xs text-gray-400">
                                         Sub-Program
                                     </div>
@@ -234,7 +238,7 @@
                                     :class="[
                                         'flex items-center gap-2 px-3 py-2 cursor-pointer',
                                         selectedTab.key == item.key
-                                            ? 'hover:bg-slate-100'
+                                            ? 'text-blue-600'
                                             : '',
                                     ]"
                                     @click="changeMenu(item)"
@@ -304,7 +308,9 @@
                                         />
                                         <DefaultButton
                                             :icon="TablerIcons.IconUserCheck"
+                                            @click="storePersonalInfo"
                                             raised
+                                            :loading="loading.storePersonalInfo"
                                             label="Save this details"
                                             size="small"
                                             class-name="!rounded-xl !px-5"
@@ -406,27 +412,34 @@
                                     <SelectInput
                                         label="Scholar Program"
                                         v-model="personalInfo.program"
+                                        :disable="!editBtn.info"
                                         :options="page.props?.programOptions"
                                     ></SelectInput>
 
                                     <SelectInput
                                         label="Scholar Sub-Program"
                                         v-model="personalInfo.sub_program"
+                                        :disable="!editBtn.info"
                                         :options="page.props?.subProgramOptions"
                                     ></SelectInput>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <TextInput
-                                        v-model="personalInfo.last_name"
+                                    <DatePickerInput
+                                        v-model="personalInfo.award_year"
                                         label="Award Year"
+                                        view="year"
                                         :disabled="!editBtn.info"
-                                    ></TextInput>
-                                    <TextInput
-                                        v-model="personalInfo.suffix"
+                                        format-date="yy"
+                                    ></DatePickerInput>
+                                    <SelectInput
                                         label="Status"
-                                        :disabled="!editBtn.info"
-                                    >
-                                    </TextInput>
+                                        v-model="personalInfo.status"
+                                        :disable="!editBtn.info"
+                                        class="capitalize"
+                                        :options="
+                                            page.props?.forDetailStatusOptions
+                                        "
+                                    ></SelectInput>
                                 </div>
                                 <Divider align="left">
                                     <span class="text-xs font-semibold"
@@ -435,26 +448,31 @@
                                 </Divider>
                                 <div class="flex items-center gap-3">
                                     <TextInput
-                                        v-model="personalInfo.last_name"
-                                        label="Program"
+                                        v-model="personalInfo.guardian_name"
+                                        label="Parent/Guardian Name"
+                                        capitalize
                                         :disabled="!editBtn.info"
                                     ></TextInput>
                                     <TextInput
-                                        v-model="personalInfo.suffix"
-                                        label="Sub-Program"
+                                        v-model="personalInfo.guardian_id_no"
+                                        label="ID Number"
                                         :disabled="!editBtn.info"
                                     >
                                     </TextInput>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <TextInput
-                                        v-model="personalInfo.last_name"
-                                        label="Award Year"
+                                        v-model="
+                                            personalInfo.guardian_place_issue
+                                        "
+                                        label="ID Place of Issue"
                                         :disabled="!editBtn.info"
                                     ></TextInput>
                                     <TextInput
-                                        v-model="personalInfo.suffix"
-                                        label="Status"
+                                        v-model="
+                                            personalInfo.guardian_date_issue
+                                        "
+                                        label="ID Date of Issue"
                                         :disabled="!editBtn.info"
                                     >
                                     </TextInput>
@@ -502,6 +520,7 @@ const editBtn = ref({
 });
 const loading = ref({
     address: false,
+    storePersonalInfo: false,
 });
 
 const personalInfo = useForm({
@@ -517,10 +536,14 @@ const personalInfo = useForm({
     civil_status: null,
     address: null,
     fulladdress: null,
-    rogram: null,
+    program: null,
     sub_program: null,
     award_year: null,
     status: null,
+    guardian_name: null,
+    guardian_id_no: null,
+    guardian_place_issue: null,
+    guardian_date_issue: null,
 });
 
 const tabs = ref([
@@ -549,6 +572,7 @@ const changeMenu = (item) => {
 };
 
 const autoSearch = (event) => {
+    loading.value.address = true;
     router.get(
         route("scholars"),
         { findAddress: event },
@@ -557,13 +581,33 @@ const autoSearch = (event) => {
             preserveScroll: true,
             replace: true,
             only: ["resultSearch"],
+            onFinish: () => {
+                loading.value.address = false;
+            },
         },
     );
 };
+
+const storePersonalInfo = () => {
+    loading.value.storePersonalInfo = true;
+    personalInfo.post(
+        route("scholars.update", {
+            id: page.props?.details.id,
+            type: "personal",
+        }),
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                loading.value.storePersonalInfo = false;
+                editBtn.value.info = false;
+            },
+        },
+    );
+};
+
 watch(
     () => page.props?.details,
     (newVal) => {
-        console.log(newVal);
         personalInfo.last_name = newVal.lname ?? null;
         personalInfo.first_name = newVal.fname ?? null;
         personalInfo.middle_name = newVal.mname ?? null;
@@ -578,6 +622,15 @@ watch(
         personalInfo.civil_status = newVal.civil_status ?? null;
         personalInfo.address = newVal.address?.address ?? null;
         personalInfo.fulladdress = newVal.fullAddress ?? null;
+        personalInfo.program = newVal.program ?? null;
+        personalInfo.sub_program = newVal.type ?? null;
+        personalInfo.award_year = newVal.awardYear ?? null;
+        personalInfo.status = newVal.status ?? null;
+        personalInfo.guardian_name = newVal.guardian?.name ?? null;
+        personalInfo.guardian_id_no = newVal.guardian?.id_no ?? null;
+        personalInfo.guardian_place_issue =
+            newVal.guardian?.place_issue ?? null;
+        personalInfo.guardian_date_issue = newVal.guardian?.date_issue ?? null;
     },
     { immediate: true },
 );
