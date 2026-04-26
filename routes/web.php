@@ -140,6 +140,7 @@ Route::middleware(['auth', 'web'])->group(function () {
 
     // Scholar 1.0 Routes
     Route::post('scholars/{id}/{type}', [Scholar1Controller::class, 'update'])->name('scholars.update');
+    Route::post('scholars/{id}/{type}/SubjectRequest', [Scholar1Controller::class, 'validate'])->name('scholars.validate');
 });
 Route::middleware(['auth', 'web', 'role'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');

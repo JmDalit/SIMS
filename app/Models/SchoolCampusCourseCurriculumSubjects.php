@@ -25,27 +25,26 @@ class SchoolCampusCourseCurriculumSubjects extends Model
     protected $hidden = [
         'semester',
         'class',
-        'curriculum_id',
         'is_delete'
     ];
 
     protected $appends = ['semester_array', 'class_array', 'is_lock', 'updated_at_formatted', 'created_at_formatted'];
 
-    protected function semester()
+    public function semester()
     {
         return $this->belongsTo(ListReferences::class, 'semester_id');
     }
-    protected function curriculum()
+    public function curriculum()
     {
         return $this->belongsTo(SchoolCampusCourseCurriculums::class, 'curriculum_id');
     }
 
-    protected function class()
+    public function class()
     {
         return $this->belongsTo(ListReferences::class, 'subject_class', 'name');
     }
 
-    protected function getSemesterArrayAttribute()
+    public function getSemesterArrayAttribute()
     {
         return $this->semester ? [
             'id'    => $this->semester->id,
@@ -53,7 +52,7 @@ class SchoolCampusCourseCurriculumSubjects extends Model
         ] : null;
     }
 
-    protected function getClassArrayAttribute()
+    public function getClassArrayAttribute()
     {
         return $this->class ? [
             'id'    => $this->class->id,
@@ -74,7 +73,7 @@ class SchoolCampusCourseCurriculumSubjects extends Model
             ->format('M d, Y | g:ia');
     }
 
-    protected function getIsLockAttribute()
+    public function getIsLockAttribute()
     {
         return true;
     }

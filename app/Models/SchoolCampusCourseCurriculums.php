@@ -7,6 +7,7 @@ use Ramsey\Uuid\Type\Integer;
 
 class SchoolCampusCourseCurriculums extends Model
 {
+    protected $connection = 'pgsql';
     protected $table = 'school_campus_course_curriculums';
 
     protected $fillable = [

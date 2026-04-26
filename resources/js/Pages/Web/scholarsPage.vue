@@ -1,202 +1,100 @@
 <template>
+
     <Head title="Scholars" />
     <AuthLayout>
         <div class="flex flex-col w-full h-full gap-5">
             <div class="flex flex-col lg:flex-row items-center space-x-0 gap-4">
-                <HeaderModule
-                    title="Scholar Management"
-                    description="Comprehensive records of all scholars, including profile details, program assignments, and status monitoring."
-                />
+                <HeaderModule title="Scholar Management"
+                    description="Comprehensive records of all scholars, including profile details, program assignments, and status monitoring." />
             </div>
             <div class="w-full flex items-end justify-between">
                 <div class="flex items-center gap-2">
-                    <IconTextInput
-                        :icon="TablerIcons.IconSearch"
-                        placeholder="Search keywords..."
-                        v-model="searchInput"
-                        class="w-64 lg:w-96"
-                    />
+                    <IconTextInput :icon="TablerIcons.IconSearch" placeholder="Search keywords..." v-model="searchInput"
+                        class="w-64 lg:w-96" />
                     <div>
-                        <DefaultButton
-                            :icon="
-                                filterSchool != null
-                                    ? TablerIcons.IconFilterFilled
-                                    : TablerIcons.IconFilter
-                            "
-                            label="Schools"
-                            class-name="w-30  !rounded-xl"
-                            size="small"
-                            severity="secondary"
-                            @click="toggleOpSchool"
-                        />
+                        <DefaultButton :icon="filterSchool != null
+                            ? TablerIcons.IconFilterFilled
+                            : TablerIcons.IconFilter
+                            " label="Schools" class-name="w-30  !rounded-xl" size="small" severity="secondary"
+                            @click="toggleOpSchool" />
                         <Popover ref="opSchool">
-                            <div
-                                class="gap-3 flex"
-                                v-if="page.props?.schoolOptions"
-                            >
+                            <div class="gap-3 flex" v-if="page.props?.schoolFilter">
                                 <div class="flex-1 w-60">
-                                    <SelectMultiInput
-                                        filter
-                                        v-model="filterSchool"
-                                        :options="page.props?.schoolOptions"
-                                        capitalize
-                                    ></SelectMultiInput>
+                                    <SelectMultiInput filter v-model="filterSchool" :options="page.props?.schoolFilter"
+                                        capitalize></SelectMultiInput>
                                 </div>
 
-                                <div
-                                    class="flex justify-end items-center gap-2"
-                                >
-                                    <DefaultButton
-                                        @click="schoolFilterClear"
-                                        label="Clear"
-                                        class-name="w-20 !rounded-xl"
-                                        size="small"
-                                        severity="secondary"
-                                    />
-                                    <DefaultButton
-                                        @click="schoolFilter"
-                                        label="Filter"
-                                        class-name="w-20 !rounded-xl"
-                                        size="small"
-                                    />
+                                <div class="flex justify-end items-center gap-2">
+                                    <DefaultButton @click="schoolFilterClear" label="Clear"
+                                        class-name="w-20 !rounded-xl" size="small" severity="secondary" />
+                                    <DefaultButton @click="schoolFilter" label="Filter" class-name="w-20 !rounded-xl"
+                                        size="small" />
                                 </div>
                             </div>
                         </Popover>
                     </div>
                     <div>
-                        <DefaultButton
-                            :icon="
-                                filterProgram != null
-                                    ? TablerIcons.IconFilterFilled
-                                    : TablerIcons.IconFilter
-                            "
-                            label="Programs"
-                            class-name="w-30  !rounded-xl"
-                            size="small"
-                            severity="secondary"
-                            @click="toggleopProgram"
-                        />
+                        <DefaultButton :icon="filterProgram != null
+                            ? TablerIcons.IconFilterFilled
+                            : TablerIcons.IconFilter
+                            " label="Programs" class-name="w-30  !rounded-xl" size="small" severity="secondary"
+                            @click="toggleopProgram" />
                         <Popover ref="opProgram">
-                            <div
-                                class="gap-3 flex"
-                                v-if="page.props?.programOptions"
-                            >
+                            <div class="gap-3 flex" v-if="page.props?.programFilter">
                                 <div class="flex-1 w-60">
-                                    <SelectMultiInput
-                                        v-model="filterProgram"
-                                        :options="page.props?.programOptions"
-                                        capitalize
-                                    ></SelectMultiInput>
+                                    <SelectMultiInput v-model="filterProgram" :options="page.props?.programFilter"
+                                        capitalize></SelectMultiInput>
                                 </div>
 
-                                <div
-                                    class="flex justify-end items-center gap-2"
-                                >
-                                    <DefaultButton
-                                        @click="programFilterClear"
-                                        label="Clear"
-                                        class-name="w-20 !rounded-xl"
-                                        size="small"
-                                        severity="secondary"
-                                    />
-                                    <DefaultButton
-                                        @click="programFilter"
-                                        label="Filter"
-                                        class-name="w-20 !rounded-xl"
-                                        size="small"
-                                    />
+                                <div class="flex justify-end items-center gap-2">
+                                    <DefaultButton @click="programFilterClear" label="Clear"
+                                        class-name="w-20 !rounded-xl" size="small" severity="secondary" />
+                                    <DefaultButton @click="programFilter" label="Filter" class-name="w-20 !rounded-xl"
+                                        size="small" />
                                 </div>
                             </div>
                         </Popover>
                     </div>
                     <div>
-                        <DefaultButton
-                            :icon="
-                                filterSub != null
-                                    ? TablerIcons.IconFilterFilled
-                                    : TablerIcons.IconFilter
-                            "
-                            label="Sub-Programs"
-                            class-name=" !rounded-xl"
-                            size="small"
-                            severity="secondary"
-                            @click="toggleopSub"
-                        />
+                        <DefaultButton :icon="filterSub != null
+                            ? TablerIcons.IconFilterFilled
+                            : TablerIcons.IconFilter
+                            " label="Sub-Programs" class-name=" !rounded-xl" size="small" severity="secondary"
+                            @click="toggleopSub" />
                         <Popover ref="opSub">
-                            <div
-                                class="gap-3 flex"
-                                v-if="page.props?.subProgramOptions"
-                            >
+                            <div class="gap-3 flex" v-if="page.props?.subProgramFilter">
                                 <div class="flex-1 w-60">
-                                    <SelectMultiInput
-                                        v-model="filterSub"
-                                        :options="page.props?.subProgramOptions"
-                                        capitalize
-                                    ></SelectMultiInput>
+                                    <SelectMultiInput v-model="filterSub" :options="page.props?.subProgramFilter"
+                                        capitalize></SelectMultiInput>
                                 </div>
 
-                                <div
-                                    class="flex justify-end items-center gap-2"
-                                >
-                                    <DefaultButton
-                                        @click="subFilterClear"
-                                        label="Clear"
-                                        class-name="w-20 !rounded-xl"
-                                        size="small"
-                                        severity="secondary"
-                                    />
-                                    <DefaultButton
-                                        @click="subFilter"
-                                        label="Filter"
-                                        class-name="w-20 !rounded-xl"
-                                        size="small"
-                                    />
+                                <div class="flex justify-end items-center gap-2">
+                                    <DefaultButton @click="subFilterClear" label="Clear" class-name="w-20 !rounded-xl"
+                                        size="small" severity="secondary" />
+                                    <DefaultButton @click="subFilter" label="Filter" class-name="w-20 !rounded-xl"
+                                        size="small" />
                                 </div>
                             </div>
                         </Popover>
                     </div>
                     <div>
-                        <DefaultButton
-                            :icon="
-                                filterStatus != null
-                                    ? TablerIcons.IconFilterFilled
-                                    : TablerIcons.IconFilter
-                            "
-                            label="Status"
-                            class-name=" !rounded-xl"
-                            size="small"
-                            severity="secondary"
-                            @click="toggleopStatus"
-                        />
+                        <DefaultButton :icon="filterStatus != null
+                            ? TablerIcons.IconFilterFilled
+                            : TablerIcons.IconFilter
+                            " label="Status" class-name=" !rounded-xl" size="small" severity="secondary"
+                            @click="toggleopStatus" />
                         <Popover ref="opStatus">
-                            <div
-                                class="gap-3 flex"
-                                v-if="page.props?.statusOptions"
-                            >
+                            <div class="gap-3 flex" v-if="page.props?.statusFilter">
                                 <div class="flex-1 w-60">
-                                    <SelectMultiInput
-                                        v-model="filterStatus"
-                                        :options="page.props?.statusOptions"
-                                        capitalize
-                                    ></SelectMultiInput>
+                                    <SelectMultiInput v-model="filterStatus" :options="page.props?.statusFilter"
+                                        capitalize></SelectMultiInput>
                                 </div>
 
-                                <div
-                                    class="flex justify-end items-center gap-2"
-                                >
-                                    <DefaultButton
-                                        @click="statusFilterClear"
-                                        label="Clear"
-                                        class-name="w-20 !rounded-xl"
-                                        size="small"
-                                        severity="secondary"
-                                    />
-                                    <DefaultButton
-                                        @click="statusFilter"
-                                        label="Filter"
-                                        class-name="w-20 !rounded-xl"
-                                        size="small"
-                                    />
+                                <div class="flex justify-end items-center gap-2">
+                                    <DefaultButton @click="statusFilterClear" label="Clear"
+                                        class-name="w-20 !rounded-xl" size="small" severity="secondary" />
+                                    <DefaultButton @click="statusFilter" label="Filter" class-name="w-20 !rounded-xl"
+                                        size="small" />
                                 </div>
                             </div>
                         </Popover>
@@ -204,22 +102,13 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <ToggleButton
-                        v-model="filterSubjectRequest"
-                        size="small"
-                        :disabled="page.props?.request_cnt == '0'"
-                        class="!rounded-xl"
-                        @update:model-value="toggleSubjectRequest"
-                    >
+                    <ToggleButton v-model="filterSubjectRequest" size="small" :disabled="page.props?.request_cnt == '0'"
+                        class="!rounded-xl" @update:model-value="toggleSubjectRequest">
                         <template #default>
                             <div class="flex items-center gap-2">
                                 <div class="text-xs">Subject Request</div>
-                                <Badge
-                                    v-if="page.props?.request_cnt != '0'"
-                                    :value="page.props?.request_cnt"
-                                    size="small"
-                                    severity="danger"
-                                ></Badge>
+                                <Badge v-if="page.props?.request_cnt != '0'" :value="page.props?.request_cnt"
+                                    size="small" severity="danger"></Badge>
                             </div>
                         </template>
                     </ToggleButton>
@@ -233,72 +122,45 @@
                     /> -->
                 </div>
             </div>
-            <DefaultSelectionTable
-                :items="page.props.scholars.data"
-                :pagination="{
-                    total: page.props.scholars.total,
-                    perPage: page.props.scholars.per_page,
-                    currentPage: page.props.scholars.current_page,
-                }"
-                @selected="toggleScholarDetails"
-                :loading="loading.table"
-                @paginate="loadPage"
-            >
+            <DefaultSelectionTable :items="page.props.scholars.data" :pagination="{
+                total: page.props.scholars.total,
+                perPage: page.props.scholars.per_page,
+                currentPage: page.props.scholars.current_page,
+            }" @selected="toggleScholarDetails" :loading="loading.table" @paginate="loadPage">
                 <Column header="Scholars">
                     <template #body="props">
                         <div class="flex items-center gap-2">
                             <div class="">
-                                <OverlayBadge
-                                    severity="danger"
-                                    class="inline-flex"
-                                    v-if="props.data.request"
-                                >
-                                    <Avatar
-                                        :label="
-                                            props.data.fullname
-                                                .charAt(0)
-                                                .toUpperCase()
-                                        "
-                                        style="
+                                <OverlayBadge severity="danger" class="inline-flex" v-if="props.data.request">
+                                    <Avatar :label="props.data.fullname
+                                        .charAt(0)
+                                        .toUpperCase()
+                                        " style="
                                             background-color: #dee9fc;
                                             color: #1a2551;
-                                        "
-                                        class="!w-[40px] !h-[40px] !rounded-xl"
-                                        :image="
-                                            props.data.photo == null
-                                                ? null
-                                                : props.data.photo
-                                        "
-                                    />
-                                </OverlayBadge>
-                                <Avatar
-                                    v-else
-                                    :label="
-                                        props.data.fullname
-                                            .charAt(0)
-                                            .toUpperCase()
-                                    "
-                                    style="
-                                        background-color: #dee9fc;
-                                        color: #1a2551;
-                                    "
-                                    class="!w-[40px] !h-[40px] !rounded-xl"
-                                    :image="
-                                        props.data.photo == null
+                                        " class="!w-[40px] !h-[40px] !rounded-xl" :image="props.data.photo == null
                                             ? null
                                             : props.data.photo
-                                    "
-                                />
+                                            " />
+                                </OverlayBadge>
+                                <Avatar v-else :label="props.data.fullname
+                                    .charAt(0)
+                                    .toUpperCase()
+                                    " style="
+                                        background-color: #dee9fc;
+                                        color: #1a2551;
+                                    " class="!w-[40px] !h-[40px] !rounded-xl" :image="props.data.photo == null
+                                        ? null
+                                        : props.data.photo
+                                        " />
                             </div>
                             <div class="flex-1 flex flex-col">
-                                <div
-                                    :class="[
-                                        'text-xs flex items-center',
-                                        props.data.sex == 'M'
-                                            ? '!text-blue-600'
-                                            : '!text-rose-600',
-                                    ]"
-                                >
+                                <div :class="[
+                                    'text-xs flex items-center',
+                                    props.data.sex == 'M'
+                                        ? '!text-blue-600'
+                                        : '!text-rose-600',
+                                ]">
                                     <div>{{ props.data.spas_no }}</div>
                                 </div>
                                 <div class="font-medium">
@@ -366,18 +228,12 @@
                     </template>
                     <template #body="props">
                         <div class="flex justify-center">
-                            <div
-                                :class="[
-                                    ' flex items-center capitalize  rounded-2xl py-1 px-3 gap-1',
-                                    props.data.status.bcolor,
-                                    props.data.status.tcolor,
-                                ]"
-                            >
-                                <component
-                                    :is="TablerIcons[props.data.status.icon]"
-                                    :size="20"
-                                    :stroke="2"
-                                />
+                            <div :class="[
+                                ' flex items-center capitalize  rounded-2xl py-1 px-3 gap-1',
+                                props.data.status.bcolor,
+                                props.data.status.tcolor,
+                            ]">
+                                <component :is="TablerIcons[props.data.status.icon]" :size="20" :stroke="2" />
                                 <div class="">
                                     {{ props.data.status.name }}
                                 </div>
@@ -405,7 +261,7 @@ import DialogUploadScholarModule from "../../Modules/Others/DialogUploadScholarM
 import TextInput from "../../Components/inputs/TextInput.vue";
 import IconTextInput from "../../Components/inputs/IconTextInput.vue";
 import DefaultButton from "../../Components/buttons/DefaultButton.vue";
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, onUpdated, reactive, ref, watch } from "vue";
 import { route } from "ziggy-js";
 import { Head, usePage, router } from "@inertiajs/vue3";
 import DrawerScholar1Module from "../../Modules/Others/DrawerScholar1Module.vue";
@@ -456,24 +312,28 @@ const toggleScholarDetails = (event) => {
     router.reload({
         only: [
             "details",
-            "programOptions",
-            "subProgramOptions",
-            "forDetailStatusOptions",
+            'programOptions',
+            'subProgramOptions',
+            'statusOptions',
+            'termOptions',
+            'yearOptions',
         ],
         data: { id: event.id },
-        preserveState: true,
+        preserveState: false,
         showProgress: true,
         replace: true,
         onFinish: () => {
             drawerScholar.value = true;
+
         },
+
     });
 };
 
 const toggleOpSchool = (event) => {
     opSchool.value.toggle(event);
     router.reload({
-        only: ["schoolOptions"],
+        only: ["schoolFilter"],
     });
 };
 
@@ -497,7 +357,7 @@ const schoolFilterClear = (event) => {
 const toggleopProgram = (event) => {
     opProgram.value.toggle(event);
     router.reload({
-        only: ["programOptions"],
+        only: ["programFilter"],
     });
 };
 
@@ -521,7 +381,7 @@ const programFilterClear = (event) => {
 const toggleopSub = (event) => {
     opSub.value.toggle(event);
     router.reload({
-        only: ["subProgramOptions"],
+        only: ["subProgramFilter"],
     });
 };
 
@@ -545,7 +405,7 @@ const subFilterClear = (event) => {
 const toggleopStatus = (event) => {
     opStatus.value.toggle(event);
     router.reload({
-        only: ["statusOptions"],
+        only: ["statusFilter"],
     });
 };
 
@@ -582,4 +442,5 @@ watch(
         }, 300);
     },
 );
+
 </script>
