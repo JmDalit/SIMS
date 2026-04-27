@@ -233,7 +233,7 @@
 														<tr>
 															<td class="pad" style="padding-bottom:10px;padding-left:30px;padding-right:30px;padding-top:10px;">
 																<div style="color:#323537;direction:ltr;font-family:'Montserrat', 'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma, sans-serif;font-size:14px;font-weight:400;letter-spacing:0px;line-height:1.8;text-align:justify;mso-line-height-alt:25px;">
-																	<p style="margin: 0;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;We are thrilled to inform you that you are now officially a member of the <strong>SIMS</strong> (Science and Technology Scholars Information Management System) family. Your journey with us marks the beginning of meaningful collaboration and growth, and we’re excited to see the great contributions you'll bring to the team.</p>
+																	<p style="margin: 0;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;We are thrilled to inform you that you are now officially a member of the <strong>SIMS</strong> ( Scholars Information Management System) family. Your journey with us marks the beginning of meaningful collaboration and growth, and we’re excited to see the great contributions you'll bring to the team.</p>
 																</div>
 															</td>
 														</tr>

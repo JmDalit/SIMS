@@ -50,4 +50,9 @@ class ScholarTerm extends Model
     {
         return $this->hasMany(StudentSubjectRequest::class, 'term_record_id');
     }
+
+    public function gradeRequests()
+    {
+        return $this->hasMany(StudentGradeRequest::class, 'term_record_id');
+    }
 }

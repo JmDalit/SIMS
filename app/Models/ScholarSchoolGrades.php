@@ -30,4 +30,9 @@ class ScholarSchoolGrades extends Model
     {
         return $this->belongsTo(SchoolCampusGrades::class, 'grade_id');
     }
+
+    public function gradeRequest()
+    {
+        return $this->hasOne(StudentGradeRequest::class, 'term_grades_id');
+    }
 }

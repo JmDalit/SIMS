@@ -29,7 +29,7 @@ class UserCreatedMail extends Mailable
     public function build()
     {
 
-        return $this->subject('Welcome to STSIMS')
+        return $this->subject('Welcome to SIMS')
             ->view(('UserMail'))
             ->with([
                 'user' => $this->user,

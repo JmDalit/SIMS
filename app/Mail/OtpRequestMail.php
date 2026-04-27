@@ -28,7 +28,7 @@ class OtpRequestMail extends Mailable
 
     public function build()
     {
-        return $this->subject('STSIMS One-Time Password Verification')
+        return $this->subject('SIMS One-Time Password Verification')
             ->view(('otpMail'))
             ->with([
                 'otp' => $this->otp,
