@@ -257,6 +257,13 @@
                                         class="ml-auto !text-xs"
                                         :value="item.badge"
                                     />
+                                    <Badge
+                                        v-if="item.status"
+                                        size="small"
+                                        severity="info"
+                                        class="ml-auto !text-xs"
+                                        :value="item.status"
+                                    />
                                 </a>
                             </template>
                         </Menu>
@@ -1681,11 +1688,23 @@ const tabs = ref([
     {
         separator: true,
     },
-    { label: "Stipend", icon: "IconCoins", key: 3 },
+    {
+        label: "Stipend",
+        icon: "IconCoins",
+        key: 3,
+        disabled: true,
+        status: "Ongoing",
+    },
     {
         separator: true,
     },
-    { label: "Activity Logs", icon: "IconWood", key: 4 },
+    {
+        label: "Activity Logs",
+        icon: "IconWood",
+        key: 4,
+        disabled: true,
+        status: "Ongoing",
+    },
 ]);
 
 const addSubject = () => {
