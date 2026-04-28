@@ -225,7 +225,9 @@ class Scholar1Controller extends Controller
                     'scholars.status_id',
                     'scholars.program_id',
                     'scholars.type_id',
-                    'scholars.award_year'
+                    'scholars.award_year',
+                    'scholars.activated_at',
+                    'scholars.activation_token'
                 )
                     ->join('scholar_profiles', 'scholar_profiles.scholar_id', '=', 'scholars.id')
                     ->with([
@@ -298,6 +300,8 @@ class Scholar1Controller extends Controller
                         'email' => $q->profile?->email,
                         'contact_no' => $q->profile?->contact_no,
                         'sex' => $q->profile?->sex,
+                        'activated_at' => $q->activated_at,
+                        'acticationRequest' => !empty($q->activation_token),
                         'fullname' => trim(collect([
                             $q->profile?->lname . ',',
                             $q->profile?->fname,
@@ -828,7 +832,7 @@ class Scholar1Controller extends Controller
             'activation_token' => $activation,
         ]);
 
-        $url = 'portal7.science-scholarships.ph/activation?token=' . $activation;
+        $url = 'https://portal7.science-scholarships.ph/activation?token=' . $activation;
         Mail::to($user->profile->email)
             ->send(new ActivationLinkMail($url));
         return redirect()->back()->with('flash', [

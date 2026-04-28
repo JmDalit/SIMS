@@ -262,8 +262,8 @@
                         </div>
                     </template>
                     <template #body="props">
-                        <DefaultButton label="Activate" @click="sendLinkEmail(props.data.id)" class-name="!rounded-lg"
-                            size="small" />
+                        <DefaultButton :disabled="props.data.acticationRequest" label="Activate"
+                            @click="sendLinkEmail(props.data.id)" class-name="!rounded-lg" size="small" />
                     </template>
                 </Column>
             </DefaultSelectionTable>
