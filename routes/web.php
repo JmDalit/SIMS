@@ -157,7 +157,7 @@ Route::middleware(['auth', 'web', 'role'])->group(function () {
     Route::get('academic/references', [ReferenceController::class, 'index'])->name('academic.references');
     Route::get('academic/schools', [SchoolController::class, 'index'])->name('academic.universities');
     Route::get('scholar/statuses', [StatusController::class, 'index'])->name('statuses');
-    Route::get('scholarsV1/oldVersion', [ScholarController::class, 'index'])->name('scholars');
+    Route::get('scholarsV1/oldVersion', [ScholarController::class, 'index'])->name('scholarsOldVersion');
     Route::get('scholars', [Scholar1Controller::class, 'index'])->name('scholars');
     Route::get('programs', [programController::class, 'index'])->name('programs');
     Route::get('events', [eventController::class, 'index'])->name('events');
