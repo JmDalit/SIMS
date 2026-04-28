@@ -61,35 +61,37 @@ class CheckScholarImport implements OnEachRow, WithHeadingRow, WithMultipleSheet
                 'id_date' => ['nullable'],
                 'companion' => ['nullable'],
                 'year_award' => ['nullable'],
-                'course' => ['nullable'],
-                // [
-                //     'required',
+                // 'course' =>  [
+                //     'nullable',
                 //     Rule::exists('list_courses', 'name'),
                 // ],
-                'school' => ['nullable']
-                //['nullabe;', Rule::exists('school_campuses', 'generated_name')->where(fn($query) => $query->where('is_active', true)->where('is_delete', false))]
+                'school' =>
+                [
+                    'required',
+                    //  Rule::exists('school_campuses', 'generated_name')->where(fn($query) => $query->where('is_active', true)->where('is_delete', false))
+                ]
             ],
-            [
-                'email.email' =>  "Row {$row->getRowIndex()}: must be valid email address.",
-                'spas_no.required' =>
-                "Row {$row->getRowIndex()}: The SPAS No field is required.",
-                'spas_no.unique' =>
-                "Row {$row->getRowIndex()}: The SPAS No has already been taken.",
-                'scholarship_type.required' =>
-                "Row {$row->getRowIndex()}: The Scholarship Type field is required.",
-                'scholarship_subprogram.required' =>
-                "Row {$row->getRowIndex()}: The Scholarship Subprogram field is required.",
-                'scholarship_program.required' =>
-                "Row {$row->getRowIndex()}: The Scholarship Program field is required.",
-                'status.required' =>
-                "Row {$row->getRowIndex()}: The Status field is required.",
-                'scholarship_type.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update scholarship option.",
-                'scholarship_subprogram.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update subprogram option.",
-                'scholarship_program.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update program option.",
-                'school.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update school option.",
-                'course.required' => "Row {$row->getRowIndex()}: Please contact admin support to update school option.",
-                'course.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update school option.",
-            ]
+            // [
+            //     'email.email' =>  "Row {$row->getRowIndex()}: must be valid email address.",
+            //     'spas_no.required' =>
+            //     "Row {$row->getRowIndex()}: The SPAS No field is required.",
+            //     'spas_no.unique' =>
+            //     "Row {$row->getRowIndex()}: The SPAS No has already been taken.",
+            //     'scholarship_type.required' =>
+            //     "Row {$row->getRowIndex()}: The Scholarship Type field is required.",
+            //     'scholarship_subprogram.required' =>
+            //     "Row {$row->getRowIndex()}: The Scholarship Subprogram field is required.",
+            //     'scholarship_program.required' =>
+            //     "Row {$row->getRowIndex()}: The Scholarship Program field is required.",
+            //     'status.required' =>
+            //     "Row {$row->getRowIndex()}: The Status field is required.",
+            //     'scholarship_type.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update scholarship option.",
+            //     'scholarship_subprogram.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update subprogram option.",
+            //     'scholarship_program.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update program option.",
+            //     'school.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update school option.",
+            //     //'course.required' => "Row {$row->getRowIndex()}: Please contact admin support to update school option.",
+            //     'course.exists' => "Row {$row->getRowIndex()}: Please contact admin support to update school option.",
+            // ]
         )->validate();
     }
 }

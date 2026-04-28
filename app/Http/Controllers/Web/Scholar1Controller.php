@@ -149,7 +149,7 @@ class Scholar1Controller extends Controller
 
         $termOptions = $request->input('id') ? ListReferences::where('is_active', true)
             ->where('type', 'Term')
-            ->where('classification', Scholars::find(Hashids::decode($request->input('id'))[0] ?? 0)->schoolInfo->first()->campus->term?->name)
+            ->where('classification', Scholars::find(Hashids::decode($request->input('id'))[0] ?? 0)->schoolInfo->first()->campus?->term?->name)
             ->where('is_delete', false)
             ->get()->map(function ($q) {
                 return [
@@ -442,9 +442,9 @@ class Scholar1Controller extends Controller
                             ],
                             'fullAddress' => $q?->address?->full_address,
                             'awardYear' => $q?->award_year,
-                            'course' => $q?->schoolInfo?->first()?->course->course->name,
-                            'school' => $q?->schoolInfo?->first()?->campus->generated_name,
-                            'region' => $q?->schoolInfo?->first()?->campus->address?->region_array,
+                            'course' => $q?->schoolInfo?->first()?->course?->course?->name,
+                            'school' => $q?->schoolInfo?->first()?->campus?->generated_name,
+                            'region' => $q?->schoolInfo?->first()?->campus?->address?->region_array,
                             'tr_request' => $q?->termRecords
                                 ->pluck('requests')
                                 ->flatten()

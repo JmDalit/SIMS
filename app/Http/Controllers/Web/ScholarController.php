@@ -128,11 +128,11 @@ class ScholarController extends Controller
                         'tcolor' => $q->status?->color?->text_color,
                         'icon' => $q->status?->icon
                     ],
-                    'course' => $q->schoolInfo->first()?->course?->course?->name,
-                    'school' => $q->schoolInfo->first()?->campus?->generated_name,
+                    'course' => $q->schoolInfo?->first()?->course?->course?->name,
+                    'school' => $q->schoolInfo?->first()?->campus?->generated_name,
                     'awardyear' => $q->award_year,
-                    'agency' => $q->schoolInfo->first()?->campus->agency?->slug,
-                    'region' => $q->schoolInfo->first()?->campus->address?->region_array,
+                    'agency' => $q->schoolInfo?->first()?->campus?->agency?->slug,
+                    'region' => $q->schoolInfo?->first()?->campus?->address?->region_array,
                     'verified_by' => $q->verified_by,
                     'verified_at' => $q->verified_at,
                     'validate_status' => $q->validate_status,
@@ -153,7 +153,7 @@ class ScholarController extends Controller
                     'birthdate' => Carbon::parse($scholarDetails?->profile?->birthdate)->format('Y-m-d'),
                     'religion' => $scholarDetails?->profile?->religion,
                     'civil_status' => $scholarDetails?->profile?->civil_status,
-                    
+
                 ] : null,
             'academic' => request('id') ?
                 ScholarSchoolInfos::select(

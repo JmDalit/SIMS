@@ -165,7 +165,7 @@
                                     <component :is="TablerIcons[item.icon]" :size="18"></component>
                                     <span class="!text-xs">{{
                                         item.label
-                                        }}</span>
+                                    }}</span>
                                     <Badge v-if="item.badge" size="small" severity="danger" class="ml-auto !text-xs"
                                         :value="item.badge" />
                                     <Badge v-if="item.status" size="small" severity="info" class="ml-auto !text-xs"

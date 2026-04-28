@@ -103,36 +103,40 @@ class ScholarImport implements OnEachRow, WithHeadingRow, WithStartRow, SkipsEmp
                 'region_code'     => LocationRegions::where('name', trim($data['region']))->value('code') ?? null,
             ]);
 
-            // $campus = SchoolCampuses::with('term:id,name')
-            //     ->select('id', 'term_id')
-            //     ->where('generated_name', $data['school'])
-            //     ->where('is_delete', false)
-            //     ->first();
-
-            $schoolInfo = $scholars->schoolInfo()->create([
-                'campus_id' => $campus->id ?? null,
-                'campus_course_id' => SchoolCampusCourses::whereHas('course', function ($q) use ($data) {
-                    $q->where('name', $data['course'])->where('is_delete', false);
-                })->value('id') ?? null,
-            ]);
-
-            $yearLevel = SchoolCampusCourses::select('years')
-                ->whereHas('course', function ($q) use ($data) {
-                    $q->where('name', $data['course']);
-                })
+            $campus = SchoolCampuses::with('term:id,name')
+                ->select('id', 'term_id')
+                ->where('generated_name', 'ILIKE', '%' . $data['school'] . '%')
+                ->where('is_delete', false)
                 ->first();
 
 
 
-            // $academic_term = ListReferences::select('id', 'name')
-            //     ->where('classification', $campus->term?->name)
-            //     ->where('type', 'Term')
-            //     ->get();
+            $schoolInfo = $scholars->schoolInfo()->create([
+                'campus_id' => $campus->id ?? null,
+                'campus_course_id' => SchoolCampusCourses::whereHas('course', function ($q) use ($data) {
+                    $q->where('name',  'ILIKE', '%' . $data['course'] . '%')->where('is_delete', false);
+                })->value('id') ?? null,
+            ]);
 
 
 
-            // $levels = ListReferences::whereIn('others', range(1, $yearLevel->years))
-            //     ->pluck('id', 'others');
+            // $yearLevel = SchoolCampusCourses::select('years')
+            //     ->whereHas('course', function ($q) use ($data) {
+            //         $q->where('name', $data['course']);
+            //     })
+            //     ->first();
+
+
+
+            //  $academic_term = ListReferences::select('id', 'name')
+            //      ->where('classification', $campus->term?->name)
+            //      ->where('type', 'Term')
+            //      ->get();
+
+
+
+            //  $levels = ListReferences::whereIn('others', range(1, $yearLevel->years))
+            //  ->pluck('id', 'others');
 
 
             // for ($i = 1; $i <= (int) $yearLevel->years; $i++) {
