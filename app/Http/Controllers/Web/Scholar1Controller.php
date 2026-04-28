@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Mail\activationLinkMail;
 use App\Models\ListPrograms;
 use App\Models\ListReferences;
 use App\Models\ListStatuses;
@@ -21,6 +22,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Vinkla\Hashids\Facades\Hashids;
@@ -573,7 +575,6 @@ class Scholar1Controller extends Controller
             $scholar = Scholars::findOrFail($decodedId);
 
             if ($type == 'personal') {
-                dd('dasd');
                 $data = $request->validate([
                     'first_name' => 'required|string|max:255',
                     'middle_name' => 'nullable|string|max:255',
@@ -759,5 +760,81 @@ class Scholar1Controller extends Controller
                 'message' => 'Missing or invalid required fields. Please check your input and try again.',
             ]);
         }
+    }
+    public function gradeValidate(string $id, string $type, Request $request)
+    {
+        try {
+            // if ($type == 'reject') {
+            //     $data = $request->validate([
+            //         'reason' => 'required|string|max:255',
+            //     ]);
+
+            //     $requestRecord = StudentGradeRequest::findOrFail($id);
+            //     $requestRecord->update([
+            //         'status' => 'rejected',
+            //         'remarks' => $data['reason'],
+            //         'reviewed_at' => now(),
+            //         'reviewed_by' => Auth::user()->profile->fullname,
+            //     ]);
+
+            //     return redirect()->back()->with('flash', [
+            //         'status'  => 'success',
+            //         'title'   => 'Request Updated!',
+            //         'message' => 'The subject request has been successfully updated.',
+            //     ]);
+            // } else {
+            //     $requestRecord = StudentGradeRequest::findOrFail($id);
+            //     $requestRecord->update([
+            //         'status' => 'approved',
+            //         'reviewed_at' => now(),
+            //         'reviewed_by' => Auth::user()->profile->fullname,
+            //     ]);
+
+            //     ScholarSchoolGrades::create([
+            //         'term_record_id' => $requestRecord->term_record_id,
+            //         'subject_id' => $requestRecord->subject_id,
+            //         'grade_id' => null,
+            //     ]);
+
+            //     return redirect()->back()->with('flash', [
+            //         'status'  => 'success',
+            //         'title'   => 'Request Updated!',
+            //         'message' => 'The subject request has been successfully updated.',
+            //     ]);
+            // }
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('flash', [
+                'status'  => 'error',
+                'title'   => 'Save Failed',
+                'message' => 'Missing or invalid required fields. Please check your input and try again.',
+            ]);
+        }
+    }
+
+    public function activation(string $id)
+    {
+        $decodedId = Hashids::decode($id)[0] ?? 0;
+        $activation = Str::random(64);
+        $user = Scholars::with(['profile'])->findOrFail($decodedId);
+
+
+        if (!$user->profile?->email) {
+            throw new \Exception('User has no email address.');
+        }
+
+        $activation = Str::random(60);
+
+        $user->update([
+            'activation_token' => $activation,
+        ]);
+
+        $url = 'portal7.science-scholarships.ph/activation?token=' . $activation;
+        Mail::to($user->profile->email)
+            ->send(new ActivationLinkMail($url));
+        return redirect()->back()->with('flash', [
+            'status'  => 'success',
+            'title'   => 'Activation Link!',
+            'message' => 'The link has been successfully send.',
+        ]);
     }
 }

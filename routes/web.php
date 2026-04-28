@@ -140,7 +140,9 @@ Route::middleware(['auth', 'web'])->group(function () {
 
     // Scholar 1.0 Routes
     Route::post('scholars/{id}/{type}', [Scholar1Controller::class, 'update'])->name('scholars.update');
+    Route::post('scholarsActivation/{id}', [Scholar1Controller::class, 'activation'])->name('scholars.activation');
     Route::post('scholars/{id}/{type}/SubjectRequest', [Scholar1Controller::class, 'validate'])->name('scholars.validate');
+    Route::post('scholars/{id}/{type}/GradeRequest', [Scholar1Controller::class, 'gradeValidate'])->name('scholars.gradeValidate');
 });
 Route::middleware(['auth', 'web', 'role'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -155,7 +157,7 @@ Route::middleware(['auth', 'web', 'role'])->group(function () {
     Route::get('academic/references', [ReferenceController::class, 'index'])->name('academic.references');
     Route::get('academic/schools', [SchoolController::class, 'index'])->name('academic.universities');
     Route::get('scholar/statuses', [StatusController::class, 'index'])->name('statuses');
-    // Route::get('scholars', [ScholarController::class, 'index'])->name('scholars');
+    //Route::get('scholarsV1/oldVersion', [ScholarController::class, 'index'])->name('scholars');
     Route::get('scholars', [Scholar1Controller::class, 'index'])->name('scholars');
     Route::get('programs', [programController::class, 'index'])->name('programs');
     Route::get('events', [eventController::class, 'index'])->name('events');

@@ -16,6 +16,8 @@ class Scholars extends Model
         'is_delete',
         'created_by',
         'updated_by',
+        'activation_token',
+        'activated_at',
         'award_year',
         'verified_by',
         'verified_at',

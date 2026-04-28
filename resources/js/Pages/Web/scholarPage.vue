@@ -483,6 +483,9 @@
                             </div>
                         </template>
                     </Column>
+                    <Column>
+                        
+                    </Column>
                 </DefaultSelectionTable>
             </div>
         </div>
