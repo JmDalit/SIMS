@@ -61,59 +61,59 @@ class ScholarImport implements OnEachRow, WithHeadingRow, WithStartRow, SkipsEmp
         DB::transaction(function () use ($data, $row) {
 
             $scholars = Scholars::create([
-                'spas_no'     => trim($data['spas_no']),
-                'type_id'     =>  ListReferences::where('name', trim($data['scholarship_type']))->value('id'),
-                'program_id'  => ListPrograms::where('name', trim($data['scholarship_subprogram']))->value('id'),
-                'category_id' =>  ListReferences::where('name', trim($data['scholarship_program']))->value('id'),
-                'status_id'   => ListStatuses::where('name', trim($data['status']))->value('id'),
+                'spas_no'     => trim($data['spas_no']) ?? null,
+                'type_id'     =>  ListReferences::where('name', trim($data['scholarship_type']))->value('id') ?? null,
+                'program_id'  => ListPrograms::where('name', trim($data['scholarship_subprogram']))->value('id') ?? null,
+                'category_id' =>  ListReferences::where('name', trim($data['scholarship_program']))->value('id') ?? null,
+                'status_id'   => ListStatuses::where('name', trim($data['status']))->value('id') ?? null,
                 'created_by'  => Auth::user()->profile->fullname,
                 'award_year' => $data['year_award']
             ]);
 
             $scholars->profile()->create([
-                'fname' => $data['firstname'],
-                'lname' => $data['lastname'],
-                'mname' => $data['middlename'],
-                'suffix' => $data['suffix'],
-                'contact_no' => $data['contact'],
-                'birthdate' => Date::excelToDateTimeObject($data['birthdate'])->format('Y-m-d'),
-                'birthplace' => $data['birth_place'],
-                'email' => $data['email'],
-                'sex' => $data['sex'],
-                'religion' => $data['religion'],
-                'civil_status' => $data['civil_status'],
+                'fname' => $data['firstname'] ?? null,
+                'lname' => $data['lastname'] ?? null,
+                'mname' => $data['middlename'] ?? null,
+                'suffix' => $data['suffix'] ?? null,
+                'contact_no' => $data['contact'] ?? null,
+                'birthdate' => Date::excelToDateTimeObject($data['birthdate'])->format('Y-m-d') ?? null,
+                'birthplace' => $data['birth_place'] ?? null,
+                'email' => $data['email'] ?? null,
+                'sex' => $data['sex'] ?? null,
+                'religion' => $data['religion'] ?? null,
+                'civil_status' => $data['civil_status'] ?? null,
 
             ]);
 
             $scholars->parent()->create([
-                'fname' => $data['parent_fullname'],
-                'id_no' => $data['id_no'],
-                'id_date' => Date::excelToDateTimeObject($data['id_date'])->format('Y-m-d'),
-                'id_place' => $data['id_place'],
-                'companion' => $data['companion']
+                'fname' => $data['parent_fullname'] ?? null,
+                'id_no' => $data['id_no'] ?? null,
+                'id_date' => Date::excelToDateTimeObject($data['id_date'])->format('Y-m-d') ?? null,
+                'id_place' => $data['id_place'] ?? null,
+                'companion' => $data['companion'] ?? null,
             ]);
 
             // $sliceName = explode(',', $data['barangay_municipality_province_region']);
 
             $scholars->address()->create([
                 'address' => $data['address'],
-                'barangay_code'   => LocationBarangays::where('name', trim($data['barangay']))->value('code'),
-                'municipality_code' => LocationCity::where('name', trim($data['municipality']))->value('code'),
-                'province_code'   => LocationProvinces::where('name', trim($data['province']))->value('code'),
-                'region_code'     => LocationRegions::where('name', trim($data['region']))->value('code'),
+                'barangay_code'   => LocationBarangays::where('name', trim($data['barangay']))->value('code') ?? null,
+                'municipality_code' => LocationCity::where('name', trim($data['municipality']))->value('code') ?? null,
+                'province_code'   => LocationProvinces::where('name', trim($data['province']))->value('code') ?? null,
+                'region_code'     => LocationRegions::where('name', trim($data['region']))->value('code') ?? null,
             ]);
 
-            $campus = SchoolCampuses::with('term:id,name')
-                ->select('id', 'term_id')
-                ->where('generated_name', $data['school'])
-                ->where('is_delete', false)
-                ->first();
+            // $campus = SchoolCampuses::with('term:id,name')
+            //     ->select('id', 'term_id')
+            //     ->where('generated_name', $data['school'])
+            //     ->where('is_delete', false)
+            //     ->first();
 
             $schoolInfo = $scholars->schoolInfo()->create([
-                'campus_id' => $campus->id,
+                'campus_id' => $campus->id ?? null,
                 'campus_course_id' => SchoolCampusCourses::whereHas('course', function ($q) use ($data) {
                     $q->where('name', $data['course'])->where('is_delete', false);
-                })->value('id'),
+                })->value('id') ?? null,
             ]);
 
             $yearLevel = SchoolCampusCourses::select('years')
@@ -124,27 +124,27 @@ class ScholarImport implements OnEachRow, WithHeadingRow, WithStartRow, SkipsEmp
 
 
 
-            $academic_term = ListReferences::select('id', 'name')
-                ->where('classification', $campus->term?->name)
-                ->where('type', 'Term')
-                ->get();
+            // $academic_term = ListReferences::select('id', 'name')
+            //     ->where('classification', $campus->term?->name)
+            //     ->where('type', 'Term')
+            //     ->get();
 
 
 
-            $levels = ListReferences::whereIn('others', range(1, $yearLevel->years))
-                ->pluck('id', 'others');
+            // $levels = ListReferences::whereIn('others', range(1, $yearLevel->years))
+            //     ->pluck('id', 'others');
 
 
-            for ($i = 1; $i <= (int) $yearLevel->years; $i++) {
-                foreach ($academic_term as $value) {
-                    $termRecords = $scholars->termRecords()->create([
-                        'scholar_school_id' => $schoolInfo->id,
-                        'term_id'           => $campus->term_id,
-                        'level_id'          => $levels[(string) $i] ?? null,
-                        'term_type_id'      => $value->id
-                    ]);
-                }
-            }
+            // for ($i = 1; $i <= (int) $yearLevel->years; $i++) {
+            //     foreach ($academic_term as $value) {
+            //         $termRecords = $scholars->termRecords()->create([
+            //             'scholar_school_id' => $schoolInfo->id ?? null,
+            //             'term_id'           => $campus->term_id ?? null,
+            //             'level_id'          => $levels[(string) $i] ?? null,
+            //             'term_type_id'      => $value->id ?? null
+            //         ]);
+            //     }
+            // }
 
 
 

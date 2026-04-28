@@ -316,11 +316,11 @@ class Scholar1Controller extends Controller
                             'tcolor' => $q->status?->color?->text_color,
                             'icon' => $q->status?->icon
                         ],
-                        'course' => $q->schoolInfo->first()?->course?->course?->name,
-                        'school' => $q->schoolInfo->first()?->campus?->generated_name,
+                        'course' => $q->schoolInfo?->first()?->course?->course?->name,
+                        'school' => $q->schoolInfo?->first()?->campus?->generated_name,
                         'awardyear' => $q->award_year,
-                        'agency' => $q->schoolInfo->first()?->campus->agency?->slug,
-                        'region' => $q->schoolInfo->first()?->campus->address?->region_array,
+                        'agency' => $q->schoolInfo?->first()?->campus?->agency?->slug,
+                        'region' => $q->schoolInfo?->first()?->campus?->address?->region_array,
                         'request' => $q->termRecords
                             ->pluck('requests')
                             ->flatten()
@@ -442,9 +442,9 @@ class Scholar1Controller extends Controller
                             ],
                             'fullAddress' => $q?->address?->full_address,
                             'awardYear' => $q?->award_year,
-                            'course' => $q?->schoolInfo->first()?->course->course->name,
-                            'school' => $q?->schoolInfo->first()?->campus->generated_name,
-                            'region' => $q?->schoolInfo->first()?->campus->address?->region_array,
+                            'course' => $q?->schoolInfo?->first()?->course->course->name,
+                            'school' => $q?->schoolInfo?->first()?->campus->generated_name,
+                            'region' => $q?->schoolInfo?->first()?->campus->address?->region_array,
                             'tr_request' => $q?->termRecords
                                 ->pluck('requests')
                                 ->flatten()
