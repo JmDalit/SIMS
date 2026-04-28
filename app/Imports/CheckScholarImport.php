@@ -61,11 +61,13 @@ class CheckScholarImport implements OnEachRow, WithHeadingRow, WithMultipleSheet
                 'id_date' => ['required'],
                 'companion' => ['required'],
                 'year_award' => ['required'],
-                'course' => [
-                    'required',
-                    Rule::exists('list_courses', 'name'),
-                ],
-                'school' => ['required', Rule::exists('school_campuses', 'generated_name')->where(fn($query) => $query->where('is_active', true)->where('is_delete', false))]
+                'course' => ['nullable'],
+                // [
+                //     'required',
+                //     Rule::exists('list_courses', 'name'),
+                // ],
+                'school' => ['nullable']
+                //['nullabe;', Rule::exists('school_campuses', 'generated_name')->where(fn($query) => $query->where('is_active', true)->where('is_delete', false))]
             ],
             [
                 'email.email' =>  "Row {$row->getRowIndex()}: must be valid email address.",
