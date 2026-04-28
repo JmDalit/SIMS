@@ -1,145 +1,88 @@
 <template>
+
     <Head title="Scholars" />
     <AuthLayout>
         <div class="flex flex-col w-full h-full gap-5">
             <div class="flex flex-col lg:flex-row items-center space-x-0 gap-4">
-                <HeaderModule
-                    title="Scholar Management"
-                    description="Comprehensive records of all scholars, including profile details, program assignments, and status monitoring."
-                />
+                <HeaderModule title="Scholar Management"
+                    description="Comprehensive records of all scholars, including profile details, program assignments, and status monitoring." />
                 <div class="flex">
-                    <div
-                        class="flex rounded-xl overflow-hidden border border-gray-200 shadow-sm"
-                    >
-                        <div
-                            v-for="(item, index) in page.props?.statuses"
-                            :key="index"
-                            :class="[
-                                'flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50',
-                                {
-                                    'border-r border-gray-200':
-                                        index !==
-                                        page.props.statuses.length - 1,
-                                },
-                            ]"
-                            v-tooltip.bottom="item.status"
-                        >
-                            <div
-                                :class="[
-                                    'p-1.5 rounded-lg',
-                                    item.color_array.bgColor,
-                                ]"
-                            >
-                                <component
-                                    :is="TablerIcons[item.icon]"
-                                    :class="[
-                                        'w-4 h-4',
-                                        item.color_array.textColor,
-                                    ]"
-                                />
+                    <div class="flex rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                        <div v-for="(item, index) in page.props?.statuses" :key="index" :class="[
+                            'flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50',
+                            {
+                                'border-r border-gray-200':
+                                    index !==
+                                    page.props.statuses.length - 1,
+                            },
+                        ]" v-tooltip.bottom="item.status">
+                            <div :class="[
+                                'p-1.5 rounded-lg',
+                                item.color_array.bgColor,
+                            ]">
+                                <component :is="TablerIcons[item.icon]" :class="[
+                                    'w-4 h-4',
+                                    item.color_array.textColor,
+                                ]" />
                             </div>
                             <div class="flex flex-col">
-                                <span
-                                    class="text-xs text-gray-400 leading-none"
-                                    >{{ item.status?.name }}</span
-                                >
-                                <span
-                                    class="text-md font-semibold text-gray-700"
-                                    >{{ item.total }}</span
-                                >
+                                <span class="text-xs text-gray-400 leading-none">{{ item.status?.name }}</span>
+                                <span class="text-md font-semibold text-gray-700">{{ item.total }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="flex-1 flex flex-col gap-2">
-                <ToolbarModule
-                    v-model="searchInput"
-                    @deleteSearch="clearSearch"
-                    @saveForm="submitForm"
-                    button-label="Create"
-                    :dialog-title="
-                        !filesUploadForm.id ? 'Create Scholar' : 'Edit Scholar'
-                    "
-                    dialog-description="Define a new scholar and configure its access permissions."
-                    :dialog-button-loading="filesUploadForm.processing"
-                    :dialog-icon="IconUserCog"
-                    dialog-button-label="Save"
-                    :message-has-errors="filesUploadForm.hasErrors"
-                    :message-errors="filesUploadForm.errors"
-                    @buttonOpenModal="toggleModal()"
-                    message-type="error"
-                    ref="toolbarRef"
-                >
+                <ToolbarModule v-model="searchInput" @deleteSearch="clearSearch" @saveForm="submitForm"
+                    button-label="Create" :dialog-title="!filesUploadForm.id ? 'Create Scholar' : 'Edit Scholar'
+                        " dialog-description="Define a new scholar and configure its access permissions."
+                    :dialog-button-loading="filesUploadForm.processing" :dialog-icon="IconUserCog"
+                    dialog-button-label="Save" :message-has-errors="filesUploadForm.hasErrors"
+                    :message-errors="filesUploadForm.errors" @buttonOpenModal="toggleModal()" message-type="error"
+                    ref="toolbarRef">
                     <template #form>
                         <div class="my-1">
-                            <div
-                                class="flex justify-between text-xs text-gray-400"
-                            >
+                            <div class="flex justify-between text-xs text-gray-400">
                                 <div class="flex items-end italic gap-1">
                                     <div>
                                         To get the scholars template, please
                                     </div>
-                                    <a
-                                        href="/templates/scholar_template.xlsx"
-                                        download
-                                        class="text-blue-500 underline text-xs"
-                                        >Download Here</a
-                                    >
+                                    <a href="/templates/scholar_template.xlsx" download
+                                        class="text-blue-500 underline text-xs">Download Here</a>
                                 </div>
                             </div>
-                            <UploadInput
-                                ref="uploadRef"
-                                @select-files="handleFiles"
-                                @remove-file="clearForm"
+                            <UploadInput ref="uploadRef" @select-files="handleFiles" @remove-file="clearForm"
                                 :progress="progressUpload"
-                                accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                            ></UploadInput>
+                                accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                            </UploadInput>
                         </div>
                         <Divider type="dashed" align="left">
-                            <span class="text-xs font-bold"
-                                >Uploaded Files</span
-                            >
+                            <span class="text-xs font-bold">Uploaded Files</span>
                         </Divider>
                         <div class="flex justify-end mb-3">
-                            <SelectButton
-                                v-model="filterFileStatus"
-                                :options="filterFileOption"
-                                @update:model-value="loadFilePage"
-                                size="small"
-                            />
+                            <SelectButton v-model="filterFileStatus" :options="filterFileOption"
+                                @update:model-value="loadFilePage" size="small" />
                         </div>
 
-                        <DefaultTable
-                            :items="page.props.files.data"
-                            :pagination="{
-                                total: page.props.files.total,
-                                perPage: page.props.files.per_page,
-                                currentPage: page.props.files.current_page,
-                            }"
-                            :loading="filesLoadingTable"
-                            @paginate="loadFilePage"
-                        >
+                        <DefaultTable :items="page.props.files.data" :pagination="{
+                            total: page.props.files.total,
+                            perPage: page.props.files.per_page,
+                            currentPage: page.props.files.current_page,
+                        }" :loading="filesLoadingTable" @paginate="loadFilePage">
                             <Column header="Files">
                                 <template #body="props">
                                     <div class="flex items-center gap-2">
-                                        <Avatar
-                                            style="
+                                        <Avatar style="
                                                 background-color: #dee9fc;
                                                 color: #1a2551;
-                                            "
-                                            class="!rounded-xl !w-10 !h-10"
-                                        >
+                                            " class="!rounded-xl !w-10 !h-10">
                                             <IconFileText size="25" />
                                         </Avatar>
                                         <div class="flex flex-col">
                                             <div>{{ props.data.filename }}</div>
-                                            <a
-                                                :href="props.data.file_url"
-                                                download
-                                                class="text-blue-500 underline text-xs"
-                                                >Click to download</a
-                                            >
+                                            <a :href="props.data.file_url" download
+                                                class="text-blue-500 underline text-xs">Click to download</a>
                                         </div>
                                     </div>
                                 </template>
@@ -148,9 +91,7 @@
                                 <template #body="props">
                                     <div class="flex flex-col text-xs">
                                         <div>{{ props.data.created_by }}</div>
-                                        <div
-                                            class="font-semibold text-gray-500"
-                                        >
+                                        <div class="font-semibold text-gray-500">
                                             {{ props.data.formatted_date }}
                                         </div>
                                     </div>
@@ -158,52 +99,33 @@
                             </Column>
                             <Column>
                                 <template #header>
-                                    <div
-                                        class="flex justify-center w-full text-xs font-semibold"
-                                    >
+                                    <div class="flex justify-center w-full text-xs font-semibold">
                                         <div>Validate Status</div>
                                     </div>
                                 </template>
                                 <template #body="props">
-                                    <div
-                                        class="flex justify-center items-center"
-                                    >
-                                        <div
-                                            v-if="
-                                                props.data.status == 'pending'
-                                            "
-                                            class="bg-amber-50 px-3 py-1 rounded-2xl antialiased text-amber-600 flex gap-2 items-center"
-                                        >
-                                            <IconDotsCircleHorizontal
-                                                size="15"
-                                                stroke-width="3"
-                                            />
+                                    <div class="flex justify-center items-center">
+                                        <div v-if="
+                                            props.data.status == 'pending'
+                                        "
+                                            class="bg-amber-50 px-3 py-1 rounded-2xl antialiased text-amber-600 flex gap-2 items-center">
+                                            <IconDotsCircleHorizontal size="15" stroke-width="3" />
                                             <div class="text-xs uppercase">
                                                 Pending
                                             </div>
                                         </div>
-                                        <div
-                                            v-else-if="
-                                                props.data.status == 'accept'
-                                            "
-                                            class="bg-green-50 px-3 py-1 rounded-2xl antialiased text-green-600 flex gap-2 items-center"
-                                        >
-                                            <IconCircleCheck
-                                                size="15"
-                                                stroke-width="3"
-                                            />
+                                        <div v-else-if="
+                                            props.data.status == 'accept'
+                                        "
+                                            class="bg-green-50 px-3 py-1 rounded-2xl antialiased text-green-600 flex gap-2 items-center">
+                                            <IconCircleCheck size="15" stroke-width="3" />
                                             <div class="text-xs uppercase">
                                                 Accept
                                             </div>
                                         </div>
-                                        <div
-                                            v-else
-                                            class="bg-red-50 px-3 py-1 rounded-2xl antialiased text-red-600 flex gap-2 items-center"
-                                        >
-                                            <IconCircleX
-                                                size="15"
-                                                stroke-width="3"
-                                            />
+                                        <div v-else
+                                            class="bg-red-50 px-3 py-1 rounded-2xl antialiased text-red-600 flex gap-2 items-center">
+                                            <IconCircleX size="15" stroke-width="3" />
                                             <div class="text-xs uppercase">
                                                 reject
                                             </div>
@@ -214,51 +136,33 @@
 
                             <Column v-if="filterFileStatus == 'Pending'">
                                 <template #header>
-                                    <div
-                                        class="flex justify-end w-full text-xs font-semibold"
-                                    >
+                                    <div class="flex justify-end w-full text-xs font-semibold">
                                         <IconSettings :size="20" />
                                     </div>
                                 </template>
                                 <template #body="props">
-                                    <div
-                                        class="flex justify-end items-center gap-2"
-                                    >
-                                        <DefaultButton
-                                            rounded
-                                            size="small"
-                                            severity="danger"
-                                            text
-                                            tooltip="Reject"
-                                            :icon="IconX"
-                                            @click="
+                                    <div class="flex justify-end items-center gap-2">
+                                        <DefaultButton rounded size="small" severity="danger" text tooltip="Reject"
+                                            :icon="IconX" @click="
                                                 validateFiles({
                                                     type: 'reject',
                                                     id: props.data.hash_id,
                                                 })
-                                            "
-                                        ></DefaultButton>
-                                        <DefaultButton
-                                            rounded
-                                            size="small"
-                                            severity="success"
-                                            tooltip="Accept"
-                                            text
-                                            :icon="IconCheck"
-                                            @click="
+                                                "></DefaultButton>
+                                        <DefaultButton rounded size="small" severity="success" tooltip="Accept" text
+                                            :icon="IconCheck" @click="
                                                 validateFiles({
                                                     type: 'accept',
                                                     id: props.data.hash_id,
                                                 })
-                                            "
-                                        ></DefaultButton>
+                                                "></DefaultButton>
                                     </div>
                                 </template>
                             </Column>
                         </DefaultTable>
                     </template>
                 </ToolbarModule>
-                <DefaultSelectionTable
+                <!-- <DefaultSelectionTable
                     :items="page.props.scholar.data"
                     :pagination="{
                         total: page.props.scholar.total,
@@ -483,24 +387,15 @@
                             </div>
                         </template>
                     </Column>
-                    <Column>
-                        
-                    </Column>
-                </DefaultSelectionTable>
+                </DefaultSelectionTable> -->
             </div>
         </div>
-        <DrawerScholarModule
-            v-if="scholarDrawer"
-            v-model:visible="scholarDrawer"
-            :details="selectedRow"
-        />
+        <DrawerScholarModule v-if="scholarDrawer" v-model:visible="scholarDrawer" :details="selectedRow" />
         <DefaultToast ref="toastRef" />
         <DefaultConfirmDialog ref="confirmRef" />
         <Dialog v-model:visible="dialog.subject" class="w-[95%]" modal>
             <template #header>
-                <div
-                    class="bg-slate-100 px-5 py-1 shadow rounded-lg flex items-center gap-2"
-                >
+                <div class="bg-slate-100 px-5 py-1 shadow rounded-lg flex items-center gap-2">
                     <IconScript :size="25" />
                     <div class="text-lg font-medium">Subject Request</div>
                 </div>
@@ -514,26 +409,16 @@
                             return with remarks.
                         </p>
 
-                        <Panel
-                            v-for="(term, termKey) in page.props
-                                ?.subjectRequest"
-                            :key="termKey"
-                            class="!rounded-xl"
-                        >
+                        <Panel v-for="(term, termKey) in page.props
+                            ?.subjectRequest" :key="termKey" class="!rounded-xl">
                             <template #header>
-                                <div
-                                    class="flex items-center justify-between w-full"
-                                >
+                                <div class="flex items-center justify-between w-full">
                                     <div class="flex items-center gap-2">
                                         <IconGridDots :size="20" />
-                                        <span class="font-medium"
-                                            >{{ term.term?.name }} /
-                                            {{ term.level?.name }}</span
-                                        >
+                                        <span class="font-medium">{{ term.term?.name }} /
+                                            {{ term.level?.name }}</span>
                                     </div>
-                                    <div
-                                        class="space-x font-semibold text-gray-500"
-                                    >
+                                    <div class="space-x font-semibold text-gray-500">
                                         {{ term.academic_year }}
                                     </div>
                                 </div>
@@ -541,38 +426,27 @@
                             <table class="min-w-full !border-none text-sm">
                                 <thead>
                                     <tr class="bg-gray-100">
-                                        <th
-                                            class="px-3 py-2 !rounded-l-2xl text-nowrap text-left"
-                                        >
+                                        <th class="px-3 py-2 !rounded-l-2xl text-nowrap text-left">
                                             Subject Type
                                         </th>
                                         <th class="px-3 py-2 text-left">
                                             Subject Name
                                         </th>
-                                        <th
-                                            class="px-3 py-2 text-nowrap text-left"
-                                        >
+                                        <th class="px-3 py-2 text-nowrap text-left">
                                             Subject Code
                                         </th>
                                         <th class="px-3 py-2 text-right">
                                             Unit
                                         </th>
 
-                                        <th
-                                            class="px-3 py-2 text-right !rounded-r-2xl"
-                                        >
+                                        <th class="px-3 py-2 text-right !rounded-r-2xl">
                                             Remarks
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr
-                                        v-for="(item, index) in term?.requests"
-                                        :key="index"
-                                    >
-                                        <td
-                                            class="px-3 py-2 capitalize text-nowrap"
-                                        >
+                                    <tr v-for="(item, index) in term?.requests" :key="index">
+                                        <td class="px-3 py-2 capitalize text-nowrap">
                                             {{
                                                 item.subject?.class_array
                                                     .name ??
@@ -596,63 +470,32 @@
                                             }}
                                         </td>
                                         <td>
-                                            <div
-                                                class="w-full justify-end flex items-center gap-1"
-                                            >
-                                                <DefaultButton
-                                                    :icon="TablerIcons.IconX"
-                                                    text
-                                                    severity="danger"
-                                                    size="small"
-                                                    @click="
+                                            <div class="w-full justify-end flex items-center gap-1">
+                                                <DefaultButton :icon="TablerIcons.IconX" text severity="danger"
+                                                    size="small" @click="
                                                         (e) => toggleOP(e, item)
-                                                    "
-                                                />
-                                                <DefaultButton
-                                                    :icon="
-                                                        TablerIcons.IconCheck
-                                                    "
-                                                    text
-                                                    severity="success"
-                                                    size="small"
-                                                    @click="
+                                                    " />
+                                                <DefaultButton :icon="TablerIcons.IconCheck
+                                                    " text severity="success" size="small" @click="
                                                         validateSubjectRequestAccept(
                                                             item,
                                                         )
-                                                    "
-                                                />
+                                                        " />
                                             </div>
-                                            <Popover
-                                                :ref="
-                                                    (el) =>
-                                                        (popovers[item.id] = el)
-                                                "
-                                            >
-                                                <div
-                                                    class="flex flex-col gap-4 w-[25rem]"
-                                                >
-                                                    <TextInput
-                                                        label="Remarks"
-                                                        :error-mark="
-                                                            page.props.errors
-                                                                ?.remarks
-                                                        "
-                                                        v-model="
-                                                            subjectRequestForm.remarks
-                                                        "
-                                                        placeholder="Enter remarks for returning the subject request"
-                                                    />
-                                                    <DefaultButton
-                                                        label="Validate and Return"
-                                                        size="small"
-                                                        @click="
-                                                            validateSubjectRequest(
-                                                                item,
-                                                            )
-                                                        "
-                                                        severity="danger"
-                                                        class-name="!rounded-xl !px-5"
-                                                    />
+                                            <Popover :ref="(el) =>
+                                                    (popovers[item.id] = el)
+                                                ">
+                                                <div class="flex flex-col gap-4 w-[25rem]">
+                                                    <TextInput label="Remarks" :error-mark="page.props.errors
+                                                            ?.remarks
+                                                        " v-model="subjectRequestForm.remarks
+                                                            "
+                                                        placeholder="Enter remarks for returning the subject request" />
+                                                    <DefaultButton label="Validate and Return" size="small" @click="
+                                                        validateSubjectRequest(
+                                                            item,
+                                                        )
+                                                        " severity="danger" class-name="!rounded-xl !px-5" />
                                                 </div>
                                             </Popover>
                                         </td>
@@ -674,9 +517,7 @@
         </Dialog>
         <Dialog v-model:visible="dialog.grade" class="w-[95%]" modal>
             <template #header>
-                <div
-                    class="bg-slate-100 px-5 py-1 shadow rounded-lg flex items-center gap-2"
-                >
+                <div class="bg-slate-100 px-5 py-1 shadow rounded-lg flex items-center gap-2">
                     <IconScript :size="25" />
                     <div class="text-lg font-medium">Grade Request</div>
                 </div>
@@ -690,26 +531,16 @@
                             return with remarks.
                         </p>
 
-                        <Panel
-                            v-for="(term, termKey) in page.props
-                                ?.subjectRequest"
-                            :key="termKey"
-                            class="!rounded-xl"
-                        >
+                        <Panel v-for="(term, termKey) in page.props
+                            ?.subjectRequest" :key="termKey" class="!rounded-xl">
                             <template #header>
-                                <div
-                                    class="flex items-center justify-between w-full"
-                                >
+                                <div class="flex items-center justify-between w-full">
                                     <div class="flex items-center gap-2">
                                         <IconGridDots :size="20" />
-                                        <span class="font-medium"
-                                            >{{ term.term?.name }} /
-                                            {{ term.level?.name }}</span
-                                        >
+                                        <span class="font-medium">{{ term.term?.name }} /
+                                            {{ term.level?.name }}</span>
                                     </div>
-                                    <div
-                                        class="space-x font-semibold text-gray-500"
-                                    >
+                                    <div class="space-x font-semibold text-gray-500">
                                         {{ term.academic_year }}
                                     </div>
                                 </div>
@@ -717,38 +548,27 @@
                             <table class="min-w-full !border-none text-sm">
                                 <thead>
                                     <tr class="bg-gray-100">
-                                        <th
-                                            class="px-3 py-2 !rounded-l-2xl text-nowrap text-left"
-                                        >
+                                        <th class="px-3 py-2 !rounded-l-2xl text-nowrap text-left">
                                             Subject Type
                                         </th>
                                         <th class="px-3 py-2 text-left">
                                             Subject Name
                                         </th>
-                                        <th
-                                            class="px-3 py-2 text-nowrap text-left"
-                                        >
+                                        <th class="px-3 py-2 text-nowrap text-left">
                                             Subject Code
                                         </th>
                                         <th class="px-3 py-2 text-right">
                                             Unit
                                         </th>
 
-                                        <th
-                                            class="px-3 py-2 text-right !rounded-r-2xl"
-                                        >
+                                        <th class="px-3 py-2 text-right !rounded-r-2xl">
                                             Remarks
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr
-                                        v-for="(item, index) in term?.requests"
-                                        :key="index"
-                                    >
-                                        <td
-                                            class="px-3 py-2 capitalize text-nowrap"
-                                        >
+                                    <tr v-for="(item, index) in term?.requests" :key="index">
+                                        <td class="px-3 py-2 capitalize text-nowrap">
                                             {{
                                                 item.subject?.class_array
                                                     .name ??
@@ -772,63 +592,32 @@
                                             }}
                                         </td>
                                         <td>
-                                            <div
-                                                class="w-full justify-end flex items-center gap-1"
-                                            >
-                                                <DefaultButton
-                                                    :icon="TablerIcons.IconX"
-                                                    text
-                                                    severity="danger"
-                                                    size="small"
-                                                    @click="
+                                            <div class="w-full justify-end flex items-center gap-1">
+                                                <DefaultButton :icon="TablerIcons.IconX" text severity="danger"
+                                                    size="small" @click="
                                                         (e) => toggleOP(e, item)
-                                                    "
-                                                />
-                                                <DefaultButton
-                                                    :icon="
-                                                        TablerIcons.IconCheck
-                                                    "
-                                                    text
-                                                    severity="success"
-                                                    size="small"
-                                                    @click="
+                                                    " />
+                                                <DefaultButton :icon="TablerIcons.IconCheck
+                                                    " text severity="success" size="small" @click="
                                                         validateSubjectRequestAccept(
                                                             item,
                                                         )
-                                                    "
-                                                />
+                                                        " />
                                             </div>
-                                            <Popover
-                                                :ref="
-                                                    (el) =>
-                                                        (popovers[item.id] = el)
-                                                "
-                                            >
-                                                <div
-                                                    class="flex flex-col gap-4 w-[25rem]"
-                                                >
-                                                    <TextInput
-                                                        label="Remarks"
-                                                        :error-mark="
-                                                            page.props.errors
-                                                                ?.remarks
-                                                        "
-                                                        v-model="
-                                                            subjectRequestForm.remarks
-                                                        "
-                                                        placeholder="Enter remarks for returning the subject request"
-                                                    />
-                                                    <DefaultButton
-                                                        label="Validate and Return"
-                                                        size="small"
-                                                        @click="
-                                                            validateSubjectRequest(
-                                                                item,
-                                                            )
-                                                        "
-                                                        severity="danger"
-                                                        class-name="!rounded-xl !px-5"
-                                                    />
+                                            <Popover :ref="(el) =>
+                                                    (popovers[item.id] = el)
+                                                ">
+                                                <div class="flex flex-col gap-4 w-[25rem]">
+                                                    <TextInput label="Remarks" :error-mark="page.props.errors
+                                                            ?.remarks
+                                                        " v-model="subjectRequestForm.remarks
+                                                            "
+                                                        placeholder="Enter remarks for returning the subject request" />
+                                                    <DefaultButton label="Validate and Return" size="small" @click="
+                                                        validateSubjectRequest(
+                                                            item,
+                                                        )
+                                                        " severity="danger" class-name="!rounded-xl !px-5" />
                                                 </div>
                                             </Popover>
                                         </td>
@@ -950,7 +739,7 @@ const menuItems = computed(() => {
             icon: IconId,
             class: "text-slate-500",
 
-            command: () => {},
+            command: () => { },
         },
 
         {
