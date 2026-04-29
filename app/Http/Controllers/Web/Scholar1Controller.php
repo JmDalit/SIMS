@@ -465,8 +465,8 @@ class Scholar1Controller extends Controller
                             ])->values()->map(function ($term) {
                                 return [
                                     'id' => $term->id,
-                                    'term' => $term->termType
-                                        ? $term->termType->only('id', 'name')
+                                    'term' => $term->id
+                                        ? $term->only('id', 'name')
                                         : null,
                                     'level' => $term?->level ? $term?->level?->only('id', 'name', 'others') : null,
                                     'academic_year' => $term->academic_year,
