@@ -615,7 +615,6 @@ class Scholar1Controller extends Controller
                     'award_year' => Carbon::parse($data['award_year'])->format('Y') + 1,
                     'status_id' => $data['status']['id']
                 ]);
-
                 $scholar->profile()->updateOrCreate(
                     ['scholar_id' => $scholar->id],
                     [
@@ -626,7 +625,8 @@ class Scholar1Controller extends Controller
                         'email' => $data['email'],
                         'contact_no' => $data['contact_no'] ?? null,
                         'birthplace' => $data['birth_place'] ?? null,
-                        'birthdate' => $data['birth_date'] ?? null,
+                        'birthdate' => Carbon::parse($data['birth_date'])->setTimezone('Asia/Manila')
+                            ->format('m/d/Y'),
                         'religion' => $data['religion'] ?? null,
                         'civil_status' => $data['civil_status'] ?? null,
                     ]

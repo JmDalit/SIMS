@@ -1058,6 +1058,7 @@ const personalInfo = useForm({
     email: null,
     contact_no: null,
     birth_date: null,
+    formatBD: null,
     birth_place: null,
     religion: null,
     civil_status: null,
@@ -1315,6 +1316,8 @@ const checkChangesYearAndTerm = () => {
 watch(
     () => page.props?.details,
     (newVal) => {
+
+        console.log(newVal.birthdate)
         if (!newVal) return;
         personalInfo.last_name = newVal.lname ?? null;
         personalInfo.first_name = newVal.fname ?? null;

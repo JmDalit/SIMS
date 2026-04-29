@@ -15,6 +15,7 @@ use App\Models\Scholars;
 use App\Models\ScholarSchoolGrades;
 use App\Models\SchoolCampusCourses;
 use App\Models\SchoolCampuses;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -76,7 +77,7 @@ class ScholarImport implements OnEachRow, WithHeadingRow, WithStartRow, SkipsEmp
                 'mname' => $data['middlename'] ?? null,
                 'suffix' => $data['suffix'] ?? null,
                 'contact_no' => $data['contact'] ?? null,
-                'birthdate' => Date::excelToDateTimeObject($data['birthdate'])->format('Y-m-d') ?? null,
+                'birthdate' => Carbon::parse($data['birthdate'])->setTimezone('Asia/Manila')->format('m/d/Y') ?? null,
                 'birthplace' => $data['birth_place'] ?? null,
                 'email' => $data['email'] ?? null,
                 'sex' => $data['sex'] ?? null,
@@ -88,7 +89,7 @@ class ScholarImport implements OnEachRow, WithHeadingRow, WithStartRow, SkipsEmp
             $scholars->parent()->create([
                 'fname' => $data['parent_fullname'] ?? null,
                 'id_no' => $data['id_no'] ?? null,
-                'id_date' => Date::excelToDateTimeObject($data['id_date'])->format('Y-m-d') ?? null,
+                'id_date' => Carbon::parse($data['birthdate'])->setTimezone('Asia/Manila')->format('Y-m-d') ?? null,
                 'id_place' => $data['id_place'] ?? null,
                 'companion' => $data['companion'] ?? null,
             ]);
